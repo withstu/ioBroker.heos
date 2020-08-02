@@ -9,7 +9,8 @@
 const utils = require('@iobroker/adapter-core');
 
 // Load your modules here, e.g.:
-// const fs = require("fs");
+const net = require('net');
+const NodeSSDP = require('node-ssdp').Client;
 
 class Heos extends utils.Adapter {
 
