@@ -23,7 +23,8 @@
     "url": "https://github.com/withstu/ioBroker.heos"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^2.4.0"
+    "@iobroker/adapter-core": "^2.4.0",
+    "node-ssdp": "^4.0.0"
   },
   "devDependencies": {
     "@iobroker/testing": "^2.2.0",
