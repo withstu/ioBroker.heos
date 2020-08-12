@@ -71,18 +71,47 @@
 			</div>
 		</div>
 
-		<!-- Put your content here -->
-
-		<!-- For example columns with settings: -->
 		<div class="row">
+			<div class="col s12"><h5 class="translate">HEOS Account</h5></div>
 			<div class="col s6 input-field">
-				<input type="checkbox" class="value" id="option1" />
-				<label for="option1" class="translate">option1</label>
+				<input type="text" class="value" id="username" />
+				<label for="username" class="translate">Username</label>
 			</div>
 
 			<div class="col s6 input-field">
-				<input type="text" class="value" id="option2" />
-				<label for="option2" class="translate">option2</label>
+				<input type="password" class="value" id="password" />
+				<label for="password" class="translate">Password</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col s12"><h5 class="translate">Text-to-Speech</h5></div>
+			<div class="col s6 input-field">
+				<input type="number" class="value" id="ttsDefaultVolume" min="0" max="100"/>
+				<label for="ttsDefaultVolume" class="translate">ttsDefaultVolume</label>
+			</div>
+
+			<div class="col s6 input-field">
+				<input type="number" class="value" id="ttsMaxVolume" min="0" max="100"/>
+				<label for="ttsMaxVolume" class="translate">ttsMaxVolume</label>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col s12"><h5 class="translate">Advanced Settings</h5></div>
+			<div class="col s6 input-field">
+				<input type="number" class="value" id="heartbeatInterval" min="0"/>
+				<label for="heartbeatInterval" class="translate">heartbeatInterval</label>
+			</div>
+			<div class="col s6 input-field">
+				<input type="number" class="value" id="heartbeatRetries" min="0"/>
+				<label for="heartbeatRetries" class="translate">heartbeatRetries</label>
+			</div>
+			<div class="col s6 input-field">
+				<input type="number" class="value" id="reconnectTimeout" min="0"/>
+				<label for="reconnectTimeout" class="translate">reconnectTimeout</label>
+			</div>
+			<div class="col s6 input-field">
+				<input type="number" class="value" id="searchInterval" min="0"/>
+				<label for="searchInterval" class="translate">searchInterval</label>
 			</div>
 		</div>
 
