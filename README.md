@@ -14,8 +14,6 @@
 
 The adapter lets control HEOS from ioBroker
 
-derived from https://forum.iobroker.net/topic/10420/vorlage-denon-heos-script by Uwe Uhula
-
 ## Changelog
 
 ### 0.0.1
