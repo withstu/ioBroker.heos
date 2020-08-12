@@ -1531,6 +1531,13 @@ class Heos extends utils.Adapter {
                                 for (var id in states) await this.setStateAsync(id, '', true);
                             });
 
+                            for (var pid in this.players) {
+                                let heosPlayer = this.players[pid];
+                                heosPlayer.group_leader = false;
+                                heosPlayer.group_member = false;
+                                heosPlayer.group_gid = '';
+                            }
+
                             // payload mit den groups auswerten
                             if ((jdata.hasOwnProperty('payload'))) {
                                 for (i = 0; i < jdata.payload.length; i++) {
