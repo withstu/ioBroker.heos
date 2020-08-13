@@ -281,7 +281,7 @@ class Heos extends utils.Adapter {
 				type: 'boolean',
 				role: 'indicator.reachable',
 				read: true,
-                write: true,
+                write: false,
                 def: false
 			},
 			native: {},
