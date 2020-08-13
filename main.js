@@ -1831,9 +1831,11 @@ class Heos extends utils.Adapter {
             this.log.info('start player ' + pid);
             let player = this.players[pid];
 
-            await this.setStateAsync(player.statePath + 'connected', true);
-
             this.sendCommandToPlayer(player.pid, 'get_play_state|get_play_mode|get_now_playing_media|get_volume');
+
+            setTimeout(() => {
+                this.setState(player.statePath + 'connected', true);
+            }, 1000);
         }
     }
 
