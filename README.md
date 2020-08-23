@@ -14,6 +14,38 @@
 
 The adapter lets control HEOS from ioBroker
 
+## Command
+
+HEOS CLI specification: http://rn.dmglobal.com/euheos/HEOS_CLI_ProtocolSpecification.pdf
+
+### HEOS Command State
+
+* "connect": Try to Connect to HEOS
+* "disconnect": Disconnect from HEOS
+* "reconnect": Disconnect and Connect
+* "load_sources": Reload sources
+* "group/set_group?pid=<pid1>,<pid2>,...": Set group with the list of player ids e.g. "group/set_group?pid=12345678,12345679".
+* "group/set_group?pid=<pid1>" : Delete existing group e.g. "group/set_group?pid=12345678"
+* "group/ungroup_all" : Delete all groups
+* "group/group_all" : Group all player in one group
+* "player/[cmd]": Send the command to all players. e.g. player/set_mute&state=on 
+* "...": All other commands are tried to send to HEOS
+
+### Player Command State
+
+Note: Multiple commands are possible, if they are separated with the pipe e.g. set_volume&level=20|play_preset&preset=1
+
+* "set_volume&level=0|1|..|100": Set the player volume 
+* "set_play_state&state=play|pause|stop": Set the player state
+* "set_play_mode&repeat=on_all|on_one|off&shuffle=on|off": Set Repeat and Shuffle mode
+* "set_mute&state=on|off": Mute player
+* "volume_down&step=1..10": Lower volume   
+* "volume_up&step=1..10": Raise volume
+* "play_next": Play next
+* "play_previous": Play previous
+* "play_preset&preset=1|2|..|n": Play preset n
+* "play_stream&url=url_path": Play URL-Stream
+
 ## Changelog
 
 ### 0.0.1
