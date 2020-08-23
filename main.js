@@ -1982,8 +1982,10 @@ class Heos extends utils.Adapter {
                 let player = this.players[pid];
                 if(player.connected === true && player.muted === false){
                     if(player.state === 'pause'){
+                        this.log.info('Play music at ' + player.name);
                         this.sendCommandToPlayer(player.pid, 'set_play_state&state=play');
                     } else if(player.state === 'stop'){
+                        this.log.info('Play preset at ' + player.name);
                         this.sendCommandToPlayer(player.pid, 'play_preset&preset=' + this.config.autoPlayPreset);
                     }
                 }
