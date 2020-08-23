@@ -33,9 +33,7 @@ class Heos extends utils.Adapter {
 		});
 		this.on('ready', this.onReady.bind(this));
         this.on('stateChange', this.onStateChange.bind(this));
-		// this.on('objectChange', this.onObjectChange.bind(this));
-		// this.on('message', this.onMessage.bind(this));
-		this.on('unload', this.onUnload.bind(this));
+        this.on('unload', this.onUnload.bind(this));
 
 		this.init();
 	}
@@ -52,7 +50,8 @@ class Heos extends utils.Adapter {
 		await this.setObjectNotExistsAsync('command', {
 			type: 'state',
 			common: {
-				name: 'Command for HEOS Calls',
+                name: 'HEOS command',
+                desc: 'Send command to HEOS',
 				type: 'string',
 				role: 'command',
 				read: true,
@@ -63,7 +62,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync('connected', {
 			type: 'state',
 			common: {
-				name: 'Verbunden?',
+                name: 'Connection status',
+                desc: 'True, if a connection to one HEOS player exists',
 				type: 'boolean',
 				role: 'command',
 				read: true,
@@ -75,7 +75,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync('signed_in', {
 			type: 'state',
 			common: {
-				name: 'Angemeldet?',
+                name: 'Sign-in status',
+                desc: 'True, if a user is signed in',
 				type: 'boolean',
 				role: 'command',
 				read: true,
@@ -87,7 +88,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync('signed_in_user', {
 			type: 'state',
 			common: {
-				name: 'Angemeldeter User',
+                name: 'Signed-in user',
+                desc: 'Username of the signed in user',
 				type: 'string',
 				role: 'command',
 				read: true,
@@ -98,7 +100,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync('error', {
 			type: 'state',
 			common: {
-				name: 'HEOS hat Fehler',
+                name: 'Error status',
+                desc: 'True, if an error exists',
 				type: 'boolean',
 				role: 'command',
 				read: true,
@@ -110,7 +113,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync('last_error', {
 			type: 'state',
 			common: {
-				name: 'Letzte Fehler',
+                name: 'Last error messages',
+                desc: 'Last 4 error messages',
 				type: 'string',
 				role: 'command',
 				read: true,
@@ -127,14 +131,21 @@ class Heos extends utils.Adapter {
         this.subscribeStates('playlists.*.play')
 
         //Players
-        this.subscribeStates('players.*.mute');
-        this.subscribeStates('players.*.play_mode_repeat');
-        this.subscribeStates('players.*.play_mode_shuffle');
-        this.subscribeStates('players.*.play_state');
+        this.subscribeStates('players.*.muted');
+        this.subscribeStates('players.*.repeat');
+        this.subscribeStates('players.*.shuffle');
+        this.subscribeStates('players.*.state');
         this.subscribeStates('players.*.volume');
+        this.subscribeStates('players.*.volume_up');
+        this.subscribeStates('players.*.volume_down');
         this.subscribeStates('players.*.group_volume');
-        this.subscribeStates('players.*.group_mute');
+        this.subscribeStates('players.*.group_muted');
         this.subscribeStates('players.*.command');
+        this.subscribeStates('players.*.play');
+        this.subscribeStates('players.*.stop');
+        this.subscribeStates('players.*.pause');
+        this.subscribeStates('players.*.next');
+        this.subscribeStates('players.*.prev');
 
         this.main();
 	}
@@ -151,23 +162,6 @@ class Heos extends utils.Adapter {
 			callback();
 		}
 	}
-
-	// If you need to react to object changes, uncomment the following block and the corresponding line in the constructor.
-	// You also need to subscribe to the objects with `this.subscribeObjects`, similar to `this.subscribeStates`.
-	// /**
-	//  * Is called if a subscribed object changes
-	//  * @param {string} id
-	//  * @param {ioBroker.Object | null | undefined} obj
-	//  */
-	// onObjectChange(id, obj) {
-	// 	if (obj) {
-	// 		// The object was changed
-	// 		this.log.info(`object ${id} changed: ${JSON.stringify(obj)}`);
-	// 	} else {
-	// 		// The object was deleted
-	// 		this.log.info(`object ${id} deleted`);
-	// 	}
-	// }
 
 	/**
 	 * Is called if a subscribed state changes
@@ -197,13 +191,13 @@ class Heos extends utils.Adapter {
                 this.sendCommandToAllPlayers('play_preset&preset=' + id.channel, true);
             } else if (id.device === 'players' && id.channel && id.state && this.players[id.channel]) {
                 let player = this.players[id.channel];
-                if(id.state === 'mute'){
+                if(id.state === 'muted'){
                     this.sendCommandToPlayer(player.pid, 'set_mute&state=' + (state.val === true ? 'on' : 'off'));
-                } else if(id.state === 'play_mode_repeat'){
+                } else if(id.state === 'repeat'){
                     this.sendCommandToPlayer(player.pid, 'set_play_mode&repeat=' + state.val);
-                } else if(id.state === 'play_mode_shuffle'){
+                } else if(id.state === 'shuffle'){
                     this.sendCommandToPlayer(player.pid, 'set_play_mode&shuffle=' + (state.val === true ? 'on' : 'off'));
-                } else if(id.state === 'play_state'){
+                } else if(id.state === 'state'){
                     this.sendCommandToPlayer(player.pid, 'set_play_state&state=' + state.val);
                 } else if(id.state === 'volume'){
                     this.sendCommandToPlayer(player.pid, 'set_volume&level=' + state.val);
@@ -212,37 +206,32 @@ class Heos extends utils.Adapter {
                         var gid = player.group_pid.split(",")[0];
                         this.sendCommandToPlayer(player.pid, 'group/set_volume?gid=' + gid + '&level=' + state.val);
                     }
-                } else if(id.state === 'group_mute'){
+                } else if(id.state === 'group_muted'){
                     if(player.group_member === true){
                         var gid = player.group_pid.split(",")[0];
                         this.sendCommandToPlayer(player.pid, 'group/set_mute?gid=' + gid + '&state=' + (state.val === true ? 'on' : 'off'));
                     }
                 } else if(id.state === 'command'){
                     this.sendCommandToPlayer(player.pid, state.val);
+                } else if(id.state === 'play'){
+                    this.sendCommandToPlayer(player.pid, 'set_play_state&state=play');
+                } else if(id.state === 'pause'){
+                    this.sendCommandToPlayer(player.pid, 'set_play_state&state=pause');
+                } else if(id.state === 'stop'){
+                    this.sendCommandToPlayer(player.pid, 'set_play_state&state=stop');
+                } else if(id.state === 'prev'){
+                    this.sendCommandToPlayer(player.pid, 'play_previous');
+                } else if(id.state === 'next'){
+                    this.sendCommandToPlayer(player.pid, 'play_next');
+                } else if(id.state === 'volume_up'){
+                    this.sendCommandToPlayer(player.pid, 'volume_up&step=' + this.config.volumeStepLevel);
+                } else if(id.state === 'volume_down'){
+                    this.sendCommandToPlayer(player.pid, 'volume_down&step=' + this.config.volumeStepLevel);
                 }
             }
         }
 	}
 
-	// If you need to accept messages in your adapter, uncomment the following block and the corresponding line in the constructor.
-	// /**
-	//  * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-	//  * Using this method requires "common.message" property to be set to true in io-package.json
-	//  * @param {ioBroker.Message} obj
-	//  */
-	// onMessage(obj) {
-	// 	if (typeof obj === 'object' && obj.message) {
-	// 		if (obj.command === 'send') {
-	// 			// e.g. send email or pushover or whatever
-	// 			this.log.info('send command');
-
-	// 			// Send response in callback if required
-	// 			if (obj.callback) this.sendTo(obj.from, obj.command, 'Message received', obj.callback);
-	// 		}
-	// 	}
-	// }
-
-    // Initialisierung
     init() {
         this.players = {};
         this.heartbeatInterval = undefined;
@@ -265,7 +254,12 @@ class Heos extends utils.Adapter {
         player.group_member = false;
         player.group_leader = false;
         player.group_pid = '';
+        player.state = 'stop';
+        player.muted = false;
+        player.connected = false;
+        player.spotify_ad_mute = false;
 
+        //Channel
         await this.setObjectNotExistsAsync(baseStatePath, {
             type: 'channel',
             common: {
@@ -274,10 +268,13 @@ class Heos extends utils.Adapter {
             },
             native: {},
         });
+
+        //Meta
         await this.setObjectNotExistsAsync(player.statePath + 'connected', {
 			type: 'state',
 			common: {
-				name: 'Verbunden?',
+                name: 'Connection status',
+                desc: 'True, if HEOS player is connected',
 				type: 'boolean',
 				role: 'indicator.reachable',
 				read: true,
@@ -289,7 +286,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'command', {
 			type: 'state',
 			common: {
-				name: 'Befehl an Heos Player senden',
+                name: 'Player command',
+                desc: 'Send command to player',
 				type: 'string',
 				role: 'media.command',
 				read: true,
@@ -301,7 +299,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'ip', {
 			type: 'state',
 			common: {
-				name: 'IP-Adresse',
+                name: 'Player IP-Address',
+                desc: 'IP Address of the player',
 				type: 'string',
 				role: 'meta.ip',
 				read: true,
@@ -313,7 +312,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'pid', {
 			type: 'state',
 			common: {
-				name: 'Player-ID',
+                name: 'Player ID',
+                desc: 'Unique ID of the player',
 				type: 'string',
 				role: 'meta.pid',
 				read: true,
@@ -325,7 +325,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'name', {
 			type: 'state',
 			common: {
-				name: 'Name des Players',
+                name: 'Player name',
+                desc: 'Name of the player',
 				type: 'string',
 				role: 'meta.name',
 				read: true,
@@ -337,7 +338,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'model', {
 			type: 'state',
 			common: {
-				name: 'Modell des Players',
+                name: 'Player model',
+                desc: 'Model of the player',
 				type: 'string',
 				role: 'meta.model',
 				read: true,
@@ -349,7 +351,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'serial', {
 			type: 'state',
 			common: {
-				name: 'Seriennummer des Players',
+                name: 'Player serial number',
+                desc: 'Serial number of the player',
 				type: 'string',
 				role: 'meta.serial',
 				read: true,
@@ -361,7 +364,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'network', {
 			type: 'state',
 			common: {
-				name: 'Netzwerkanschluss',
+                name: 'Network connection type',
+                desc: 'wired, wifi or unknown',
 				type: 'string',
 				role: 'meta.network',
 				read: true,
@@ -373,19 +377,21 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'lineout', {
 			type: 'state',
 			common: {
-				name: 'Lineout',
-				type: 'string',
+                name: 'LineOut level type',
+                desc: 'variable or fixed',
+				type: 'number',
 				role: 'meta.lineout',
 				read: true,
                 write: false,
-                def: ""
+                def: 0
 			},
 			native: {},
         });
         await this.setObjectNotExistsAsync(player.statePath + 'error', {
 			type: 'state',
 			common: {
-				name: 'Player hat einen Fehler',
+                name: 'Player error status',
+                desc: 'True, if player has an error',
 				type: 'boolean',
 				role: 'media.error',
 				read: true,
@@ -397,7 +403,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'last_error', {
 			type: 'state',
 			common: {
-				name: 'Letzte Fehler',
+                name: 'Last player error messages',
+                desc: 'Last 4 player error messages',
 				type: 'string',
 				role: 'media.last_error',
 				read: true,
@@ -409,19 +416,21 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'volume', {
 			type: 'state',
 			common: {
-				name: 'Aktuelle Lautstärke',
+                name: 'Player volume',
+                desc: 'State and control of volume',
 				type: 'number',
-				role: 'media.volume',
+				role: 'level.volume',
 				read: true,
                 write: true,
                 def: 0
 			},
 			native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'mute', {
+        await this.setObjectNotExistsAsync(player.statePath + 'muted', {
             type: 'state',
             common: {
-                name: 'Mute aktiviert?',
+                name: 'Player mute',
+                desc: 'Player is muted',
                 type: 'boolean',
                 role: 'media.mute',
                 read: true,
@@ -430,214 +439,250 @@ class Heos extends utils.Adapter {
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'play_state', {
+        await this.setObjectNotExistsAsync(player.statePath + 'state', {
             type: 'state',
             common: {
-                name: 'Aktueller Wiedergabezustand',
+                name: 'String state',
+                desc: 'Play, stop, or pause',
                 type: 'string',
-                role: 'media.play_state',
+                role: 'media.state',
                 read: true,
                 write: true,
-                def: ''
+                states: {
+                    'stop': 'Stop',
+                    'play': 'Play',
+                    'pause': 'Pause'
+                },
+                def: 'stop'
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'play_mode_repeat', {
+        await this.setObjectNotExistsAsync(player.statePath + 'repeat', {
             type: 'state',
             common: {
-                name: 'Wiedergabewiederholung',
+                name: 'Repeat',
+                desc: 'Repeat mode',
                 type: 'string',
-                role: 'media.play_mode_repeat',
+                role: 'media.mode.repeat',
                 read: true,
                 write: true,
-                def: ''
+                states: {
+                    'on_all':'on_all',
+                    'on_one':'on_one',
+                    'off':'off'
+                },
+                def: 'off'
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'play_mode_shuffle', {
+        await this.setObjectNotExistsAsync(player.statePath + 'shuffle', {
             type: 'state',
             common: {
-                name: 'Zufällige Wiedergabe',
-                type: 'string',
-                role: 'media.play_mode_shuffle',
+                name: 'Shuffle',
+                desc: 'Shuffle mode',
+                type: 'boolean',
+                role: 'media.mode.shuffle',
                 read: true,
                 write: true,
-                def: ''
+                def: false
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'now_playing_media_type', {
+
+        //Now playing
+        await this.setObjectNotExistsAsync(player.statePath + 'current_type', {
             type: 'state',
             common: {
-                name: 'Aktuelle Wiedergabemedium',
+                name: 'Media Type',
+                desc: 'Type of the media',
                 type: 'string',
-                role: 'media.now_playing_media_type',
+                role: 'media.type',
                 read: true,
                 write: false,
                 def: ''
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'now_playing_media_song', {
+        await this.setObjectNotExistsAsync(player.statePath + 'current_title', {
             type: 'state',
             common: {
-                name: 'Aktuelles Lied',
+                name: 'Current title',
+                desc: 'Title of current played song',
                 type: 'string',
-                role: 'media.now_playing_media_song',
+                role: 'media.title',
                 read: true,
                 write: false,
                 def: ''
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'now_playing_media_station', {
+        await this.setObjectNotExistsAsync(player.statePath + 'current_station', {
             type: 'state',
             common: {
-                name: 'Aktuelle Station',
+                name: 'Current station',
+                desc: 'Title of current played station',
                 type: 'string',
-                role: 'media.now_playing_media_station',
+                role: 'media.station',
                 read: true,
                 write: false,
                 def: ''
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'now_playing_media_album', {
+        await this.setObjectNotExistsAsync(player.statePath + 'current_album_id', {
             type: 'state',
             common: {
-                name: 'Aktuelle Wiedergabemedium',
+                name: 'Current album ID',
+                desc: 'Album ID of current played song',
                 type: 'string',
-                role: 'media.now_playing_media_album',
+                role: 'media.album_id',
                 read: true,
                 write: false,
                 def: ''
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'now_playing_media_artist', {
+        await this.setObjectNotExistsAsync(player.statePath + 'current_album', {
             type: 'state',
             common: {
-                name: 'Aktueller Artist',
+                name: 'Current album',
+                desc: 'Album of current played song',
                 type: 'string',
-                role: 'media.now_playing_media_artist',
+                role: 'media.album',
                 read: true,
                 write: false,
                 def: ''
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'now_playing_media_image_url', {
+        await this.setObjectNotExistsAsync(player.statePath + 'current_artist', {
             type: 'state',
             common: {
-                name: 'Aktuelles Coverbild',
+                name: 'Current artist',
+                desc: 'Artist of current played song',
                 type: 'string',
-                role: 'media.now_playing_media_image_url',
+                role: 'media.artist',
                 read: true,
                 write: false,
                 def: ''
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'now_playing_media_album_id', {
+        await this.setObjectNotExistsAsync(player.statePath + 'current_image_url', {
             type: 'state',
             common: {
-                name: 'Aktuelle Album-ID',
+                name: 'Current cover URL',
+                desc: 'Cover image of current played song',
                 type: 'string',
-                role: 'media.now_playing_media_album_id',
+                role: 'media.cover',
                 read: true,
                 write: false,
                 def: ''
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'now_playing_media_mid', {
+        await this.setObjectNotExistsAsync(player.statePath + 'current_mid', {
             type: 'state',
             common: {
-                name: 'Aktuelle mid',
+                name: 'Current media ID',
+                desc: 'Media ID of current played song',
                 type: 'string',
-                role: 'media.now_playing_media_mid',
+                role: 'media.mid',
                 read: true,
                 write: false,
                 def: ''
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'now_playing_media_sid', {
+        await this.setObjectNotExistsAsync(player.statePath + 'current_sid', {
             type: 'state',
             common: {
-                name: 'Aktuelle sid',
+                name: 'Current source ID',
+                desc: 'Source ID of current played song',
                 type: 'string',
-                role: 'media.now_playing_media_sid',
+                role: 'media.sid',
                 read: true,
                 write: false,
                 def: ''
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'now_playing_media_qid', {
+        await this.setObjectNotExistsAsync(player.statePath + 'current_qid', {
             type: 'state',
             common: {
-                name: 'Aktuelle qid',
+                name: 'Current queue ID',
+                desc: 'Queue ID of current played song',
                 type: 'string',
-                role: 'media.now_playing_media_qid',
+                role: 'media.qid',
                 read: true,
                 write: false,
                 def: ''
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'cur_pos', {
+        await this.setObjectNotExistsAsync(player.statePath + 'current_elapsed', {
             type: 'state',
             common: {
-                name: 'lfd. Position',
+                name: 'Elapsed time in seconds',
+                desc: 'Elapsed time of current played song in seconds',
                 type: 'number',
-                role: 'media.cur_pos',
+                role: 'media.elapsed',
                 read: true,
                 write: false,
-                def: ''
+                unit: 'seconds',
+                def: 0
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'duration', {
+        await this.setObjectNotExistsAsync(player.statePath + 'current_elapsed_s', {
             type: 'state',
             common: {
-                name: 'Dauer',
+                name: 'Elapsed time as text',
+                desc: 'Elapsed time of current played song as HH:MM:SS',
+                type: 'string',
+                role: 'media.elapsed.text',
+                read: true,
+                write: false,
+                unit: 'interval',
+                def: '00:00'
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(player.statePath + 'current_duration', {
+            type: 'state',
+            common: {
+                name: 'Current song duration',
+                desc: 'Duration of current played song in seconds',
                 type: 'number',
                 role: 'media.duration',
                 read: true,
                 write: false,
-                def: ''
+                unit: 'seconds',
+                def: 0
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'cur_pos_MMSS', {
+        await this.setObjectNotExistsAsync(player.statePath + 'current_duration_s', {
             type: 'state',
             common: {
-                name: 'lfd. Position MM:SS',
+                name: 'Current duration',
+                desc: 'Duration of current played song as HH:MM:SS',
                 type: 'string',
-                role: 'media.cur_pos_MMSS',
+                role: 'media.duration.text',
                 read: true,
                 write: false,
-                def: ''
+                unit: 'interval',
+                def: '00:00'
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'duration_MMSS', {
-            type: 'state',
-            common: {
-                name: 'Dauer MM:SS',
-                type: 'string',
-                role: 'media.duration_MMSS',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
+
+        //Group
         await this.setObjectNotExistsAsync(player.statePath + 'group_leader', {
             type: 'state',
             common: {
-                name: 'Ist Gruppenleiter',
+                name: 'Group Leader',
+                desc: 'True, if player is group leader',
                 type: 'boolean',
                 role: 'media.group_leader',
                 read: true,
@@ -649,7 +694,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'group_member', {
             type: 'state',
             common: {
-                name: 'Ist Gruppenmitglied',
+                name: 'Group member',
+                desc: 'True, if player is member of a group',
                 type: 'boolean',
                 role: 'media.group_member',
                 read: true,
@@ -661,7 +707,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'group_pid', {
             type: 'state',
             common: {
-                name: 'PlayerIDs in der Gruppe',
+                name: 'Group player IDs',
+                desc: 'Player IDs of the group members',
                 type: 'string',
                 role: 'media.group_pid',
                 read: true,
@@ -673,9 +720,10 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'group_volume', {
             type: 'state',
             common: {
-                name: 'Lautstärke wenn Gruppen-Leiter',
+                name: 'Group volume',
+                desc: 'State and control of group volume',
                 type: 'number',
-                role: 'media.group_volume',
+                role: 'level.volume.group',
                 read: true,
                 write: true,
                 def: 0
@@ -685,7 +733,8 @@ class Heos extends utils.Adapter {
         await this.setObjectNotExistsAsync(player.statePath + 'group_name', {
             type: 'state',
             common: {
-                name: 'Name der Gruppe',
+                name: 'Group name',
+                desc: 'Name of the group',
                 type: 'string',
                 role: 'media.group_name',
                 read: true,
@@ -694,15 +743,102 @@ class Heos extends utils.Adapter {
             },
             native: {},
         });
-        await this.setObjectNotExistsAsync(player.statePath + 'group_mute', {
+        await this.setObjectNotExistsAsync(player.statePath + 'group_muted', {
             type: 'state',
             common: {
-                name: 'Gruppe gemutet?',
+                name: 'Group mute',
+                desc: 'Group is muted',
                 type: 'boolean',
-                role: 'media.group_mute',
+                role: 'media.mute.group',
                 read: true,
                 write: true,
                 def: false
+            },
+            native: {},
+        });
+
+        //Buttons
+        await this.setObjectNotExistsAsync(player.statePath + 'play', {
+            type: 'state',
+            common: {
+                name: 'Play button',
+                desc: 'play',
+                type: 'boolean',
+                role: 'button.play',
+                read: true,
+                write: true
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(player.statePath + 'stop', {
+            type: 'state',
+            common: {
+                name: 'Stop button',
+                desc: 'Stop',
+                type: 'boolean',
+                role: 'button.stop',
+                read: true,
+                write: true
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(player.statePath + 'pause', {
+            type: 'state',
+            common: {
+                name: 'Pause button',
+                desc: 'pause',
+                type: 'boolean',
+                role: 'button.pause',
+                read: true,
+                write: true
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(player.statePath + 'prev', {
+            type: 'state',
+            common: {
+                name: 'Previous button',
+                desc: 'prev',
+                type: 'boolean',
+                role: 'button.prev',
+                read: true,
+                write: true
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(player.statePath + 'next', {
+            type: 'state',
+            common: {
+                name: 'Next button',
+                desc: 'next',
+                type: 'boolean',
+                role: 'button.next',
+                read: true,
+                write: true
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(player.statePath + 'volume_up', {
+            type: 'state',
+            common: {
+                name: 'Volume up',
+                desc: 'Turn the volume up',
+                type: 'boolean',
+                role: 'button.volume.up',
+                read: true,
+                write: true
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(player.statePath + 'volume_down', {
+            type: 'state',
+            common: {
+                name: 'Volume down',
+                desc: 'Turn the volume down',
+                type: 'boolean',
+                role: 'button.volume.down',
+                read: true,
+                write: true
             },
             native: {},
         });
@@ -747,6 +883,8 @@ class Heos extends utils.Adapter {
 
                     this.net_client.on('connect', async () => {
                         await this.setStateAsync("connected", true);
+                        this.setStateChanged('info.connection', true, true);
+
                         this.state = States.Connected;
                         this.log.info('connected to HEOS (' + this.ip + ')');
                         this.getPlayers();
@@ -800,6 +938,9 @@ class Heos extends utils.Adapter {
                         break;
                     case 'disconnect':
                         this.disconnect();
+                        break;
+                    case 'reconnect':
+                        this.reconnect();
                         break;
                     case 'reboot':
                         this.reboot();
@@ -1021,7 +1162,7 @@ class Heos extends utils.Adapter {
                                             let pid = memberPids[i];
                                             let heosPlayer = this.players[pid];
                                             if (heosPlayer) {
-                                                this.setState(heosPlayer.statePath + 'group_mute', (jmsg.mute == 'on' ? true : false), true);
+                                                this.setState(heosPlayer.statePath + 'group_muted', (jmsg.mute == 'on' ? true : false), true);
                                             }
                                         }
                                     }
@@ -1077,7 +1218,7 @@ class Heos extends utils.Adapter {
                                     await this.setObjectNotExistsAsync(baseStatePath, {
                                         type: 'channel',
                                         common: {
-                                            name: source.sid,
+                                            name: source.name,
                                             role: 'media.source'
                                         },
                                         native: {},
@@ -1088,43 +1229,51 @@ class Heos extends utils.Adapter {
                                         type: 'state',
                                         common: {
                                             name: 'Source ID',
+                                            desc: 'ID of the source',
                                             type: 'number',
                                             role: 'media.sid',
                                             read: true,
-                                            write: false
+                                            write: false,
+                                            def: ''
                                         },
                                         native: {},
                                     });
                                     await this.setObjectNotExistsAsync(statePath + 'name', {
                                         type: 'state',
                                         common: {
-                                            name: 'Source Name',
+                                            name: 'Source name',
+                                            desc: 'Name of the source',
                                             type: 'string',
                                             role: 'media.name',
                                             read: true,
-                                            write: false
+                                            write: false,
+                                            def: ''
                                         },
                                         native: {},
                                     });
                                     await this.setObjectNotExistsAsync(statePath + 'type', {
                                         type: 'state',
                                         common: {
-                                            name: 'Source Type',
+                                            name: 'Source type',
+                                            desc: 'Type of the source',
                                             type: 'string',
                                             role: 'media.type',
                                             read: true,
-                                            write: false
+                                            write: false,
+                                            def: ''
                                         },
                                         native: {},
                                     });
                                     await this.setObjectNotExistsAsync(statePath + 'image_url', {
                                         type: 'state',
                                         common: {
-                                            name: 'Bild Url',
+                                            name: 'Source image url',
+                                            desc: 'Image URL of the source',
                                             type: 'string',
                                             role: 'media.image_url',
                                             read: true,
-                                            write: false
+                                            write: false,
+                                            def: ''
                                         },
                                         native: {},
                                     });
@@ -1184,7 +1333,8 @@ class Heos extends utils.Adapter {
                                             await this.setObjectNotExistsAsync(statePath + 'id', {
                                                 type: 'state',
                                                 common: {
-                                                    name: 'ID',
+                                                    name: 'Playlist ID',
+                                                    desc: 'ID of the playlist',
                                                     type: 'number',
                                                     role: 'media.id',
                                                     read: true,
@@ -1195,22 +1345,26 @@ class Heos extends utils.Adapter {
                                             await this.setObjectNotExistsAsync(statePath + 'name', {
                                                 type: 'state',
                                                 common: {
-                                                    name: 'Playlistname',
+                                                    name: 'Playlist name',
+                                                    desc: 'Name of the playlist',
                                                     type: 'string',
                                                     role: 'media.name',
                                                     read: true,
-                                                    write: false
+                                                    write: false,
+                                                    def: ''
                                                 },
                                                 native: {},
                                             });
                                             await this.setObjectNotExistsAsync(statePath + 'playable', {
                                                 type: 'state',
                                                 common: {
-                                                    name: 'Playlist ist spielbar',
+                                                    name: 'Playable',
+                                                    desc: 'Playlist is playable',
                                                     type: 'boolean',
                                                     role: 'media.playable',
                                                     read: true,
-                                                    write: false
+                                                    write: false,
+                                                    def: false
                                                 },
                                                 native: {},
                                             });
@@ -1218,11 +1372,13 @@ class Heos extends utils.Adapter {
                                                 await this.setObjectNotExistsAsync(statePath + 'play', {
                                                     type: 'state',
                                                     common: {
-                                                        name: 'Playlist auf allen Playern abspielen',
+                                                        name: 'Play',
+                                                        desc: 'Play on all players',
                                                         type: 'boolean',
                                                         role: 'button',
                                                         read: true,
-                                                        write: true
+                                                        write: true,
+                                                        def: false
                                                     },
                                                     native: {},
                                                 });
@@ -1230,22 +1386,26 @@ class Heos extends utils.Adapter {
                                             await this.setObjectNotExistsAsync(statePath + 'type', {
                                                 type: 'state',
                                                 common: {
-                                                    name: 'Playlisttyp',
+                                                    name: 'Playlist type',
+                                                    desc: 'Type of the playlist',
                                                     type: 'string',
                                                     role: 'media.type',
                                                     read: true,
-                                                    write: false
+                                                    write: false,
+                                                    def: ''
                                                 },
                                                 native: {},
                                             });
                                             await this.setObjectNotExistsAsync(statePath + 'image_url', {
                                                 type: 'state',
                                                 common: {
-                                                    name: 'Playlistbild',
+                                                    name: 'Playlist image url',
+                                                    desc: 'Image URL of the playlist',
                                                     type: 'string',
                                                     role: 'media.image_url',
                                                     read: true,
-                                                    write: false
+                                                    write: false,
+                                                    def: ''
                                                 },
                                                 native: {},
                                             });
@@ -1253,10 +1413,12 @@ class Heos extends utils.Adapter {
                                                 type: 'state',
                                                 common: {
                                                     name: 'Container',
-                                                    type: 'string',
+                                                    desc: 'True, if the playlist is a container',
+                                                    type: 'boolean',
                                                     role: 'media.container',
                                                     read: true,
-                                                    write: false
+                                                    write: false,
+                                                    def: false
                                                 },
                                                 native: {},
                                             });
@@ -1264,11 +1426,13 @@ class Heos extends utils.Adapter {
                                                 await this.setObjectNotExistsAsync(statePath + 'cid', {
                                                     type: 'state',
                                                     common: {
-                                                        name: 'cid',
+                                                        name: 'Container ID',
+                                                        desc: 'ID of the container',
                                                         type: 'string',
                                                         role: 'media.cid',
                                                         read: true,
-                                                        write: false
+                                                        write: false,
+                                                        def: ''
                                                     },
                                                     native: {},
                                                 });
@@ -1276,11 +1440,13 @@ class Heos extends utils.Adapter {
                                                 await this.setObjectNotExistsAsync(statePath + 'mid', {
                                                     type: 'state',
                                                     common: {
-                                                        name: 'mid',
+                                                        name: 'Media ID',
+                                                        desc: 'ID of the media',
                                                         type: 'string',
                                                         role: 'media.mid',
                                                         read: true,
-                                                        write: false
+                                                        write: false,
+                                                        def: ''
                                                     },
                                                     native: {},
                                                 });
@@ -1334,7 +1500,8 @@ class Heos extends utils.Adapter {
                                             await this.setObjectNotExistsAsync(statePath + 'id', {
                                                 type: 'state',
                                                 common: {
-                                                    name: 'ID',
+                                                    name: 'Preset ID',
+                                                    desc: 'ID of the preset',
                                                     type: 'number',
                                                     role: 'media.id',
                                                     read: true,
@@ -1345,22 +1512,26 @@ class Heos extends utils.Adapter {
                                             await this.setObjectNotExistsAsync(statePath + 'name', {
                                                 type: 'state',
                                                 common: {
-                                                    name: 'Favoritenname',
+                                                    name: 'Preset name',
+                                                    desc: 'Name of the preset',
                                                     type: 'string',
                                                     role: 'media.name',
                                                     read: true,
-                                                    write: false
+                                                    write: false,
+                                                    def: ''
                                                 },
                                                 native: {},
                                             });
                                             await this.setObjectNotExistsAsync(statePath + 'playable', {
                                                 type: 'state',
                                                 common: {
-                                                    name: 'Favorit ist spielbar',
+                                                    name: 'Playable',
+                                                    desc: 'Preset is playable',
                                                     type: 'boolean',
                                                     role: 'media.playable',
                                                     read: true,
-                                                    write: false
+                                                    write: false,
+                                                    def: false
                                                 },
                                                 native: {},
                                             });
@@ -1368,11 +1539,13 @@ class Heos extends utils.Adapter {
                                                 await this.setObjectNotExistsAsync(statePath + 'play', {
                                                     type: 'state',
                                                     common: {
-                                                        name: 'Favorit auf allen Playern abspielen',
+                                                        name: 'Play',
+                                                        desc: 'Play on all players',
                                                         type: 'boolean',
                                                         role: 'button',
                                                         read: true,
-                                                        write: true
+                                                        write: true,
+                                                        def: false
                                                     },
                                                     native: {},
                                                 });
@@ -1380,7 +1553,8 @@ class Heos extends utils.Adapter {
                                             await this.setObjectNotExistsAsync(statePath + 'type', {
                                                 type: 'state',
                                                 common: {
-                                                    name: 'Favorittyp',
+                                                    name: 'Preset type',
+                                                    desc: 'Type of the preset',
                                                     type: 'string',
                                                     role: 'media.type',
                                                     read: true,
@@ -1391,11 +1565,13 @@ class Heos extends utils.Adapter {
                                             await this.setObjectNotExistsAsync(statePath + 'image_url', {
                                                 type: 'state',
                                                 common: {
-                                                    name: 'Favoritbild',
+                                                    name: 'Preset image url',
+                                                    desc: 'Image URL of the preset',
                                                     type: 'string',
                                                     role: 'media.image_url',
                                                     read: true,
-                                                    write: false
+                                                    write: false,
+                                                    def: ''
                                                 },
                                                 native: {},
                                             });
@@ -1403,10 +1579,12 @@ class Heos extends utils.Adapter {
                                                 type: 'state',
                                                 common: {
                                                     name: 'Container',
-                                                    type: 'string',
+                                                    desc: 'True, if the preset is a container',
+                                                    type: 'boolean',
                                                     role: 'media.container',
                                                     read: true,
-                                                    write: false
+                                                    write: false,
+                                                    def: false
                                                 },
                                                 native: {},
                                             });
@@ -1414,11 +1592,13 @@ class Heos extends utils.Adapter {
                                                 await this.setObjectNotExistsAsync(statePath + 'cid', {
                                                     type: 'state',
                                                     common: {
-                                                        name: 'cid',
+                                                        name: 'Container ID',
+                                                        desc: 'ID of the container',
                                                         type: 'string',
                                                         role: 'media.cid',
                                                         read: true,
-                                                        write: false
+                                                        write: false,
+                                                        def: ''
                                                     },
                                                     native: {},
                                                 });
@@ -1426,11 +1606,13 @@ class Heos extends utils.Adapter {
                                                 await this.setObjectNotExistsAsync(statePath + 'mid', {
                                                     type: 'state',
                                                     common: {
-                                                        name: 'mid',
+                                                        name: 'Media ID',
+                                                        desc: 'ID of the media',
                                                         type: 'string',
                                                         role: 'media.mid',
                                                         read: true,
-                                                        write: false
+                                                        write: false,
+                                                        def: ''
                                                     },
                                                     native: {},
                                                 });
@@ -1499,7 +1681,7 @@ class Heos extends utils.Adapter {
                                             let pid = memberPids[i];
                                             let heosPlayer = this.players[pid];
                                             if (heosPlayer) {
-                                                this.setState(heosPlayer.statePath + 'group_mute', (jmsg.state == 'on' ? true : false), true);
+                                                this.setState(heosPlayer.statePath + 'group_muted', (jmsg.state == 'on' ? true : false), true);
                                             }
                                         }
                                     }
@@ -1577,14 +1759,20 @@ class Heos extends utils.Adapter {
 		} catch (err) { this.log.error('parseResponse: ' + err.message + '\n ' + response); }
     }
 
-    /** wandelt einen sek Wert in MM:SS Darstellung um**/
-    toMMSS(s) {
-        var sec_num = parseInt(s, 10);
-        var minutes = Math.floor(sec_num / 60);
-        var seconds = sec_num - (minutes * 60);
-        if (seconds < 10) { seconds = "0" + seconds; }
-        return minutes + ':' + seconds;
+    toFormattedTime(time) {
+        let hours = Math.floor(time / 3600);
+        hours = (hours) ? (hours + ':') : '';
+        let min = Math.floor(time / 60) % 60;
+        if (min < 10) min = '0' + min;
+        let sec = time % 60;
+        if (sec < 10) sec = '0' + sec;
+    
+        return hours + min + ':' + sec;
     }
+
+    //#################
+    // Player functions
+    //#################
 
     /** Group Leader or no group member  */
     isPlayerLeader(pid){
@@ -1598,7 +1786,7 @@ class Heos extends utils.Adapter {
     async cleanupPlayerNowPlaying(pid){
         if(pid in this.players){
             let player = this.players[pid];
-            this.getStates(player.statePath + "now_playing*", async (err, states) => {
+            this.getStates(player.statePath + "current_*", async (err, states) => {
                 for (var id in states) {
                     this.setState(id, "", true);
                 }
@@ -1656,27 +1844,30 @@ class Heos extends utils.Adapter {
                                 this.setPlayerLastError(pid, jmsg.error.replace(/_/g, ' '));
                                 break;
                             case 'player_state_changed':
-                                this.setState(player.statePath + "play_state", jmsg.state, true);
+                                this.setState(player.statePath + "state", jmsg.state, true);
+                                player.state = jmsg.state;
                                 this.sendCommandToPlayer(pid, 'get_now_playing_media');
                                 break;
                             case 'player_volume_changed':
                                 this.setState(player.statePath + "volume", jmsg.level, true);
-                                this.setState(player.statePath + "mute", (jmsg.mute == 'on' ? true : false), true);
+                                this.setState(player.statePath + "muted", (jmsg.mute == 'on' ? true : false), true);
+                                player.muted = (jmsg.state == 'on' ? true : false);
+                                this.playerAutoPlay(player.pid);
                                 break;
                             case 'repeat_mode_changed':
-                                this.setState(player.statePath + "play_mode_repeat", jmsg.repeat, true);
+                                this.setState(player.statePath + "repeat", jmsg.repeat, true);
                                 break;
                             case 'shuffle_mode_changed':
-                                this.setState(player.statePath + "play_mode_shuffle", (jmsg.shuffle == 'on' ? true : false), true);
+                                this.setState(player.statePath + "shuffle", (jmsg.shuffle == 'on' ? true : false), true);
                                 break;
                             case 'player_now_playing_changed':
                                 this.sendCommandToPlayer(pid, 'get_now_playing_media');
                                 break;
                             case 'player_now_playing_progress':
-                                this.setState(player.statePath + "cur_pos", jmsg.cur_pos / 1000, true);
-                                this.setState(player.statePath + "cur_pos_MMSS", this.toMMSS(jmsg.cur_pos / 1000), true);
-                                this.setState(player.statePath + "duration", jmsg.duration / 1000, true);
-                                this.setState(player.statePath + "duration_MMSS", this.toMMSS(jmsg.duration / 1000), true);
+                                this.setState(player.statePath + "current_elapsed", jmsg.cur_pos / 1000, true);
+                                this.setState(player.statePath + "current_elapsed_s", this.toFormattedTime(jmsg.cur_pos / 1000), true);
+                                this.setState(player.statePath + "current_duration", jmsg.duration / 1000, true);
+                                this.setState(player.statePath + "current_duration_s", this.toFormattedTime(jmsg.duration / 1000), true);
                                 break;
                         }
                         break;
@@ -1693,69 +1884,73 @@ class Heos extends utils.Adapter {
                                 break;
                             case 'set_mute':
                             case 'get_mute':
-                                this.setState(player.statePath + "mute", (jmsg.state == 'on' ? true : false), true);
+                                this.setState(player.statePath + "muted", (jmsg.state == 'on' ? true : false), true);
+                                player.muted = (jmsg.state == 'on' ? true : false);
                                 break;
                             case 'set_play_state':
                             case 'get_play_state':
-                                this.setState(player.statePath + "play_state", jmsg.state, true);
+                                this.setState(player.statePath + "state", jmsg.state, true);
+                                player.state = jmsg.state;
                                 break;
                             case 'set_play_mode':
                             case 'get_play_mode':
-                                this.setState(player.statePath + "play_mode_repeat", jmsg.repeat, true);
-                                this.setState(player.statePath + "play_mode_shuffle", (jmsg.shuffle == 'on' ? true : false), true);
+                                this.setState(player.statePath + "repeat", jmsg.repeat, true);
+                                this.setState(player.statePath + "shuffle", (jmsg.shuffle == 'on' ? true : false), true);
                                 break;
                             case 'get_now_playing_media':
                                 this.resetPlayerError(pid, false);
                                 if (jdata.payload.hasOwnProperty('type')) {
-                                    this.setState(player.statePath + "now_playing_media_type", jdata.payload.type, true);
+                                    this.setState(player.statePath + "current_type", jdata.payload.type, true);
                                     if (jdata.payload.type == 'station') {
-                                        this.setState(player.statePath + "now_playing_media_station", jdata.payload.station, true);
+                                        this.setState(player.statePath + "current_station", jdata.payload.station, true);
                                     } else {
-                                        this.setState(player.statePath + "now_playing_media_station", "", true);
+                                        this.setState(player.statePath + "current_station", "", true);
                                     }
                                 } else {
-                                    this.setState(player.statePath + "now_playing_media_type", "", true);
+                                    this.setState(player.statePath + "current_type", "", true);
                                 }
 
                                 if (jdata.payload.hasOwnProperty('song'))
-                                    this.setState(player.statePath + "now_playing_media_song", jdata.payload.song, true);
+                                    this.setState(player.statePath + "current_title", jdata.payload.song, true);
                                 else
-                                    this.setState(player.statePath + "now_playing_media_song", "", true);
+                                    this.setState(player.statePath + "current_title", "", true);
 
                                 if (jdata.payload.hasOwnProperty('album'))
-                                    this.setState(player.statePath + "now_playing_media_album", jdata.payload.album, true);
+                                    this.setState(player.statePath + "current_album", jdata.payload.album, true);
                                 else
-                                    this.setState(player.statePath + "now_playing_media_album", "", true);
+                                    this.setState(player.statePath + "current_album", "", true);
 
                                 if (jdata.payload.hasOwnProperty('album_id'))
-                                    this.setState(player.statePath + "now_playing_media_album_id", jdata.payload.album_id, true);
+                                    this.setState(player.statePath + "current_album_id", jdata.payload.album_id, true);
                                 else
-                                    this.setState(player.statePath + "now_playing_media_album_id", "", true);
+                                    this.setState(player.statePath + "current_album_id", "", true);
 
                                 if (jdata.payload.hasOwnProperty('artist'))
-                                    this.setState(player.statePath + "now_playing_media_artist", jdata.payload.artist, true);
+                                    this.setState(player.statePath + "current_artist", jdata.payload.artist, true);
                                 else
-                                    this.setState(player.statePath + "now_playing_media_artist", "", true);
+                                    this.setState(player.statePath + "current_artist", "", true);
 
                                 if (jdata.payload.hasOwnProperty('image_url'))
-                                    this.setState(player.statePath + "now_playing_media_image_url", jdata.payload.image_url, true);
+                                    this.setState(player.statePath + "current_image_url", jdata.payload.image_url, true);
                                 else
-                                    this.setState(player.statePath + "now_playing_media_image_url", "", true);
+                                    this.setState(player.statePath + "current_image_url", "", true);
 
-                                if (jdata.payload.hasOwnProperty('mid'))
-                                    this.setState(player.statePath + "now_playing_media_mid", jdata.payload.mid, true);
-                                else
-                                    this.setState(player.statePath + "now_playing_media_mid", "", true);
+                                if (jdata.payload.hasOwnProperty('mid')) {
+                                    this.setState(player.statePath + "current_mid", jdata.payload.mid, true);
+                                    this.playerMuteSpotifyAd(player.pid, jdata.payload.mid);
+                                } else {
+                                    this.setState(player.statePath + "current_mid", "", true);
+                                }
 
                                 if (jdata.payload.hasOwnProperty('qid'))
-                                    this.setState(player.statePath + "now_playing_media_qid", jdata.payload.qid, true);
+                                    this.setState(player.statePath + "current_qid", jdata.payload.qid, true);
                                 else
-                                    this.setState(player.statePath + "now_playing_media_qid", "", true);
+                                    this.setState(player.statePath + "current_qid", "", true);
 
                                 if (jdata.payload.hasOwnProperty('sid'))
-                                    this.setState(player.statePath + "now_playing_media_sid", jdata.payload.sid, true);
+                                    this.setState(player.statePath + "current_sid", jdata.payload.sid, true);
                                 else
-                                    this.setState(player.statePath + "now_playing_media_sid", "", true);
+                                    this.setState(player.statePath + "current_sid", "", true);
                                 break;
                         }
                         break;
@@ -1763,6 +1958,36 @@ class Heos extends utils.Adapter {
 
 
             } catch (err) { this.log.error('parseResponse: ' + err.message); }
+        }
+    }
+
+    playerMuteSpotifyAd(pid, mid){
+        if(this.config.muteSpotifyAds === true){
+            if(pid in this.players){
+                let player = this.players[pid];
+                if(mid.startsWith("spotify:ad:") && player.muted === false){
+                    player.spotify_ad_mute = true;
+                    this.sendCommandToPlayer(player.pid, 'set_mute&state=on');
+                } else if(player.spotify_ad_mute === true){
+                    player.spotify_ad_mute = false;
+                    this.sendCommandToPlayer(player.pid, 'set_mute&state=off');
+                }        
+            }
+        }
+    }
+
+    playerAutoPlay(pid){
+        if(this.config.autoPlay === true){
+            if(pid in this.players){
+                let player = this.players[pid];
+                if(player.connected === true && player.muted === false){
+                    if(player.state === 'pause'){
+                        this.sendCommandToPlayer(player.pid, 'set_play_state&state=play');
+                    } else if(player.state === 'stop'){
+                        this.sendCommandToPlayer(player.pid, 'play_preset&preset=' + this.config.autoPlayPreset);
+                    }
+                }
+            }
         }
     }
 
@@ -1835,6 +2060,8 @@ class Heos extends utils.Adapter {
 
             setTimeout(() => {
                 this.setState(player.statePath + 'connected', true);
+                player.connected = true;
+                this.playerAutoPlay(player.pid);
             }, 1000);
         }
     }
@@ -2091,6 +2318,7 @@ class Heos extends utils.Adapter {
         this.setState('signed_in', false);
         this.setState('signed_in_user', "");
         this.state = States.Disconnected;
+        this.setStateChanged('info.connection', false, true);
         this.log.info('disconnected from HEOS');
 	}
 	

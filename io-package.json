@@ -75,8 +75,10 @@
 		"searchInterval": 30000,
 		"heartbeatInterval": 15000,
 		"heartbeatRetries": 4,
-		"ttsDefaultVolume": 15,
-		"ttsMaxVolume": 20
+		"muteSpotifyAds": true,
+		"autoPlayPreset": 1,
+		"autoPlay": true,
+		"volumeStepLevel": 2
 	},
 	"objects": [],
 	"instanceObjects": []
