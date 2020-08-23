@@ -901,7 +901,7 @@ class Heos extends utils.Adapter {
 
                     // timeout
                     this.net_client.on('timeout', () => {
-                        this.log.warn('Timeout trying connect to ' + this.ip);
+                        this.log.warn('timeout trying connect to ' + this.ip);
                         this.reconnect();
                     });
 
@@ -1965,7 +1965,7 @@ class Heos extends utils.Adapter {
         if(this.config.muteSpotifyAds === true){
             if(pid in this.players){
                 let player = this.players[pid];
-                this.log.debug("AutoMute player: " + JSON.stringify(player));
+                this.log.debug("autoMute player: " + JSON.stringify(player));
                 if(mid.startsWith("spotify:ad:") && player.muted === false){
                     player.spotify_ad_mute = true;
                     this.sendCommandToPlayer(player.pid, 'set_mute&state=on');
@@ -1981,13 +1981,13 @@ class Heos extends utils.Adapter {
         if(this.config.autoPlay === true){
             if(pid in this.players){
                 let player = this.players[pid];
-                this.log.debug("AutoPlay player: " + JSON.stringify(player));
+                this.log.debug("autoPlay player: " + JSON.stringify(player));
                 if(player.connected === true && player.muted === false){
                     if(player.state === 'pause'){
-                        this.log.info('Start playing music at ' + player.name);
+                        this.log.info('start playing music at ' + player.name);
                         this.sendCommandToPlayer(player.pid, 'set_play_state&state=play');
                     } else if(player.state === 'stop'){
-                        this.log.info('Start playing preset at ' + player.name);
+                        this.log.info('start playing preset at ' + player.name);
                         this.sendCommandToPlayer(player.pid, 'play_preset&preset=' + this.config.autoPlayPreset);
                     }
                 }
@@ -2110,7 +2110,7 @@ class Heos extends utils.Adapter {
 
     //Alle Player stoppen
     stopPlayers() {
-        this.log.debug("Try to stop players:" + JSON.stringify(Object.keys(this.players)));
+        this.log.debug("try to stop players:" + JSON.stringify(Object.keys(this.players)));
         for (var pid in this.players) {
             this.stopPlayer(pid);
         }
@@ -2225,14 +2225,14 @@ class Heos extends utils.Adapter {
 	
 	startHeartbeat() {
         if (this.state == States.Connected) {
-            this.log.debug("[HEARTBEAT] Start interval");
+            this.log.debug("[HEARTBEAT] start interval");
             this.heartbeatInterval = setInterval(() => {
-                this.log.debug("[HEARTBEAT] Ping")
+                this.log.debug("[HEARTBEAT] ping")
                 this.msgs.push('heos://system/heart_beat');
                 this.sendNextMsg();
                 this.heartbeatRetries += 1;
                 if(this.heartbeatRetries >= this.config.heartbeatRetries){
-                    this.log.warn("[HEARTBEAT] Retries exceeded");
+                    this.log.warn("[HEARTBEAT] retries exceeded");
                     this.resetHeartbeatRetries(false);
                     this.reboot();
                 }
@@ -2242,9 +2242,9 @@ class Heos extends utils.Adapter {
 
     resetHeartbeatRetries(pong) {
         if(pong){
-            this.log.debug("[HEARTBEAT] Pong");
+            this.log.debug("[HEARTBEAT] pong");
         } else {
-            this.log.debug("[HEARTBEAT] Reset retries");
+            this.log.debug("[HEARTBEAT] reset retries");
         }
         this.heartbeatRetries = 0;
     }
