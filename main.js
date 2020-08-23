@@ -1851,7 +1851,7 @@ class Heos extends utils.Adapter {
                             case 'player_volume_changed':
                                 this.setState(player.statePath + "volume", jmsg.level, true);
                                 this.setState(player.statePath + "muted", (jmsg.mute == 'on' ? true : false), true);
-                                player.muted = (jmsg.state == 'on' ? true : false);
+                                player.muted = (jmsg.mute == 'on' ? true : false);
                                 this.playerAutoPlay(player.pid);
                                 break;
                             case 'repeat_mode_changed':
@@ -1965,6 +1965,7 @@ class Heos extends utils.Adapter {
         if(this.config.muteSpotifyAds === true){
             if(pid in this.players){
                 let player = this.players[pid];
+                this.log.info("AutoMute: " + JSON.stringify(player));
                 if(mid.startsWith("spotify:ad:") && player.muted === false){
                     player.spotify_ad_mute = true;
                     this.sendCommandToPlayer(player.pid, 'set_mute&state=on');
@@ -1980,6 +1981,7 @@ class Heos extends utils.Adapter {
         if(this.config.autoPlay === true){
             if(pid in this.players){
                 let player = this.players[pid];
+                this.log.info("AutoPlay: " + JSON.stringify(player));
                 if(player.connected === true && player.muted === false){
                     if(player.state === 'pause'){
                         this.log.info('Play music at ' + player.name);
