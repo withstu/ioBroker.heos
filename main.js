@@ -1965,10 +1965,11 @@ class Heos extends utils.Adapter {
         if(this.config.muteSpotifyAds === true){
             if(pid in this.players){
                 let player = this.players[pid];
+                this.log.debug("AutoMute player: " + JSON.stringify(player));
                 if(mid.startsWith("spotify:ad:") && player.muted === false){
                     player.spotify_ad_mute = true;
                     this.sendCommandToPlayer(player.pid, 'set_mute&state=on');
-                } else if(player.spotify_ad_mute === true){
+                } else if(!mid.startsWith("spotify:ad:") && player.spotify_ad_mute === true){
                     player.spotify_ad_mute = false;
                     this.sendCommandToPlayer(player.pid, 'set_mute&state=off');
                 }        
@@ -1980,6 +1981,7 @@ class Heos extends utils.Adapter {
         if(this.config.autoPlay === true){
             if(pid in this.players){
                 let player = this.players[pid];
+                this.log.debug("AutoPlay player: " + JSON.stringify(player));
                 if(player.connected === true && player.muted === false){
                     if(player.state === 'pause'){
                         this.log.info('Start playing music at ' + player.name);
