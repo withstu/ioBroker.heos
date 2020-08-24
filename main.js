@@ -146,6 +146,7 @@ class Heos extends utils.Adapter {
         this.subscribeStates('players.*.pause');
         this.subscribeStates('players.*.next');
         this.subscribeStates('players.*.prev');
+        this.subscribeStates('players.*.auto_play');
 
         this.main();
 	}
@@ -227,6 +228,8 @@ class Heos extends utils.Adapter {
                     this.sendCommandToPlayer(player.pid, 'volume_up&step=' + this.config.volumeStepLevel);
                 } else if(id.state === 'volume_down'){
                     this.sendCommandToPlayer(player.pid, 'volume_down&step=' + this.config.volumeStepLevel);
+                }else if(id.state === 'auto_play'){
+                    player.auto_play = state.val;
                 }
             }
         }
@@ -842,6 +845,19 @@ class Heos extends utils.Adapter {
             },
             native: {},
         });
+        await this.setObjectNotExistsAsync(player.statePath + 'auto_play', {
+			type: 'state',
+			common: {
+                name: 'Automatic Playback',
+                desc: 'True, if automatic playback activated',
+				type: 'boolean',
+				role: 'media.auto_play',
+				read: true,
+                write: true,
+                def: true
+			},
+			native: {},
+        });
 
         await this.setStateAsync(player.statePath + 'name', player.name, true);
         await this.setStateAsync(player.statePath + 'pid', player.pid, true);
@@ -851,6 +867,11 @@ class Heos extends utils.Adapter {
         await this.setStateAsync(player.statePath + 'network', player.network, true);
         await this.setStateAsync(player.statePath + 'lineout', player.lineout, true);
         await this.setStateAsync(player.statePath + 'serial', player.serial, true);
+
+        this.getStateAsync(player.statePath + 'auto_play', (err, state) => {
+            this.log.debug("Player " + player.pid + " Auto Play: " + state.val);
+            player.auto_play = state.val;
+        });
 
         return player;
     }
@@ -1849,10 +1870,14 @@ class Heos extends utils.Adapter {
                                 this.sendCommandToPlayer(pid, 'get_now_playing_media');
                                 break;
                             case 'player_volume_changed':
-                                this.setState(player.statePath + "volume", jmsg.level, true);
-                                this.setState(player.statePath + "muted", (jmsg.mute == 'on' ? true : false), true);
-                                player.muted = (jmsg.mute == 'on' ? true : false);
-                                this.playerAutoPlay(player.pid);
+                                this.setStateChanged(player.statePath + "volume", jmsg.level, true);
+                                let newMuted = (jmsg.mute == 'on' ? true : false);
+                                player.muted = newMuted;
+                                this.setStateChanged(player.statePath + "muted", newMuted, true, (error, id, notChanged) =>{
+                                    if(!notChanged){
+                                        this.playerAutoPlay(player.pid);
+                                    }
+                                });
                                 break;
                             case 'repeat_mode_changed':
                                 this.setState(player.statePath + "repeat", jmsg.repeat, true);
@@ -1982,7 +2007,7 @@ class Heos extends utils.Adapter {
             if(pid in this.players){
                 let player = this.players[pid];
                 this.log.debug("autoPlay player: " + JSON.stringify(player));
-                if(player.connected === true && player.muted === false){
+                if(player.auto_play === true && player.connected === true && player.muted === false){
                     if(player.state === 'pause'){
                         this.log.info('start playing music at ' + player.name);
                         this.sendCommandToPlayer(player.pid, 'set_play_state&state=play');
