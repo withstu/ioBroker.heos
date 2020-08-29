@@ -77,7 +77,7 @@
 		"heartbeatRetries": 4,
 		"muteSpotifyAds": true,
 		"autoPlay": true,
-		"autoPlayCmd": "set_volume&level=15|set_group_volume&level=15|play_preset&preset=1",
+		"autoPlayCmd": "set_group_volume&level=15|play_preset&preset=1",
 		"volumeStepLevel": 2
 	},
 	"objects": [],
