@@ -204,15 +204,9 @@ class Heos extends utils.Adapter {
                 } else if(id.state === 'volume'){
                     this.sendCommandToPlayer(player.pid, 'set_volume&level=' + state.val);
                 } else if(id.state === 'group_volume'){
-                    if(player.group_member === true){
-                        var gid = player.group_pid.split(",")[0];
-                        this.sendCommandToPlayer(player.pid, 'group/set_volume?gid=' + gid + '&level=' + state.val);
-                    }
+                    this.sendCommandToPlayer(player.pid, 'set_group_volume&level=' + state.val);
                 } else if(id.state === 'group_muted'){
-                    if(player.group_member === true){
-                        var gid = player.group_pid.split(",")[0];
-                        this.sendCommandToPlayer(player.pid, 'group/set_mute?gid=' + gid + '&state=' + (state.val === true ? 'on' : 'off'));
-                    }
+                    this.sendCommandToPlayer(player.pid, 'set_group_mute&state=' + (state.val === true ? 'on' : 'off'));
                 } else if(id.state === 'command'){
                     this.sendCommandToPlayer(player.pid, state.val);
                 } else if(id.state === 'play'){
@@ -259,12 +253,14 @@ class Heos extends utils.Adapter {
         player.statePath = baseStatePath + '.';
         player.group_member = false;
         player.group_leader = false;
+        player.group_leader_pid = '';
         player.group_pid = '';
         player.state = 'stop';
         player.muted = false;
         player.connected = false;
         player.muted_ad = false;
         player.error = false;
+        
 
         //Channel
         await this.setObjectNotExistsAsync(baseStatePath, {
@@ -1740,24 +1736,16 @@ class Heos extends utils.Adapter {
                         //                "players":[{"name":"player name ... 
                         case 'get_groups':
                             // bisherige groups leeren
-                            this.getStates("players.*.group_name", async (err, states) => {
-                                for (var id in states) await this.setStateAsync(id, 'no group', true);
-                            });
-                            this.getStates("players.*.group_leader", async (err, states) => {
-                                for (var id in states) await this.setStateAsync(id, false, true);
-                            });
-                            this.getStates("players.*.group_member", async (err, states) => {
-                                for (var id in states) await this.setStateAsync(id, false, true);
-                            });
-                            this.getStates("players.*.group_pid", async (err, states) => {
-                                for (var id in states) await this.setStateAsync(id, '', true);
-                            });
-
                             for (var pid in this.players) {
-                                let heosPlayer = this.players[pid];
-                                heosPlayer.group_leader = false;
-                                heosPlayer.group_member = false;
-                                heosPlayer.group_gid = '';
+                                let player = this.players[pid];
+                                player.group_leader = false;
+                                player.group_leader_pid = '';
+                                player.group_member = false;
+
+                                this.setStateAsync(player.statePath + 'group_name', '', true);
+                                this.setStateAsync(player.statePath + 'group_pid', '', true);
+                                this.setStateAsync(player.statePath + 'group_leader', player.group_leader, true);
+                                this.setStateAsync(player.statePath + 'group_member', player.group_member, true);
                             }
 
                             // payload mit den groups auswerten
@@ -2025,7 +2013,10 @@ class Heos extends utils.Adapter {
             if(pid in this.players){
                 let player = this.players[pid];
                 this.log.debug("autoPlay player: " + JSON.stringify(player));
-                if(player.auto_play === true && player.connected === true && player.muted === false){
+                if(player.auto_play === true
+                    && player.connected === true
+                    && player.state !== 'play'
+                    && player.muted === false){
                     this.log.info('start playing music at ' + player.name);
                     if(player.error === true){
                         this.sendCommandToPlayer(player.pid, this.config.autoPlayCmd);
@@ -2041,36 +2032,83 @@ class Heos extends utils.Adapter {
         cmd der Form "cmd?param"  werden zur msg heos+cmd+?param aufbereitet
      **/
     playerCommandToMsg(pid, cmd) {
+        var addPid = true;
+        if(cmd.includes('?')){
+            addPid = false;
+        }
         var param = cmd.split('&');
         cmd = param.shift();
-        if (param.length > 0) param = '&' + param.join('&'); else param = '';
+        if (param.length > 0) param = param.join('&'); else param = '';
         var cmd_group = 'player';
+        if(pid in this.players){
+            let player = this.players[pid];
+            let gid = null;
+            if(player.group_member === true){
+                gid = player.group_leader_pid;
+            }
 
-        switch (cmd) {
-            case 'get_play_state':
-            case 'get_play_mode':
-            case 'get_now_playing_media':
-            case 'get_volume':
-            case 'play_next':
-            case 'play_previous':
-            case 'set_mute':       // &state=on|off        
-            case 'set_volume':     // &level=1..100   
-            case 'volume_down':    // &step=1..10   
-            case 'volume_up':      // &step=1..10
-            case 'set_play_state': // &state=play|pause|stop
-            case 'set_play_mode':  // &repeat=on_all|on_one|off  shuffle=on|off
-                break;
+            switch (cmd) {
+                case 'set_group_mute':
+                    cmd = "set_mute";
+                    if(gid != null){
+                        cmd_group = 'group'
+                        param = 'gid=' + gid + '&' + param;
+                        addPid = false;
+                    }
+                    break;
+                case 'set_group_volume':
+                    cmd = "set_volume";
+                    if(gid != null){
+                        cmd_group = 'group'
+                        param = 'gid=' + gid + '&' + param;
+                        addPid = false;
+                    }
+                    break;
+                case 'group_volume_up':
+                    cmd = "volume_up";
+                    if(gid != null){
+                        cmd_group = 'group'
+                        param = 'gid=' + gid + '&' + param;
+                        addPid = false;
+                    }
+                    break;
+                case 'group_volume_down':
+                    cmd = "volume_down";
+                    if(gid != null){
+                        cmd_group = 'group'
+                        param = 'gid=' + gid + '&' + param;
+                        addPid = false;
+                    }
+                    break;
+                case 'get_play_state':
+                case 'get_play_mode':
+                case 'get_now_playing_media':
+                case 'get_volume':
+                case 'play_next':
+                case 'play_previous':
+                case 'set_mute':       // &state=on|off        
+                case 'set_volume':     // &level=1..100   
+                case 'volume_down':    // &step=1..10   
+                case 'volume_up':      // &step=1..10
+                case 'set_play_state': // &state=play|pause|stop
+                case 'set_play_mode':  // &repeat=on_all|on_one|off  shuffle=on|off
+                    break;
 
-            // browse            
-            case 'play_preset':    // heos://browse/play_preset?pid=player_id&preset=preset_position
-                cmd_group = 'browse';
-                break;
-            case 'play_stream':    // heos://browse/play_stream?pid=player_id&url=url_path
-                cmd_group = 'browse';
-                break;
+                // browse            
+                case 'play_preset':    // heos://browse/play_preset?pid=player_id&preset=preset_position
+                    cmd_group = 'browse';
+                    break;
+                case 'play_stream':    // heos://browse/play_stream?pid=player_id&url=url_path
+                    cmd_group = 'browse';
+                    break;
 
+            }
         }
-        return 'heos://' + cmd_group + '/' + cmd + '?pid=' + pid + param;
+        if(addPid){
+            return 'heos://' + cmd_group + '/' + cmd + '?pid=' + pid + '&' + param;
+        } else {
+            return 'heos://' + cmd_group + '/' + cmd + '?' + param;
+        }
     }
 
     /** Nachricht (command) an player senden
@@ -2179,6 +2217,7 @@ class Heos extends utils.Adapter {
                     player.group_pid = group.pid;
                     player.group_leader = (i == 0) && (pids.length > 1);
                     player.group_member = (pids.length > 1);
+                    player.group_leader_pid = pids[0];
                     this.setState(player.statePath + 'group_name', (group.hasOwnProperty('name') ? group.name : ''), true);
                     this.setState(player.statePath + 'group_pid', player.group_pid, true);
                     this.setState(player.statePath + 'group_leader', player.group_leader, true);
