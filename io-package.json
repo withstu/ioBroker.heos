@@ -76,8 +76,8 @@
 		"heartbeatInterval": 15000,
 		"heartbeatRetries": 4,
 		"muteSpotifyAds": true,
-		"autoPlayPreset": 1,
 		"autoPlay": true,
+		"autoPlayCmd": "play_preset&preset=1",
 		"volumeStepLevel": 2
 	},
 	"objects": [],

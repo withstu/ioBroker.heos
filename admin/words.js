@@ -62,17 +62,29 @@ systemDictionary = {
 		"pl": "Automatyczne odtwarzanie przy uruchamianiu i wyłączanie wyciszenia",
 		"zh-cn": "启动和取消静音时自动播放"
 	},
-	"Default favorite": {
-		"en": "Default favorite",
-		"de": "Standardfavorit",
-		"ru": "Избранное по умолчанию",
-		"pt": "Favorito padrão",
-		"nl": "Standaard favoriet",
-		"fr": "Favoris par défaut",
-		"it": "Preferito predefinito",
-		"es": "Favorito predeterminado",
-		"pl": "Domyślny ulubiony",
-		"zh-cn": "默认收藏夹"
+	"Default automatic playback command": {
+		"en": "Default automatic playback command",
+		"de": "Standardbefehl für die automatische Wiedergabe",
+		"ru": "Команда автоматического воспроизведения по умолчанию",
+		"pt": "Comando de reprodução automática padrão",
+		"nl": "Standaard automatisch afspeelcommando",
+		"fr": "Commande de lecture automatique par défaut",
+		"it": "Comando di riproduzione automatica predefinito",
+		"es": "Comando de reproducción automática predeterminado",
+		"pl": "Domyślne polecenie automatycznego odtwarzania",
+		"zh-cn": "默认自动播放命令"
+	},
+	"Automatic playback on startup and unmute": {
+		"en": "Automatic playback on startup and unmute",
+		"de": "Automatische Wiedergabe beim Start und Aufheben der Stummschaltung",
+		"ru": "Автоматическое воспроизведение при запуске и включении звука",
+		"pt": "Reprodução automática ao iniciar e ativar o som",
+		"nl": "Automatisch afspelen bij opstarten en dempen opheffen",
+		"fr": "Lecture automatique au démarrage et réactivation du son",
+		"it": "Riproduzione automatica all'avvio e riattivazione dell'audio",
+		"es": "Reproducción automática al iniciar y activar el sonido",
+		"pl": "Automatyczne odtwarzanie po uruchomieniu i wyłącz wyciszenie",
+		"zh-cn": "启动和取消静音时自动播放"
 	},
 	"Volume step": {
 		"en": "Volume step",
