@@ -868,7 +868,7 @@ class Heos extends utils.Adapter {
                 name: 'Ignore Broadcast commands',
                 desc: 'If true, player ignores commands to all players',
 				type: 'boolean',
-				role: 'media.auto_play',
+				role: 'media.ignore_broadcast_cmd',
 				read: true,
                 write: true,
                 def: false
