@@ -2091,8 +2091,7 @@ class Heos extends utils.Adapter {
         if (this.state == States.Connected) {
             for (var pid in this.players) {
                 let player = this.players[pid];
-
-                if((player.ignore_broadcast_cmd === false && !leaderOnly) || (leaderOnly && this.isPlayerLeader(pid))){
+                if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && this.isPlayerLeader(pid)))){
                     this.sendCommandToPlayer(pid, cmd);
                 }
             }
