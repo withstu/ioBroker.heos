@@ -260,6 +260,7 @@ class Heos extends utils.Adapter {
         player.connected = false;
         player.muted_ad = false;
         player.error = false;
+        player.current_type = '';
         
 
         //Channel
@@ -1932,6 +1933,7 @@ class Heos extends utils.Adapter {
                                 this.resetPlayerError(pid, false);
                                 if (jdata.payload.hasOwnProperty('type')) {
                                     this.setState(player.statePath + "current_type", jdata.payload.type, true);
+                                    player.current_type = jdata.payload.type;
                                     if (jdata.payload.type == 'station') {
                                         this.setState(player.statePath + "current_station", jdata.payload.station, true);
                                     } else {
@@ -1939,6 +1941,7 @@ class Heos extends utils.Adapter {
                                     }
                                 } else {
                                     this.setState(player.statePath + "current_type", "", true);
+                                    player.current_type = "";
                                 }
 
                                 if (jdata.payload.hasOwnProperty('song'))
@@ -1996,7 +1999,6 @@ class Heos extends utils.Adapter {
         if(this.config.muteSpotifyAds === true){
             if(pid in this.players){
                 let player = this.players[pid];
-                this.log.debug("autoMute player: " + JSON.stringify(player));
                 if(mid.startsWith("spotify:ad:") && player.muted === false){
                     player.muted_ad = true;
                     this.sendCommandToPlayer(player.pid, 'set_mute&state=on');
@@ -2012,13 +2014,12 @@ class Heos extends utils.Adapter {
         if(this.config.autoPlay === true){
             if(pid in this.players){
                 let player = this.players[pid];
-                this.log.debug("autoPlay player: " + JSON.stringify(player));
                 if(player.auto_play === true
                     && player.connected === true
-                    && player.state !== 'play'
+                    && (player.state !== 'play' || player.current_type.length == 0)
                     && player.muted === false){
                     this.log.info('start playing music at ' + player.name);
-                    if(player.error === true){
+                    if(player.error === true || player.current_type.length == 0){
                         this.sendCommandToPlayer(player.pid, this.config.autoPlayCmd);
                     } else {
                         this.sendCommandToPlayer(player.pid, 'set_play_state&state=play');
