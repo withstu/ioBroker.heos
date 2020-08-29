@@ -147,6 +147,7 @@ class Heos extends utils.Adapter {
         this.subscribeStates('players.*.next');
         this.subscribeStates('players.*.prev');
         this.subscribeStates('players.*.auto_play');
+        this.subscribeStates('players.*.ignore_broadcast_cmd');
 
         this.main();
 	}
@@ -228,8 +229,10 @@ class Heos extends utils.Adapter {
                     this.sendCommandToPlayer(player.pid, 'volume_up&step=' + this.config.volumeStepLevel);
                 } else if(id.state === 'volume_down'){
                     this.sendCommandToPlayer(player.pid, 'volume_down&step=' + this.config.volumeStepLevel);
-                }else if(id.state === 'auto_play'){
+                } else if(id.state === 'auto_play'){
                     player.auto_play = state.val;
+                } else if(id.state === 'ignore_broadcast_cmd'){
+                    player.ignore_broadcast_cmd = state.val;
                 }
             }
         }
@@ -260,7 +263,8 @@ class Heos extends utils.Adapter {
         player.state = 'stop';
         player.muted = false;
         player.connected = false;
-        player.spotify_ad_mute = false;
+        player.muted_ad = false;
+        player.error = false;
 
         //Channel
         await this.setObjectNotExistsAsync(baseStatePath, {
@@ -849,12 +853,25 @@ class Heos extends utils.Adapter {
 			type: 'state',
 			common: {
                 name: 'Automatic Playback',
-                desc: 'True, if automatic playback activated',
+                desc: 'Starts music automatically, if true and automatic playback is activated in the configuration',
 				type: 'boolean',
 				role: 'media.auto_play',
 				read: true,
                 write: true,
                 def: true
+			},
+			native: {},
+        });
+        await this.setObjectNotExistsAsync(player.statePath + 'ignore_broadcast_cmd', {
+			type: 'state',
+			common: {
+                name: 'Ignore Broadcast commands',
+                desc: 'If true, player ignores commands to all players',
+				type: 'boolean',
+				role: 'media.auto_play',
+				read: true,
+                write: true,
+                def: false
 			},
 			native: {},
         });
@@ -869,8 +886,10 @@ class Heos extends utils.Adapter {
         await this.setStateAsync(player.statePath + 'serial', player.serial, true);
 
         this.getStateAsync(player.statePath + 'auto_play', (err, state) => {
-            this.log.debug("Player " + player.pid + " Auto Play: " + state.val);
             player.auto_play = state.val;
+        });
+        this.getStateAsync(player.statePath + 'ignore_broadcast_cmd', (err, state) => {
+            player.ignore_broadcast_cmd = state.val;
         });
 
         return player;
@@ -1815,24 +1834,25 @@ class Heos extends utils.Adapter {
         }
     }
 
-    async setPlayerLastError(pid, err) {
+    async setPlayerLastError(pid, last_error) {
         if(pid in this.players){
             let player = this.players[pid];
-            this.getState(player.statePath + 'error',  async (err, state) => {
-                if(state.val !== true){
-                    await this.setStateAsync(player.statePath + 'error', true, true);
+            player.error = true;
+            this.setStateChanged(player.statePath + 'error', true, true, (error, id, notChanged) =>{
+                if(!notChanged){
+                    this.playerAutoPlay(player.pid);
                 }
             });
             try {
-                this.log.warn(err);
+                this.log.warn(last_error);
                 this.getState(player.statePath + 'last_error',  async (err, state) => {
                     let val = state.val + '';
                     let lines = val.split('\n');
-                    if(lines.includes(err))
-                        lines.splice(lines.indexOf(err), 1);
+                    if(lines.includes(last_error))
+                        lines.splice(lines.indexOf(last_error), 1);
                     if (lines.length > 4)
                         lines.pop();
-                    lines.unshift(err);
+                    lines.unshift(last_error);
                     await this.setStateAsync(player.statePath + 'last_error', lines.join('\n'), true)
                 });
             } catch (e) { this.log.error('setLastError: ' + e.message); }
@@ -1842,10 +1862,8 @@ class Heos extends utils.Adapter {
     async resetPlayerError(pid, deleteLastError){
         if(pid in this.players){
             let player = this.players[pid];
-            this.getState(player.statePath + 'error', async (err, state) => {
-                if(state == null || state == undefined || state.val !== false)
-                    await this.setStateAsync(player.statePath + 'error', false, true);
-            });
+            player.error = false;
+            await this.setStateAsync(player.statePath + 'error', false, true);
             if(deleteLastError)
                 await this.setStateAsync(player.statePath + 'last_error', '', true);
         }
@@ -1992,10 +2010,10 @@ class Heos extends utils.Adapter {
                 let player = this.players[pid];
                 this.log.debug("autoMute player: " + JSON.stringify(player));
                 if(mid.startsWith("spotify:ad:") && player.muted === false){
-                    player.spotify_ad_mute = true;
+                    player.muted_ad = true;
                     this.sendCommandToPlayer(player.pid, 'set_mute&state=on');
-                } else if(!mid.startsWith("spotify:ad:") && player.spotify_ad_mute === true){
-                    player.spotify_ad_mute = false;
+                } else if(!mid.startsWith("spotify:ad:") && player.muted_ad === true){
+                    player.muted_ad = false;
                     this.sendCommandToPlayer(player.pid, 'set_mute&state=off');
                 }        
             }
@@ -2008,12 +2026,11 @@ class Heos extends utils.Adapter {
                 let player = this.players[pid];
                 this.log.debug("autoPlay player: " + JSON.stringify(player));
                 if(player.auto_play === true && player.connected === true && player.muted === false){
-                    if(player.state === 'pause'){
-                        this.log.info('start playing music at ' + player.name);
+                    this.log.info('start playing music at ' + player.name);
+                    if(player.error === true){
+                        this.sendCommandToPlayer(player.pid, this.config.autoPlayCmd);
+                    } else {
                         this.sendCommandToPlayer(player.pid, 'set_play_state&state=play');
-                    } else if(player.state === 'stop'){
-                        this.log.info('start playing preset at ' + player.name);
-                        this.sendCommandToPlayer(player.pid, 'play_preset&preset=' + this.config.autoPlayPreset);
                     }
                 }
             }
@@ -2073,7 +2090,9 @@ class Heos extends utils.Adapter {
     sendCommandToAllPlayers(cmd, leaderOnly){
         if (this.state == States.Connected) {
             for (var pid in this.players) {
-                if(!leaderOnly || (leaderOnly && this.isPlayerLeader(pid))){
+                let player = this.players[pid];
+
+                if((player.ignore_broadcast_cmd === false && !leaderOnly) || (leaderOnly && this.isPlayerLeader(pid))){
                     this.sendCommandToPlayer(pid, cmd);
                 }
             }
