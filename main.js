@@ -423,13 +423,15 @@ class Heos extends utils.Adapter {
             this.unfinishedResponses = '';
 
             var responses = data.split(/(?={"heos")/g);
-            for (var r = 0; r < responses.length; r++) if (responses[r].trim().length > 0) {
-                try {
-                    JSON.parse(responses[r]); // check ob korrektes JSON Array
-                    this.parseResponse(responses[r]);
-                } catch (e) {
-                    this.log.debug('onData: invalid json (error: ' + e.message + '): ' + responses[r]);
-                    this.unfinishedResponses += responses[r];
+            for (var r = 0; r < responses.length; r++) {
+                if (responses[r].trim().length > 0) {
+                    try {
+                        JSON.parse(responses[r]); // check ob korrektes JSON Array
+                        this.parseResponse(responses[r]);
+                    } catch (e) {
+                        this.log.debug('onData: invalid json (error: ' + e.message + '): ' + responses[r]);
+                        this.unfinishedResponses += responses[r];
+                    }
                 }
             }
             // wenn weitere Msg zum Senden vorhanden sind, die nächste senden
