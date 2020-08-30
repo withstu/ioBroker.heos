@@ -11,6 +11,7 @@ const utils = require('@iobroker/adapter-core');
 
 const net = require('net');
 const NodeSSDP = require('node-ssdp').Client;
+const HeosPlayer = require('./lib/heos-player');
 
 const States = {
     Disconnecting: 0,
@@ -35,8 +36,22 @@ class Heos extends utils.Adapter {
         this.on('stateChange', this.onStateChange.bind(this));
         this.on('unload', this.onUnload.bind(this));
 
-		this.init();
-	}
+        /** @type {Map<String,HeosPlayer>} */
+        this.players = new Map();
+        this.ip = '';
+        this.state = States.Disconnected;
+        
+        this.heartbeatInterval = undefined;
+        this.heartbeatRetries = 0;
+        this.ssdpSearchInterval = undefined;
+        this.reconnectTimeout = undefined;
+
+        this.net_client = undefined;
+        this.nodessdp_client = undefined;
+        this.msgs = [];
+        this.unfinishedResponses = '';
+        this.ssdpSearchTargetName = 'urn:schemas-denon-com:device:ACT-Denon:1';
+    }
 
 	async onReady() {
 		await this.setObjectNotExistsAsync('players', {
@@ -191,706 +206,48 @@ class Heos extends utils.Adapter {
                 this.sendCommandToAllPlayers('add_to_queue&sid=1025&aid=4&cid=' + id.channel, true);
             } else if (id.device === 'presets' && id.channel && id.state === 'play') {
                 this.sendCommandToAllPlayers('play_preset&preset=' + id.channel, true);
-            } else if (id.device === 'players' && id.channel && id.state && this.players[id.channel]) {
-                let player = this.players[id.channel];
-                if(id.state === 'muted'){
-                    this.sendCommandToPlayer(player.pid, 'set_mute&state=' + (state.val === true ? 'on' : 'off'));
-                } else if(id.state === 'repeat'){
-                    this.sendCommandToPlayer(player.pid, 'set_play_mode&repeat=' + state.val);
-                } else if(id.state === 'shuffle'){
-                    this.sendCommandToPlayer(player.pid, 'set_play_mode&shuffle=' + (state.val === true ? 'on' : 'off'));
-                } else if(id.state === 'state'){
-                    this.sendCommandToPlayer(player.pid, 'set_play_state&state=' + state.val);
-                } else if(id.state === 'volume'){
-                    this.sendCommandToPlayer(player.pid, 'set_volume&level=' + state.val);
-                } else if(id.state === 'group_volume'){
-                    this.sendCommandToPlayer(player.pid, 'set_group_volume&level=' + state.val);
-                } else if(id.state === 'group_muted'){
-                    this.sendCommandToPlayer(player.pid, 'set_group_mute&state=' + (state.val === true ? 'on' : 'off'));
-                } else if(id.state === 'command'){
-                    this.sendCommandToPlayer(player.pid, state.val);
-                } else if(id.state === 'play'){
-                    this.sendCommandToPlayer(player.pid, 'set_play_state&state=play');
-                } else if(id.state === 'pause'){
-                    this.sendCommandToPlayer(player.pid, 'set_play_state&state=pause');
-                } else if(id.state === 'stop'){
-                    this.sendCommandToPlayer(player.pid, 'set_play_state&state=stop');
-                } else if(id.state === 'prev'){
-                    this.sendCommandToPlayer(player.pid, 'play_previous');
-                } else if(id.state === 'next'){
-                    this.sendCommandToPlayer(player.pid, 'play_next');
-                } else if(id.state === 'volume_up'){
-                    this.sendCommandToPlayer(player.pid, 'volume_up&step=' + this.config.volumeStepLevel);
-                } else if(id.state === 'volume_down'){
-                    this.sendCommandToPlayer(player.pid, 'volume_down&step=' + this.config.volumeStepLevel);
-                } else if(id.state === 'auto_play'){
-                    player.auto_play = state.val;
-                } else if(id.state === 'ignore_broadcast_cmd'){
-                    player.ignore_broadcast_cmd = state.val;
+            } else if (id.device === 'players' && id.channel && id.state && this.players.has(id.channel)) {
+                let player = this.players.get(id.channel);
+                if(player) {
+                    if(id.state === 'muted'){
+                        player.sendCommand('set_mute&state=' + (state.val === true ? 'on' : 'off'));
+                    } else if(id.state === 'repeat'){
+                        player.sendCommand('set_play_mode&repeat=' + state.val);
+                    } else if(id.state === 'shuffle'){
+                        player.sendCommand('set_play_mode&shuffle=' + (state.val === true ? 'on' : 'off'));
+                    } else if(id.state === 'state'){
+                        player.sendCommand('set_play_state&state=' + state.val);
+                    } else if(id.state === 'volume'){
+                        player.sendCommand('set_volume&level=' + state.val);
+                    } else if(id.state === 'group_volume'){
+                        player.sendCommand('set_group_volume&level=' + state.val);
+                    } else if(id.state === 'group_muted'){
+                        player.sendCommand('set_group_mute&state=' + (state.val === true ? 'on' : 'off'));
+                    } else if(id.state === 'command'){
+                        player.sendCommand(state.val);
+                    } else if(id.state === 'play'){
+                        player.sendCommand('set_play_state&state=play');
+                    } else if(id.state === 'pause'){
+                        player.sendCommand('set_play_state&state=pause');
+                    } else if(id.state === 'stop'){
+                        player.sendCommand('set_play_state&state=stop');
+                    } else if(id.state === 'prev'){
+                        player.sendCommand('play_previous');
+                    } else if(id.state === 'next'){
+                        player.sendCommand('play_next');
+                    } else if(id.state === 'volume_up'){
+                        player.sendCommand('volume_up&step=' + this.config.volumeStepLevel);
+                    } else if(id.state === 'volume_down'){
+                        player.sendCommand('volume_down&step=' + this.config.volumeStepLevel);
+                    } else if(id.state === 'auto_play'){
+                        player.auto_play = state.val;
+                    } else if(id.state === 'ignore_broadcast_cmd'){
+                        player.ignore_broadcast_cmd = state.val;
+                    }
                 }
             }
         }
 	}
-
-    init() {
-        this.players = {};
-        this.heartbeatInterval = undefined;
-        this.heartbeatRetries = 0;
-        this.ssdpSearchInterval = undefined;
-        this.reconnectTimeout = undefined;
-        this.net_client = undefined;
-        this.nodessdp_client = undefined;
-
-        this.ip = '';
-        this.msgs = [];
-        this.state = States.Disconnected;
-        this.unfinishedResponses = '';
-        this.ssdpSearchTargetName = 'urn:schemas-denon-com:device:ACT-Denon:1';
-    }
-
-    async createPlayer(player, callback) {
-        let baseStatePath = 'players.' + player.pid;
-        player.statePath = baseStatePath + '.';
-        player.group_member = false;
-        player.group_leader = false;
-        player.group_leader_pid = '';
-        player.group_pid = '';
-        player.state = 'stop';
-        player.muted = false;
-        player.connected = false;
-        player.muted_ad = false;
-        player.error = false;
-        player.current_type = '';
-        
-
-        //Channel
-        await this.setObjectNotExistsAsync(baseStatePath, {
-            type: 'channel',
-            common: {
-                name: player.name || player.ip,
-                role: 'media.music'
-            },
-            native: {},
-        });
-
-        //Meta
-        await this.setObjectNotExistsAsync(player.statePath + 'connected', {
-			type: 'state',
-			common: {
-                name: 'Connection status',
-                desc: 'True, if HEOS player is connected',
-				type: 'boolean',
-				role: 'indicator.reachable',
-				read: true,
-                write: false,
-                def: false
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'command', {
-			type: 'state',
-			common: {
-                name: 'Player command',
-                desc: 'Send command to player',
-				type: 'string',
-				role: 'media.command',
-				read: true,
-                write: true,
-                def: ""
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'ip', {
-			type: 'state',
-			common: {
-                name: 'Player IP-Address',
-                desc: 'IP Address of the player',
-				type: 'string',
-				role: 'meta.ip',
-				read: true,
-                write: false,
-                def: ""
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'pid', {
-			type: 'state',
-			common: {
-                name: 'Player ID',
-                desc: 'Unique ID of the player',
-				type: 'string',
-				role: 'meta.pid',
-				read: true,
-                write: false,
-                def: ""
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'name', {
-			type: 'state',
-			common: {
-                name: 'Player name',
-                desc: 'Name of the player',
-				type: 'string',
-				role: 'meta.name',
-				read: true,
-                write: false,
-                def: ""
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'model', {
-			type: 'state',
-			common: {
-                name: 'Player model',
-                desc: 'Model of the player',
-				type: 'string',
-				role: 'meta.model',
-				read: true,
-                write: false,
-                def: ""
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'serial', {
-			type: 'state',
-			common: {
-                name: 'Player serial number',
-                desc: 'Serial number of the player',
-				type: 'string',
-				role: 'meta.serial',
-				read: true,
-                write: false,
-                def: ""
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'network', {
-			type: 'state',
-			common: {
-                name: 'Network connection type',
-                desc: 'wired, wifi or unknown',
-				type: 'string',
-				role: 'meta.network',
-				read: true,
-                write: false,
-                def: ""
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'lineout', {
-			type: 'state',
-			common: {
-                name: 'LineOut level type',
-                desc: 'variable or fixed',
-				type: 'number',
-				role: 'meta.lineout',
-				read: true,
-                write: false,
-                def: 0
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'error', {
-			type: 'state',
-			common: {
-                name: 'Player error status',
-                desc: 'True, if player has an error',
-				type: 'boolean',
-				role: 'media.error',
-				read: true,
-                write: false,
-                def: false
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'last_error', {
-			type: 'state',
-			common: {
-                name: 'Last player error messages',
-                desc: 'Last 4 player error messages',
-				type: 'string',
-				role: 'media.last_error',
-				read: true,
-                write: false,
-                def: ""
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'volume', {
-			type: 'state',
-			common: {
-                name: 'Player volume',
-                desc: 'State and control of volume',
-				type: 'number',
-				role: 'level.volume',
-				read: true,
-                write: true,
-                def: 0
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'muted', {
-            type: 'state',
-            common: {
-                name: 'Player mute',
-                desc: 'Player is muted',
-                type: 'boolean',
-                role: 'media.mute',
-                read: true,
-                write: true,
-                def: false
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'state', {
-            type: 'state',
-            common: {
-                name: 'String state',
-                desc: 'Play, stop, or pause',
-                type: 'string',
-                role: 'media.state',
-                read: true,
-                write: true,
-                states: {
-                    'stop': 'Stop',
-                    'play': 'Play',
-                    'pause': 'Pause'
-                },
-                def: 'stop'
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'repeat', {
-            type: 'state',
-            common: {
-                name: 'Repeat',
-                desc: 'Repeat mode',
-                type: 'string',
-                role: 'media.mode.repeat',
-                read: true,
-                write: true,
-                states: {
-                    'on_all':'on_all',
-                    'on_one':'on_one',
-                    'off':'off'
-                },
-                def: 'off'
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'shuffle', {
-            type: 'state',
-            common: {
-                name: 'Shuffle',
-                desc: 'Shuffle mode',
-                type: 'boolean',
-                role: 'media.mode.shuffle',
-                read: true,
-                write: true,
-                def: false
-            },
-            native: {},
-        });
-
-        //Now playing
-        await this.setObjectNotExistsAsync(player.statePath + 'current_type', {
-            type: 'state',
-            common: {
-                name: 'Media Type',
-                desc: 'Type of the media',
-                type: 'string',
-                role: 'media.type',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_title', {
-            type: 'state',
-            common: {
-                name: 'Current title',
-                desc: 'Title of current played song',
-                type: 'string',
-                role: 'media.title',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_station', {
-            type: 'state',
-            common: {
-                name: 'Current station',
-                desc: 'Title of current played station',
-                type: 'string',
-                role: 'media.station',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_album_id', {
-            type: 'state',
-            common: {
-                name: 'Current album ID',
-                desc: 'Album ID of current played song',
-                type: 'string',
-                role: 'media.album_id',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_album', {
-            type: 'state',
-            common: {
-                name: 'Current album',
-                desc: 'Album of current played song',
-                type: 'string',
-                role: 'media.album',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_artist', {
-            type: 'state',
-            common: {
-                name: 'Current artist',
-                desc: 'Artist of current played song',
-                type: 'string',
-                role: 'media.artist',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_image_url', {
-            type: 'state',
-            common: {
-                name: 'Current cover URL',
-                desc: 'Cover image of current played song',
-                type: 'string',
-                role: 'media.cover',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_mid', {
-            type: 'state',
-            common: {
-                name: 'Current media ID',
-                desc: 'Media ID of current played song',
-                type: 'string',
-                role: 'media.mid',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_sid', {
-            type: 'state',
-            common: {
-                name: 'Current source ID',
-                desc: 'Source ID of current played song',
-                type: 'string',
-                role: 'media.sid',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_qid', {
-            type: 'state',
-            common: {
-                name: 'Current queue ID',
-                desc: 'Queue ID of current played song',
-                type: 'string',
-                role: 'media.qid',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_elapsed', {
-            type: 'state',
-            common: {
-                name: 'Elapsed time in seconds',
-                desc: 'Elapsed time of current played song in seconds',
-                type: 'number',
-                role: 'media.elapsed',
-                read: true,
-                write: false,
-                unit: 'seconds',
-                def: 0
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_elapsed_s', {
-            type: 'state',
-            common: {
-                name: 'Elapsed time as text',
-                desc: 'Elapsed time of current played song as HH:MM:SS',
-                type: 'string',
-                role: 'media.elapsed.text',
-                read: true,
-                write: false,
-                unit: 'interval',
-                def: '00:00'
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_duration', {
-            type: 'state',
-            common: {
-                name: 'Current song duration',
-                desc: 'Duration of current played song in seconds',
-                type: 'number',
-                role: 'media.duration',
-                read: true,
-                write: false,
-                unit: 'seconds',
-                def: 0
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'current_duration_s', {
-            type: 'state',
-            common: {
-                name: 'Current duration',
-                desc: 'Duration of current played song as HH:MM:SS',
-                type: 'string',
-                role: 'media.duration.text',
-                read: true,
-                write: false,
-                unit: 'interval',
-                def: '00:00'
-            },
-            native: {},
-        });
-
-        //Group
-        await this.setObjectNotExistsAsync(player.statePath + 'group_leader', {
-            type: 'state',
-            common: {
-                name: 'Group Leader',
-                desc: 'True, if player is group leader',
-                type: 'boolean',
-                role: 'media.group_leader',
-                read: true,
-                write: false,
-                def: false
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'group_member', {
-            type: 'state',
-            common: {
-                name: 'Group member',
-                desc: 'True, if player is member of a group',
-                type: 'boolean',
-                role: 'media.group_member',
-                read: true,
-                write: false,
-                def: false
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'group_pid', {
-            type: 'state',
-            common: {
-                name: 'Group player IDs',
-                desc: 'Player IDs of the group members',
-                type: 'string',
-                role: 'media.group_pid',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'group_volume', {
-            type: 'state',
-            common: {
-                name: 'Group volume',
-                desc: 'State and control of group volume',
-                type: 'number',
-                role: 'level.volume.group',
-                read: true,
-                write: true,
-                def: 0
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'group_name', {
-            type: 'state',
-            common: {
-                name: 'Group name',
-                desc: 'Name of the group',
-                type: 'string',
-                role: 'media.group_name',
-                read: true,
-                write: false,
-                def: ''
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'group_muted', {
-            type: 'state',
-            common: {
-                name: 'Group mute',
-                desc: 'Group is muted',
-                type: 'boolean',
-                role: 'media.mute.group',
-                read: true,
-                write: true,
-                def: false
-            },
-            native: {},
-        });
-
-        //Buttons
-        await this.setObjectNotExistsAsync(player.statePath + 'play', {
-            type: 'state',
-            common: {
-                name: 'Play button',
-                desc: 'play',
-                type: 'boolean',
-                role: 'button.play',
-                read: true,
-                write: true
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'stop', {
-            type: 'state',
-            common: {
-                name: 'Stop button',
-                desc: 'Stop',
-                type: 'boolean',
-                role: 'button.stop',
-                read: true,
-                write: true
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'pause', {
-            type: 'state',
-            common: {
-                name: 'Pause button',
-                desc: 'pause',
-                type: 'boolean',
-                role: 'button.pause',
-                read: true,
-                write: true
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'prev', {
-            type: 'state',
-            common: {
-                name: 'Previous button',
-                desc: 'prev',
-                type: 'boolean',
-                role: 'button.prev',
-                read: true,
-                write: true
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'next', {
-            type: 'state',
-            common: {
-                name: 'Next button',
-                desc: 'next',
-                type: 'boolean',
-                role: 'button.next',
-                read: true,
-                write: true
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'volume_up', {
-            type: 'state',
-            common: {
-                name: 'Volume up',
-                desc: 'Turn the volume up',
-                type: 'boolean',
-                role: 'button.volume.up',
-                read: true,
-                write: true
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'volume_down', {
-            type: 'state',
-            common: {
-                name: 'Volume down',
-                desc: 'Turn the volume down',
-                type: 'boolean',
-                role: 'button.volume.down',
-                read: true,
-                write: true
-            },
-            native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'auto_play', {
-			type: 'state',
-			common: {
-                name: 'Automatic Playback',
-                desc: 'Starts music automatically, if true and automatic playback is activated in the configuration',
-				type: 'boolean',
-				role: 'media.auto_play',
-				read: true,
-                write: true,
-                def: true
-			},
-			native: {},
-        });
-        await this.setObjectNotExistsAsync(player.statePath + 'ignore_broadcast_cmd', {
-			type: 'state',
-			common: {
-                name: 'Ignore Broadcast commands',
-                desc: 'If true, player ignores commands to all players',
-				type: 'boolean',
-				role: 'media.ignore_broadcast_cmd',
-				read: true,
-                write: true,
-                def: false
-			},
-			native: {},
-        });
-
-        await this.setStateAsync(player.statePath + 'name', player.name, true);
-        await this.setStateAsync(player.statePath + 'pid', player.pid, true);
-        await this.setStateAsync(player.statePath + 'model', player.model, true);
-        await this.setStateAsync(player.statePath + 'version', player.version, true);
-        await this.setStateAsync(player.statePath + 'ip', player.ip, true);
-        await this.setStateAsync(player.statePath + 'network', player.network, true);
-        await this.setStateAsync(player.statePath + 'lineout', player.lineout, true);
-        await this.setStateAsync(player.statePath + 'serial', player.serial, true);
-
-        this.getStateAsync(player.statePath + 'auto_play', (err, state) => {
-            player.auto_play = state.val;
-        });
-        this.getStateAsync(player.statePath + 'ignore_broadcast_cmd', (err, state) => {
-            player.ignore_broadcast_cmd = state.val;
-        });
-
-        return player;
-    }
     
 	async onNodeSSDPResponse(headers, statusCode, rinfo) {
         try {
@@ -970,7 +327,6 @@ class Heos extends utils.Adapter {
                         break;
                     case 'connect':
                         this.disconnect();
-                        this.init();
                         this.connect();
                         break;
                     case 'disconnect':
@@ -1023,22 +379,24 @@ class Heos extends utils.Adapter {
 
 	setLastError(error) {
         this.getState('error',  async (err, state) => {
-            if(state.val !== true){
+            if(state && state.val !== true){
                 await this.setStateAsync('error', true);
             }
         })
         this.getState('last_error',  async (err, state) => {
-            try {
-                this.log.warn(error);
-                let val = state.val + '';
-                let lines = val.split('\n');
-                if(lines.includes(error))
-                    lines.splice(lines.indexOf(error), 1);
-                if (lines.length > 4)
-                    lines.pop();
-                lines.unshift(error);
-                await this.setStateAsync('last_error', lines.join('\n'), true);
-            } catch (e) { this.log.error('setLastError: ' + e.message); }
+            if(state) {
+                try {
+                    this.log.warn(error);
+                    let val = state.val + '';
+                    let lines = val.split('\n');
+                    if(lines.includes(error))
+                        lines.splice(lines.indexOf(error), 1);
+                    if (lines.length > 4)
+                        lines.pop();
+                    lines.unshift(error);
+                    await this.setStateAsync('last_error', lines.join('\n'), true);
+                } catch (e) { this.log.error('setLastError: ' + e.message); }
+            }
         });
     }
 
@@ -1098,6 +456,389 @@ class Heos extends utils.Adapter {
         return result;
     }
 
+    async createSource(devicePath, source){
+        var baseStatePath = devicePath + '.' + source.sid;
+        var statePath = baseStatePath + '.';
+        //Channel
+        await this.setObjectNotExistsAsync(baseStatePath, {
+            type: 'channel',
+            common: {
+                name: source.name,
+                role: 'media.source'
+            },
+            native: {},
+        });
+
+        //States
+        await this.setObjectNotExistsAsync(statePath + 'sid', {
+            type: 'state',
+            common: {
+                name: 'Source ID',
+                desc: 'ID of the source',
+                type: 'number',
+                role: 'media.sid',
+                read: true,
+                write: false,
+                def: ''
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(statePath + 'name', {
+            type: 'state',
+            common: {
+                name: 'Source name',
+                desc: 'Name of the source',
+                type: 'string',
+                role: 'media.name',
+                read: true,
+                write: false,
+                def: ''
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(statePath + 'type', {
+            type: 'state',
+            common: {
+                name: 'Source type',
+                desc: 'Type of the source',
+                type: 'string',
+                role: 'media.type',
+                read: true,
+                write: false,
+                def: ''
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(statePath + 'image_url', {
+            type: 'state',
+            common: {
+                name: 'Source image url',
+                desc: 'Image URL of the source',
+                type: 'string',
+                role: 'media.image_url',
+                read: true,
+                write: false,
+                def: ''
+            },
+            native: {},
+        });
+
+        await this.setStateAsync(statePath + 'sid', source.sid, true);
+        await this.setStateAsync(statePath + 'name', source.name, true);
+        await this.setStateAsync(statePath + 'type', source.type, true);
+        await this.setStateAsync(statePath + 'image_url', source.image_url, true);
+
+        //Browse Playlists & Favorites
+        if ([1025, 1028].includes(source.sid)) {
+            this.browse(source.sid);
+        }
+    }
+
+    async createPlaylist(devicePath, payload){
+        var itemId = payload.cid;
+        var baseStatePath = devicePath + '.' + itemId;
+        var statePath = baseStatePath + '.';
+        //Channel
+        await this.setObjectNotExistsAsync(baseStatePath, {
+            type: 'channel',
+            common: {
+                name: payload.name || 'Playlist ' + itemId,
+                role: 'media.playlist'
+            },
+            native: {},
+        });
+
+        //States
+        await this.setObjectNotExistsAsync(statePath + 'id', {
+            type: 'state',
+            common: {
+                name: 'Playlist ID',
+                desc: 'ID of the playlist',
+                type: 'number',
+                role: 'media.id',
+                read: true,
+                write: false
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(statePath + 'name', {
+            type: 'state',
+            common: {
+                name: 'Playlist name',
+                desc: 'Name of the playlist',
+                type: 'string',
+                role: 'media.name',
+                read: true,
+                write: false,
+                def: ''
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(statePath + 'playable', {
+            type: 'state',
+            common: {
+                name: 'Playable',
+                desc: 'Playlist is playable',
+                type: 'boolean',
+                role: 'media.playable',
+                read: true,
+                write: false,
+                def: false
+            },
+            native: {},
+        });
+        if(payload.playable == 'yes'){
+            await this.setObjectNotExistsAsync(statePath + 'play', {
+                type: 'state',
+                common: {
+                    name: 'Play',
+                    desc: 'Play on all players',
+                    type: 'boolean',
+                    role: 'button',
+                    read: true,
+                    write: true,
+                    def: false
+                },
+                native: {},
+            });
+        }
+        await this.setObjectNotExistsAsync(statePath + 'type', {
+            type: 'state',
+            common: {
+                name: 'Playlist type',
+                desc: 'Type of the playlist',
+                type: 'string',
+                role: 'media.type',
+                read: true,
+                write: false,
+                def: ''
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(statePath + 'image_url', {
+            type: 'state',
+            common: {
+                name: 'Playlist image url',
+                desc: 'Image URL of the playlist',
+                type: 'string',
+                role: 'media.image_url',
+                read: true,
+                write: false,
+                def: ''
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(statePath + 'container', {
+            type: 'state',
+            common: {
+                name: 'Container',
+                desc: 'True, if the playlist is a container',
+                type: 'boolean',
+                role: 'media.container',
+                read: true,
+                write: false,
+                def: false
+            },
+            native: {},
+        });
+        if(payload.container == 'yes'){
+            await this.setObjectNotExistsAsync(statePath + 'cid', {
+                type: 'state',
+                common: {
+                    name: 'Container ID',
+                    desc: 'ID of the container',
+                    type: 'string',
+                    role: 'media.cid',
+                    read: true,
+                    write: false,
+                    def: ''
+                },
+                native: {},
+            });
+        } else {
+            await this.setObjectNotExistsAsync(statePath + 'mid', {
+                type: 'state',
+                common: {
+                    name: 'Media ID',
+                    desc: 'ID of the media',
+                    type: 'string',
+                    role: 'media.mid',
+                    read: true,
+                    write: false,
+                    def: ''
+                },
+                native: {},
+            });
+        }
+
+        await this.setStateAsync(statePath + 'id', itemId, true);
+        await this.setStateAsync(statePath + 'name', payload.name, true);
+        await this.setStateAsync(statePath + 'playable', (payload.playable == 'yes' ? true : false), true);
+        if(payload.playable == 'yes'){
+            await this.setStateAsync(statePath + 'play', (payload.playable == 'yes' ? true : false), true);
+        }
+        await this.setStateAsync(statePath + 'type', payload.type, true);
+        await this.setStateAsync(statePath + 'image_url', payload.image_url, true);
+        await this.setStateAsync(statePath + 'container', (payload.container == 'yes' ? true : false), true);
+        if(payload.container == 'yes'){
+            await this.setStateAsync(statePath + 'cid', payload.cid, true);
+        } else {
+            await this.setStateAsync(statePath + 'mid', payload.mid, true);
+        }
+    }
+
+    async createPreset(devicePath, itemId, payload){
+        var baseStatePath = devicePath + '.' + itemId;
+        var statePath = baseStatePath + '.';
+
+        //Channel
+        await this.setObjectNotExistsAsync(baseStatePath, {
+            type: 'channel',
+            common: {
+                name: 'Preset ' + itemId,
+                role: 'media.preset'
+            },
+            native: {},
+        });
+
+        //States
+        await this.setObjectNotExistsAsync(statePath + 'id', {
+            type: 'state',
+            common: {
+                name: 'Preset ID',
+                desc: 'ID of the preset',
+                type: 'number',
+                role: 'media.id',
+                read: true,
+                write: false
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(statePath + 'name', {
+            type: 'state',
+            common: {
+                name: 'Preset name',
+                desc: 'Name of the preset',
+                type: 'string',
+                role: 'media.name',
+                read: true,
+                write: false,
+                def: ''
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(statePath + 'playable', {
+            type: 'state',
+            common: {
+                name: 'Playable',
+                desc: 'Preset is playable',
+                type: 'boolean',
+                role: 'media.playable',
+                read: true,
+                write: false,
+                def: false
+            },
+            native: {},
+        });
+        if(payload.playable == 'yes'){
+            await this.setObjectNotExistsAsync(statePath + 'play', {
+                type: 'state',
+                common: {
+                    name: 'Play',
+                    desc: 'Play on all players',
+                    type: 'boolean',
+                    role: 'button',
+                    read: true,
+                    write: true,
+                    def: false
+                },
+                native: {},
+            });
+        }
+        await this.setObjectNotExistsAsync(statePath + 'type', {
+            type: 'state',
+            common: {
+                name: 'Preset type',
+                desc: 'Type of the preset',
+                type: 'string',
+                role: 'media.type',
+                read: true,
+                write: false
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(statePath + 'image_url', {
+            type: 'state',
+            common: {
+                name: 'Preset image url',
+                desc: 'Image URL of the preset',
+                type: 'string',
+                role: 'media.image_url',
+                read: true,
+                write: false,
+                def: ''
+            },
+            native: {},
+        });
+        await this.setObjectNotExistsAsync(statePath + 'container', {
+            type: 'state',
+            common: {
+                name: 'Container',
+                desc: 'True, if the preset is a container',
+                type: 'boolean',
+                role: 'media.container',
+                read: true,
+                write: false,
+                def: false
+            },
+            native: {},
+        });
+        if(payload.container == 'yes'){
+            await this.setObjectNotExistsAsync(statePath + 'cid', {
+                type: 'state',
+                common: {
+                    name: 'Container ID',
+                    desc: 'ID of the container',
+                    type: 'string',
+                    role: 'media.cid',
+                    read: true,
+                    write: false,
+                    def: ''
+                },
+                native: {},
+            });
+        } else {
+            await this.setObjectNotExistsAsync(statePath + 'mid', {
+                type: 'state',
+                common: {
+                    name: 'Media ID',
+                    desc: 'ID of the media',
+                    type: 'string',
+                    role: 'media.mid',
+                    read: true,
+                    write: false,
+                    def: ''
+                },
+                native: {},
+            });
+        }
+
+        await this.setStateAsync(statePath + 'id', itemId, true);
+        await this.setStateAsync(statePath + 'name', payload.name, true);
+        await this.setStateAsync(statePath + 'playable', (payload.playable == 'yes' ? true : false), true);
+        if(payload.playable == 'yes'){
+            await this.setStateAsync(statePath + 'play', (payload.playable == 'yes' ? true : false), true);
+        }
+        await this.setStateAsync(statePath + 'type', payload.type, true);
+        await this.setStateAsync(statePath + 'image_url', payload.image_url, true);
+        await this.setStateAsync(statePath + 'container', (payload.container == 'yes' ? true : false), true);
+        if(payload.container == 'yes'){
+            await this.setStateAsync(statePath + 'cid', payload.cid, true);
+        } else {
+            await this.setStateAsync(statePath + 'mid', payload.mid, true);
+        }
+    }
+
     /** Antwort(en) verarbeiten.
      **/
     async parseResponse(response) {
@@ -1133,7 +874,7 @@ class Heos extends utils.Adapter {
                 return; //Stop Parsing, because of error
             } else {
                 this.getState('error',  async (err, state) => {
-                    if(state.val !== false){
+                    if(state && state.val !== false){
                         await this.setStateAsync('error', false, true);
                     }
                 });
@@ -1179,27 +920,27 @@ class Heos extends utils.Adapter {
                             // "heos": {"command": "event/group_volume_changed ","message": "gid='group_id'&level='vol_level'&mute='on_or_off'"}
                             if (jmsg.hasOwnProperty('gid')) {
                                 if (jmsg.hasOwnProperty('level')) {
-                                    let leadHeosPlayer = this.players[jmsg.gid];
+                                    let leadHeosPlayer = this.players.get(jmsg.gid);
                                     if (leadHeosPlayer) {
                                         var memberPids = leadHeosPlayer.group_pid.split(',');
-                                        for (var i = 0; i < memberPids.length; i++) {
+                                        for (let i = 0; i < memberPids.length; i++) {
                                             let pid = memberPids[i];
-                                            let heosPlayer = this.players[pid];
+                                            let heosPlayer = this.players.get(pid);
                                             if (heosPlayer) {
-                                                this.setState(heosPlayer.statePath + 'group_volume', jmsg.level, true);
+                                                heosPlayer.setGroupVolume(jmsg.level);
                                             }
                                         }
                                     }
                                 }
                                 if (jmsg.hasOwnProperty('mute')) {
-                                    let leadHeosPlayer = this.players[jmsg.gid];
+                                    let leadHeosPlayer = this.players.get(jmsg.gid);
                                     if (leadHeosPlayer) {
                                         var memberPids = leadHeosPlayer.group_pid.split(',');
-                                        for (var i = 0; i < memberPids.length; i++) {
+                                        for (let i = 0; i < memberPids.length; i++) {
                                             let pid = memberPids[i];
-                                            let heosPlayer = this.players[pid];
+                                            let heosPlayer = this.players.get(pid);
                                             if (heosPlayer) {
-                                                this.setState(heosPlayer.statePath + 'group_muted', (jmsg.mute == 'on' ? true : false), true);
+                                                heosPlayer.setGroupMuted(jmsg.mute == 'on' ? true : false)
                                             }
                                         }
                                     }
@@ -1247,86 +988,9 @@ class Heos extends utils.Adapter {
                                 });
                                 
                                 for (i = 0; i < jdata.payload.length; i++) {
-                                    var source = jdata.payload[i];
-                                    var baseStatePath = devicePath + '.' + source.sid;
-                                    var statePath = baseStatePath + '.'
-
-                                    //Channel
-                                    await this.setObjectNotExistsAsync(baseStatePath, {
-                                        type: 'channel',
-                                        common: {
-                                            name: source.name,
-                                            role: 'media.source'
-                                        },
-                                        native: {},
-                                    });
-
-                                    //States
-                                    await this.setObjectNotExistsAsync(statePath + 'sid', {
-                                        type: 'state',
-                                        common: {
-                                            name: 'Source ID',
-                                            desc: 'ID of the source',
-                                            type: 'number',
-                                            role: 'media.sid',
-                                            read: true,
-                                            write: false,
-                                            def: ''
-                                        },
-                                        native: {},
-                                    });
-                                    await this.setObjectNotExistsAsync(statePath + 'name', {
-                                        type: 'state',
-                                        common: {
-                                            name: 'Source name',
-                                            desc: 'Name of the source',
-                                            type: 'string',
-                                            role: 'media.name',
-                                            read: true,
-                                            write: false,
-                                            def: ''
-                                        },
-                                        native: {},
-                                    });
-                                    await this.setObjectNotExistsAsync(statePath + 'type', {
-                                        type: 'state',
-                                        common: {
-                                            name: 'Source type',
-                                            desc: 'Type of the source',
-                                            type: 'string',
-                                            role: 'media.type',
-                                            read: true,
-                                            write: false,
-                                            def: ''
-                                        },
-                                        native: {},
-                                    });
-                                    await this.setObjectNotExistsAsync(statePath + 'image_url', {
-                                        type: 'state',
-                                        common: {
-                                            name: 'Source image url',
-                                            desc: 'Image URL of the source',
-                                            type: 'string',
-                                            role: 'media.image_url',
-                                            read: true,
-                                            write: false,
-                                            def: ''
-                                        },
-                                        native: {},
-                                    });
-
-                                    await this.setStateAsync(statePath + 'sid', source.sid, true);
-                                    await this.setStateAsync(statePath + 'name', source.name, true);
-                                    await this.setStateAsync(statePath + 'type', source.type, true);
-                                    await this.setStateAsync(statePath + 'image_url', source.image_url, true);
-
-                                    //Browse Playlists & Favorites
-                                    if ([1025, 1028].includes(source.sid)) {
-                                        this.browse(source.sid);
-                                    }
+                                    await this.createSource(devicePath, jdata.payload[i]);
                                 }
                             }
-
                             break;
 
                         // {"heos": {"command": "browse/browse", "result": "success", "message": "pid=1262037998&sid=1028&returned=5&count=5"}, 
@@ -1351,158 +1015,7 @@ class Heos extends utils.Adapter {
                                             native: {},
                                         });
                                         for (i = 0; i < jdata.payload.length; i++) {
-                                            var payload = jdata.payload[i];
-                                            var itemId = payload.cid;
-                                            var baseStatePath = devicePath + '.' + itemId;
-                                            var statePath = baseStatePath + '.';
-
-                                            //Channel
-                                            await this.setObjectNotExistsAsync(baseStatePath, {
-                                                type: 'channel',
-                                                common: {
-                                                    name: payload.name || 'Playlist ' + itemId,
-                                                    role: 'media.playlist'
-                                                },
-                                                native: {},
-                                            });
-
-                                            //States
-                                            await this.setObjectNotExistsAsync(statePath + 'id', {
-                                                type: 'state',
-                                                common: {
-                                                    name: 'Playlist ID',
-                                                    desc: 'ID of the playlist',
-                                                    type: 'number',
-                                                    role: 'media.id',
-                                                    read: true,
-                                                    write: false
-                                                },
-                                                native: {},
-                                            });
-                                            await this.setObjectNotExistsAsync(statePath + 'name', {
-                                                type: 'state',
-                                                common: {
-                                                    name: 'Playlist name',
-                                                    desc: 'Name of the playlist',
-                                                    type: 'string',
-                                                    role: 'media.name',
-                                                    read: true,
-                                                    write: false,
-                                                    def: ''
-                                                },
-                                                native: {},
-                                            });
-                                            await this.setObjectNotExistsAsync(statePath + 'playable', {
-                                                type: 'state',
-                                                common: {
-                                                    name: 'Playable',
-                                                    desc: 'Playlist is playable',
-                                                    type: 'boolean',
-                                                    role: 'media.playable',
-                                                    read: true,
-                                                    write: false,
-                                                    def: false
-                                                },
-                                                native: {},
-                                            });
-                                            if(payload.playable == 'yes'){
-                                                await this.setObjectNotExistsAsync(statePath + 'play', {
-                                                    type: 'state',
-                                                    common: {
-                                                        name: 'Play',
-                                                        desc: 'Play on all players',
-                                                        type: 'boolean',
-                                                        role: 'button',
-                                                        read: true,
-                                                        write: true,
-                                                        def: false
-                                                    },
-                                                    native: {},
-                                                });
-                                            }
-                                            await this.setObjectNotExistsAsync(statePath + 'type', {
-                                                type: 'state',
-                                                common: {
-                                                    name: 'Playlist type',
-                                                    desc: 'Type of the playlist',
-                                                    type: 'string',
-                                                    role: 'media.type',
-                                                    read: true,
-                                                    write: false,
-                                                    def: ''
-                                                },
-                                                native: {},
-                                            });
-                                            await this.setObjectNotExistsAsync(statePath + 'image_url', {
-                                                type: 'state',
-                                                common: {
-                                                    name: 'Playlist image url',
-                                                    desc: 'Image URL of the playlist',
-                                                    type: 'string',
-                                                    role: 'media.image_url',
-                                                    read: true,
-                                                    write: false,
-                                                    def: ''
-                                                },
-                                                native: {},
-                                            });
-                                            await this.setObjectNotExistsAsync(statePath + 'container', {
-                                                type: 'state',
-                                                common: {
-                                                    name: 'Container',
-                                                    desc: 'True, if the playlist is a container',
-                                                    type: 'boolean',
-                                                    role: 'media.container',
-                                                    read: true,
-                                                    write: false,
-                                                    def: false
-                                                },
-                                                native: {},
-                                            });
-                                            if(payload.container == 'yes'){
-                                                await this.setObjectNotExistsAsync(statePath + 'cid', {
-                                                    type: 'state',
-                                                    common: {
-                                                        name: 'Container ID',
-                                                        desc: 'ID of the container',
-                                                        type: 'string',
-                                                        role: 'media.cid',
-                                                        read: true,
-                                                        write: false,
-                                                        def: ''
-                                                    },
-                                                    native: {},
-                                                });
-                                            } else {
-                                                await this.setObjectNotExistsAsync(statePath + 'mid', {
-                                                    type: 'state',
-                                                    common: {
-                                                        name: 'Media ID',
-                                                        desc: 'ID of the media',
-                                                        type: 'string',
-                                                        role: 'media.mid',
-                                                        read: true,
-                                                        write: false,
-                                                        def: ''
-                                                    },
-                                                    native: {},
-                                                });
-                                            }
-
-                                            await this.setStateAsync(statePath + 'id', itemId, true);
-                                            await this.setStateAsync(statePath + 'name', payload.name, true);
-                                            await this.setStateAsync(statePath + 'playable', (payload.playable == 'yes' ? true : false), true);
-                                            if(payload.playable == 'yes'){
-                                                await this.setStateAsync(statePath + 'play', (payload.playable == 'yes' ? true : false), true);
-                                            }
-                                            await this.setStateAsync(statePath + 'type', payload.type, true);
-                                            await this.setStateAsync(statePath + 'image_url', payload.image_url, true);
-                                            await this.setStateAsync(statePath + 'container', (payload.container == 'yes' ? true : false), true);
-                                            if(payload.container == 'yes'){
-                                                await this.setStateAsync(statePath + 'cid', payload.cid, true);
-                                            } else {
-                                                await this.setStateAsync(statePath + 'mid', payload.mid, true);
-                                            }
+                                            await this.createPlaylist(devicePath, jdata.payload[i]);
                                         }
                                         break;
                                     case 1028:
@@ -1518,157 +1031,8 @@ class Heos extends utils.Adapter {
                                         });
 
                                         for (i = 0; i < jdata.payload.length; i++) {
-                                            var payload = jdata.payload[i];
                                             var itemId = (i + 1);
-                                            var baseStatePath = devicePath + '.' + itemId;
-                                            var statePath = baseStatePath + '.';
-
-                                            //Channel
-                                            await this.setObjectNotExistsAsync(baseStatePath, {
-                                                type: 'channel',
-                                                common: {
-                                                    name: 'Preset ' + itemId,
-                                                    role: 'media.preset'
-                                                },
-                                                native: {},
-                                            });
-
-                                            //States
-                                            await this.setObjectNotExistsAsync(statePath + 'id', {
-                                                type: 'state',
-                                                common: {
-                                                    name: 'Preset ID',
-                                                    desc: 'ID of the preset',
-                                                    type: 'number',
-                                                    role: 'media.id',
-                                                    read: true,
-                                                    write: false
-                                                },
-                                                native: {},
-                                            });
-                                            await this.setObjectNotExistsAsync(statePath + 'name', {
-                                                type: 'state',
-                                                common: {
-                                                    name: 'Preset name',
-                                                    desc: 'Name of the preset',
-                                                    type: 'string',
-                                                    role: 'media.name',
-                                                    read: true,
-                                                    write: false,
-                                                    def: ''
-                                                },
-                                                native: {},
-                                            });
-                                            await this.setObjectNotExistsAsync(statePath + 'playable', {
-                                                type: 'state',
-                                                common: {
-                                                    name: 'Playable',
-                                                    desc: 'Preset is playable',
-                                                    type: 'boolean',
-                                                    role: 'media.playable',
-                                                    read: true,
-                                                    write: false,
-                                                    def: false
-                                                },
-                                                native: {},
-                                            });
-                                            if(payload.playable == 'yes'){
-                                                await this.setObjectNotExistsAsync(statePath + 'play', {
-                                                    type: 'state',
-                                                    common: {
-                                                        name: 'Play',
-                                                        desc: 'Play on all players',
-                                                        type: 'boolean',
-                                                        role: 'button',
-                                                        read: true,
-                                                        write: true,
-                                                        def: false
-                                                    },
-                                                    native: {},
-                                                });
-                                            }
-                                            await this.setObjectNotExistsAsync(statePath + 'type', {
-                                                type: 'state',
-                                                common: {
-                                                    name: 'Preset type',
-                                                    desc: 'Type of the preset',
-                                                    type: 'string',
-                                                    role: 'media.type',
-                                                    read: true,
-                                                    write: false
-                                                },
-                                                native: {},
-                                            });
-                                            await this.setObjectNotExistsAsync(statePath + 'image_url', {
-                                                type: 'state',
-                                                common: {
-                                                    name: 'Preset image url',
-                                                    desc: 'Image URL of the preset',
-                                                    type: 'string',
-                                                    role: 'media.image_url',
-                                                    read: true,
-                                                    write: false,
-                                                    def: ''
-                                                },
-                                                native: {},
-                                            });
-                                            await this.setObjectNotExistsAsync(statePath + 'container', {
-                                                type: 'state',
-                                                common: {
-                                                    name: 'Container',
-                                                    desc: 'True, if the preset is a container',
-                                                    type: 'boolean',
-                                                    role: 'media.container',
-                                                    read: true,
-                                                    write: false,
-                                                    def: false
-                                                },
-                                                native: {},
-                                            });
-                                            if(payload.container == 'yes'){
-                                                await this.setObjectNotExistsAsync(statePath + 'cid', {
-                                                    type: 'state',
-                                                    common: {
-                                                        name: 'Container ID',
-                                                        desc: 'ID of the container',
-                                                        type: 'string',
-                                                        role: 'media.cid',
-                                                        read: true,
-                                                        write: false,
-                                                        def: ''
-                                                    },
-                                                    native: {},
-                                                });
-                                            } else {
-                                                await this.setObjectNotExistsAsync(statePath + 'mid', {
-                                                    type: 'state',
-                                                    common: {
-                                                        name: 'Media ID',
-                                                        desc: 'ID of the media',
-                                                        type: 'string',
-                                                        role: 'media.mid',
-                                                        read: true,
-                                                        write: false,
-                                                        def: ''
-                                                    },
-                                                    native: {},
-                                                });
-                                            }
-
-                                            await this.setStateAsync(statePath + 'id', itemId, true);
-                                            await this.setStateAsync(statePath + 'name', payload.name, true);
-                                            await this.setStateAsync(statePath + 'playable', (payload.playable == 'yes' ? true : false), true);
-                                            if(payload.playable == 'yes'){
-                                                await this.setStateAsync(statePath + 'play', (payload.playable == 'yes' ? true : false), true);
-                                            }
-                                            await this.setStateAsync(statePath + 'type', payload.type, true);
-                                            await this.setStateAsync(statePath + 'image_url', payload.image_url, true);
-                                            await this.setStateAsync(statePath + 'container', (payload.container == 'yes' ? true : false), true);
-                                            if(payload.container == 'yes'){
-                                                await this.setStateAsync(statePath + 'cid', payload.cid, true);
-                                            } else {
-                                                await this.setStateAsync(statePath + 'mid', payload.mid, true);
-                                            }
+                                            await this.createPreset(devicePath, itemId, jdata.payload[i]);
                                         }
                                         break;
                                 }
@@ -1692,14 +1056,14 @@ class Heos extends utils.Adapter {
                         case 'get_volume':
                             if (jmsg.hasOwnProperty('gid')) {
                                 if (jmsg.hasOwnProperty('level')) {
-                                    let leadHeosPlayer = this.players[jmsg.gid];
+                                    let leadHeosPlayer = this.players.get(jmsg.gid);
                                     if (leadHeosPlayer) {
                                         var memberPids = leadHeosPlayer.group_pid.split(',');
-                                        for (var i = 0; i < memberPids.length; i++) {
+                                        for (let i = 0; i < memberPids.length; i++) {
                                             let pid = memberPids[i];
-                                            let heosPlayer = this.players[pid];
+                                            let heosPlayer = this.players.get(pid);
                                             if (heosPlayer) {
-                                                this.setState(heosPlayer.statePath + 'group_volume', jmsg.level, true);
+                                                heosPlayer.setGroupVolume(jmsg.level);
                                             }
                                         }
                                     }
@@ -1711,14 +1075,14 @@ class Heos extends utils.Adapter {
                         case 'get_mute':
                             if (jmsg.hasOwnProperty('gid')) {
                                 if (jmsg.hasOwnProperty('state')) {
-                                    let leadHeosPlayer = this.players[jmsg.gid];
+                                    let leadHeosPlayer = this.players.get(jmsg.gid);
                                     if (leadHeosPlayer) {
                                         var memberPids = leadHeosPlayer.group_pid.split(',');
-                                        for (var i = 0; i < memberPids.length; i++) {
+                                        for (let i = 0; i < memberPids.length; i++) {
                                             let pid = memberPids[i];
-                                            let heosPlayer = this.players[pid];
+                                            let heosPlayer = this.players.get(pid);
                                             if (heosPlayer) {
-                                                this.setState(heosPlayer.statePath + 'group_muted', (jmsg.state == 'on' ? true : false), true);
+                                                heosPlayer.setGroupMuted(jmsg.state == 'on' ? true : false);
                                             }
                                         }
                                     }
@@ -1737,16 +1101,11 @@ class Heos extends utils.Adapter {
                         //                "players":[{"name":"player name ... 
                         case 'get_groups':
                             // bisherige groups leeren
-                            for (var pid in this.players) {
-                                let player = this.players[pid];
-                                player.group_leader = false;
-                                player.group_leader_pid = '';
-                                player.group_member = false;
-
-                                this.setStateAsync(player.statePath + 'group_name', '', true);
-                                this.setStateAsync(player.statePath + 'group_pid', '', true);
-                                this.setStateAsync(player.statePath + 'group_leader', player.group_leader, true);
-                                this.setStateAsync(player.statePath + 'group_member', player.group_member, true);
+                            for (let [pid, player] of this.players) {
+                                await player.setGroupName('');
+                                await player.setGroupPid('');
+                                await player.setGroupLeader(false);
+                                await player.setGroupMember(false);
                             }
 
                             // payload mit den groups auswerten
@@ -1782,389 +1141,36 @@ class Heos extends utils.Adapter {
 
             // an die zugehörigen Player weiterleiten
             if (jmsg.hasOwnProperty('pid')) {
-                this.parsePlayerResponse(jdata, jmsg, cmd_group, cmd);
+                let heosPlayer = this.players.get(jmsg.pid);
+                if (heosPlayer) {
+                    heosPlayer.parseResponse(jdata, jmsg, cmd_group, cmd)
+                }
             }
 
 		} catch (err) { this.log.error('parseResponse: ' + err.message + '\n ' + response); }
     }
 
-    toFormattedTime(time) {
-        let hours = Math.floor(time / 3600);
-        hours = (hours) ? (hours + ':') : '';
-        let min = Math.floor(time / 60) % 60;
-        if (min < 10) min = '0' + min;
-        let sec = time % 60;
-        if (sec < 10) sec = '0' + sec;
-    
-        return hours + min + ':' + sec;
-    }
-
-    //#################
-    // Player functions
-    //#################
-
-    /** Group Leader or no group member  */
-    isPlayerLeader(pid){
-        if(pid in this.players){
-            let player = this.players[pid];
-            return player.group_member === false || player.group_leader === true;
-        }
-        return false;
-    }
-
-    async cleanupPlayerNowPlaying(pid){
-        if(pid in this.players){
-            let player = this.players[pid];
-            this.getStates(player.statePath + "current_*", async (err, states) => {
-                for (var id in states) {
-                    this.setState(id, "", true);
-                }
-            })
-        }
-    }
-
-    async setPlayerLastError(pid, last_error) {
-        if(pid in this.players){
-            let player = this.players[pid];
-            player.error = true;
-            this.setStateChanged(player.statePath + 'error', true, true, (error, id, notChanged) =>{
-                if(!notChanged){
-                    this.playerAutoPlay(player.pid);
-                }
-            });
-            try {
-                this.log.warn(last_error);
-                this.getState(player.statePath + 'last_error',  async (err, state) => {
-                    let val = state.val + '';
-                    let lines = val.split('\n');
-                    if(lines.includes(last_error))
-                        lines.splice(lines.indexOf(last_error), 1);
-                    if (lines.length > 4)
-                        lines.pop();
-                    lines.unshift(last_error);
-                    await this.setStateAsync(player.statePath + 'last_error', lines.join('\n'), true)
-                });
-            } catch (e) { this.log.error('setLastError: ' + e.message); }
-        }
-    }
-
-    async resetPlayerError(pid, deleteLastError){
-        if(pid in this.players){
-            let player = this.players[pid];
-            player.error = false;
-            await this.setStateAsync(player.statePath + 'error', false, true);
-            if(deleteLastError)
-                await this.setStateAsync(player.statePath + 'last_error', '', true);
-        }
-    }
-
-    /** Auswertung der empfangenen Daten
-     **/
-    async parsePlayerResponse(jdata, jmsg, cmd_group, cmd) {
-        let pid = jmsg.pid;
-        if(pid in this.players){
-            let player = this.players[pid];
-            try {
-                switch (cmd_group) {
-                    case 'event':
-                        switch (cmd) {
-                            case 'player_playback_error':
-                                this.setPlayerLastError(pid, jmsg.error.replace(/_/g, ' '));
-                                break;
-                            case 'player_state_changed':
-                                this.setState(player.statePath + "state", jmsg.state, true);
-                                player.state = jmsg.state;
-                                this.sendCommandToPlayer(pid, 'get_now_playing_media');
-                                break;
-                            case 'player_volume_changed':
-                                this.setStateChanged(player.statePath + "volume", jmsg.level, true);
-                                let newMuted = (jmsg.mute == 'on' ? true : false);
-                                player.muted = newMuted;
-                                this.setStateChanged(player.statePath + "muted", newMuted, true, (error, id, notChanged) =>{
-                                    if(!notChanged){
-                                        this.playerAutoPlay(player.pid);
-                                    }
-                                });
-                                break;
-                            case 'repeat_mode_changed':
-                                this.setState(player.statePath + "repeat", jmsg.repeat, true);
-                                break;
-                            case 'shuffle_mode_changed':
-                                this.setState(player.statePath + "shuffle", (jmsg.shuffle == 'on' ? true : false), true);
-                                break;
-                            case 'player_now_playing_changed':
-                                this.sendCommandToPlayer(pid, 'get_now_playing_media');
-                                break;
-                            case 'player_now_playing_progress':
-                                this.setState(player.statePath + "current_elapsed", jmsg.cur_pos / 1000, true);
-                                this.setState(player.statePath + "current_elapsed_s", this.toFormattedTime(jmsg.cur_pos / 1000), true);
-                                this.setState(player.statePath + "current_duration", jmsg.duration / 1000, true);
-                                this.setState(player.statePath + "current_duration_s", this.toFormattedTime(jmsg.duration / 1000), true);
-                                break;
-                        }
-                        break;
-
-
-                    case 'player':
-                        switch (cmd) {
-                            case 'set_volume':
-                            case 'get_volume':
-                                this.getState(player.statePath + "volume",  async (err, state) => {
-                                    if (state == null || state == undefined || state.val != jmsg.level)
-                                        this.setState(player.statePath + "volume", jmsg.level, true);
-                                });
-                                break;
-                            case 'set_mute':
-                            case 'get_mute':
-                                this.setState(player.statePath + "muted", (jmsg.state == 'on' ? true : false), true);
-                                player.muted = (jmsg.state == 'on' ? true : false);
-                                break;
-                            case 'set_play_state':
-                            case 'get_play_state':
-                                this.setState(player.statePath + "state", jmsg.state, true);
-                                player.state = jmsg.state;
-                                break;
-                            case 'set_play_mode':
-                            case 'get_play_mode':
-                                this.setState(player.statePath + "repeat", jmsg.repeat, true);
-                                this.setState(player.statePath + "shuffle", (jmsg.shuffle == 'on' ? true : false), true);
-                                break;
-                            case 'get_now_playing_media':
-                                this.resetPlayerError(pid, false);
-                                if (jdata.payload.hasOwnProperty('type')) {
-                                    this.setState(player.statePath + "current_type", jdata.payload.type, true);
-                                    player.current_type = jdata.payload.type;
-                                    if (jdata.payload.type == 'station') {
-                                        this.setState(player.statePath + "current_station", jdata.payload.station, true);
-                                    } else {
-                                        this.setState(player.statePath + "current_station", "", true);
-                                    }
-                                } else {
-                                    this.setState(player.statePath + "current_type", "", true);
-                                    player.current_type = "";
-                                }
-
-                                if (jdata.payload.hasOwnProperty('song'))
-                                    this.setState(player.statePath + "current_title", jdata.payload.song, true);
-                                else
-                                    this.setState(player.statePath + "current_title", "", true);
-
-                                if (jdata.payload.hasOwnProperty('album'))
-                                    this.setState(player.statePath + "current_album", jdata.payload.album, true);
-                                else
-                                    this.setState(player.statePath + "current_album", "", true);
-
-                                if (jdata.payload.hasOwnProperty('album_id'))
-                                    this.setState(player.statePath + "current_album_id", jdata.payload.album_id, true);
-                                else
-                                    this.setState(player.statePath + "current_album_id", "", true);
-
-                                if (jdata.payload.hasOwnProperty('artist'))
-                                    this.setState(player.statePath + "current_artist", jdata.payload.artist, true);
-                                else
-                                    this.setState(player.statePath + "current_artist", "", true);
-
-                                if (jdata.payload.hasOwnProperty('image_url'))
-                                    this.setState(player.statePath + "current_image_url", jdata.payload.image_url, true);
-                                else
-                                    this.setState(player.statePath + "current_image_url", "", true);
-
-                                if (jdata.payload.hasOwnProperty('mid')) {
-                                    this.setState(player.statePath + "current_mid", jdata.payload.mid, true);
-                                    this.playerMuteSpotifyAd(player.pid, jdata.payload.mid);
-                                } else {
-                                    this.setState(player.statePath + "current_mid", "", true);
-                                }
-
-                                if (jdata.payload.hasOwnProperty('qid'))
-                                    this.setState(player.statePath + "current_qid", jdata.payload.qid, true);
-                                else
-                                    this.setState(player.statePath + "current_qid", "", true);
-
-                                if (jdata.payload.hasOwnProperty('sid'))
-                                    this.setState(player.statePath + "current_sid", jdata.payload.sid, true);
-                                else
-                                    this.setState(player.statePath + "current_sid", "", true);
-                                break;
-                        }
-                        break;
-                } // switch
-
-
-            } catch (err) { this.log.error('parseResponse: ' + err.message); }
-        }
-    }
-
-    playerMuteSpotifyAd(pid, mid){
-        if(this.config.muteSpotifyAds === true){
-            if(pid in this.players){
-                let player = this.players[pid];
-                if(mid.startsWith("spotify:ad:") && player.muted === false){
-                    player.muted_ad = true;
-                    this.sendCommandToPlayer(player.pid, 'set_mute&state=on');
-                } else if(!mid.startsWith("spotify:ad:") && player.muted_ad === true){
-                    player.muted_ad = false;
-                    this.sendCommandToPlayer(player.pid, 'set_mute&state=off');
-                }        
-            }
-        }
-    }
-
-    playerAutoPlay(pid){
-        if(this.config.autoPlay === true){
-            if(pid in this.players){
-                let player = this.players[pid];
-                if(player.auto_play === true
-                    && player.connected === true
-                    && (player.state !== 'play' || player.current_type.length == 0)
-                    && player.muted === false){
-                    this.log.info('start playing music at ' + player.name);
-                    if(player.error === true || player.current_type.length == 0){
-                        this.sendCommandToPlayer(player.pid, this.config.autoPlayCmd);
-                    } else {
-                        this.sendCommandToPlayer(player.pid, 'set_play_state&state=play');
-                    }
-                }
-            }
-        }
-    }
-
-    /** cmd der Form "cmd&param"  werden zur msg heos+cmd+pid+&param aufbereitet
-        cmd der Form "cmd?param"  werden zur msg heos+cmd+?param aufbereitet
-     **/
-    playerCommandToMsg(pid, cmd) {
-        var addPid = true;
-        if(cmd.includes('?')){
-            addPid = false;
-        }
-        var param = cmd.split('&');
-        cmd = param.shift();
-        if (param.length > 0) param = param.join('&'); else param = '';
-        var cmd_group = 'player';
-        if(pid in this.players){
-            let player = this.players[pid];
-            let gid = null;
-            if(player.group_member === true){
-                gid = player.group_leader_pid;
-            }
-
-            switch (cmd) {
-                case 'set_group_mute':
-                    cmd = "set_mute";
-                    if(gid != null){
-                        cmd_group = 'group'
-                        param = 'gid=' + gid + '&' + param;
-                        addPid = false;
-                    }
-                    break;
-                case 'set_group_volume':
-                    cmd = "set_volume";
-                    if(gid != null){
-                        cmd_group = 'group'
-                        param = 'gid=' + gid + '&' + param;
-                        addPid = false;
-                    }
-                    break;
-                case 'group_volume_up':
-                    cmd = "volume_up";
-                    if(gid != null){
-                        cmd_group = 'group'
-                        param = 'gid=' + gid + '&' + param;
-                        addPid = false;
-                    }
-                    break;
-                case 'group_volume_down':
-                    cmd = "volume_down";
-                    if(gid != null){
-                        cmd_group = 'group'
-                        param = 'gid=' + gid + '&' + param;
-                        addPid = false;
-                    }
-                    break;
-                case 'get_play_state':
-                case 'get_play_mode':
-                case 'get_now_playing_media':
-                case 'get_volume':
-                case 'play_next':
-                case 'play_previous':
-                case 'set_mute':       // &state=on|off        
-                case 'set_volume':     // &level=1..100   
-                case 'volume_down':    // &step=1..10   
-                case 'volume_up':      // &step=1..10
-                case 'set_play_state': // &state=play|pause|stop
-                case 'set_play_mode':  // &repeat=on_all|on_one|off  shuffle=on|off
-                    break;
-
-                // browse            
-                case 'play_preset':    // heos://browse/play_preset?pid=player_id&preset=preset_position
-                    cmd_group = 'browse';
-                    break;
-                case 'play_stream':    // heos://browse/play_stream?pid=player_id&url=url_path
-                    cmd_group = 'browse';
-                    break;
-
-            }
-        }
-        if(addPid){
-            return 'heos://' + cmd_group + '/' + cmd + '?pid=' + pid + '&' + param;
-        } else {
-            return 'heos://' + cmd_group + '/' + cmd + '?' + param;
-        }
-    }
-
-    /** Nachricht (command) an player senden
-        es sind auch mehrere commands, getrennt mit | erlaubt
-        bsp: set_volume&level=20|play_preset&preset=1
-     **/
-    sendCommandToPlayer(pid, cmd) {
-        if(pid in this.players){
-            var cmds = cmd.split('|');
-            for (var c = 0; c < cmds.length; c++) {
-                this.msgs.push(this.playerCommandToMsg(pid, cmds[c]));
-            }
-            this.sendNextMsg();
-        }
-    }
-
     sendCommandToAllPlayers(cmd, leaderOnly){
         if (this.state == States.Connected) {
-            for (var pid in this.players) {
-                let player = this.players[pid];
-                if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && this.isPlayerLeader(pid)))){
-                    this.sendCommandToPlayer(pid, cmd);
+            for (let [pid, player] of this.players) {
+                if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerLeader()))){
+                    player.sendCommand(cmd);
                 }
             }
         }
     }
 
-    async startPlayer(pid){
-        if(pid in this.players){
-            this.log.info('start player ' + pid);
-            let player = this.players[pid];
-
-            this.sendCommandToPlayer(player.pid, 'get_play_state|get_play_mode|get_now_playing_media|get_volume');
-
-            setTimeout(() => {
-                this.setState(player.statePath + 'connected', true);
-                player.connected = true;
-                this.playerAutoPlay(player.pid);
-            }, 1000);
-        }
-    }
-
+    /**
+     * 
+     * @param {String} pid 
+     */
     async stopPlayer(pid){
-        if(pid in this.players){
-            let player = this.players[pid];
-            this.log.info('stopping HEOS player with pid ' + player.pid + ' (' + player.ip + ')');
-            //cleanup now playing
-            this.cleanupPlayerNowPlaying(pid);
-            // reset error
-            this.resetPlayerError(pid, true);
-            // connected zurücksetzen
-            await this.setStateAsync(player.statePath + "connected", false, true);
-            // player leeren
-            delete this.players[pid];
+        let player = this.players.get(pid);
+        if(player){
+            await player.disconnect();
         }
+        // player leeren
+        this.players.delete(pid);
     }
 
     // Für die gefundenen HEOS Player entsprechende class HeosPlayer Instanzen bilden und nicht mehr verbundene Player stoppen
@@ -2174,14 +1180,15 @@ class Heos extends utils.Adapter {
             for (var i = 0; i < payload.length; i++) {
                 var player = payload[i];
                 var pid = player.pid + ''; //Convert to String
-                if(!(pid in this.players)){
-                    this.players[pid] = await this.createPlayer(player);
-                    await this.startPlayer(pid);
+                if(!(this.players.has(pid))){
+                    let heosPlayer = new HeosPlayer(this, player);
+                    this.players.set(pid, heosPlayer);
+                    await heosPlayer.connect();
                 }
                 connectedPlayers.push(pid);
             }
             //Remove disconnected players
-            for(var pid in this.players) {
+            for (let [pid, player] of this.players) {
                 if(!connectedPlayers.includes(pid)){
                     this.stopPlayer(pid);
                 }
@@ -2192,8 +1199,8 @@ class Heos extends utils.Adapter {
 
     //Alle Player stoppen
     stopPlayers() {
-        this.log.debug("try to stop players:" + JSON.stringify(Object.keys(this.players)));
-        for (var pid in this.players) {
+        this.log.debug("try to stop players:" + JSON.stringify(this.players.keys()));
+        for (let [pid, player] of this.players) {
             this.stopPlayer(pid);
         }
     }
@@ -2213,16 +1220,13 @@ class Heos extends utils.Adapter {
 
             for (var i = 0; i < pids.length; i++) {
                 let pid = pids[i];
-                if(pid in this.players){
-                    let player = this.players[pid];
-                    player.group_pid = group.pid;
-                    player.group_leader = (i == 0) && (pids.length > 1);
-                    player.group_member = (pids.length > 1);
+                let player = this.players.get(pid);
+                if (player) {
                     player.group_leader_pid = pids[0];
-                    this.setState(player.statePath + 'group_name', (group.hasOwnProperty('name') ? group.name : ''), true);
-                    this.setState(player.statePath + 'group_pid', player.group_pid, true);
-                    this.setState(player.statePath + 'group_leader', player.group_leader, true);
-                    this.setState(player.statePath + 'group_member', player.group_member, true);
+                    await player.setGroupName((group.hasOwnProperty('name') ? group.name : ''));
+                    await player.setGroupPid(group.pid);
+                    await player.setGroupLeader((i == 0) && (pids.length > 1));
+                    await player.setGroupMember(pids.length > 1);
                 }
             }
 
@@ -2244,8 +1248,7 @@ class Heos extends utils.Adapter {
 
     ungroupAll() {
         if (this.state == States.Connected) {
-            for (var pid in this.players) {
-                let player = this.players[pid];
+            for (let [pid, player] of this.players) {
                 if(player.group_leader === true){
                     this.msgs.push('heos://group/set_group?pid=' + pid);
                     this.sendNextMsg();
@@ -2350,13 +1353,15 @@ class Heos extends utils.Adapter {
 
     // Nachricht an player senden
     sendMsg(msg) {
-        try {
-            this.net_client.write(msg + "\n");
-        } catch (err) { 
-            this.log.error('sendMsg: ' + err.message);
-            this.reconnect();
+        if(this.net_client){
+            try {
+                this.net_client.write(msg + "\n");
+            } catch (err) { 
+                this.log.error('sendMsg: ' + err.message);
+                this.reconnect();
+            }
+            this.log.debug("data sent: " + msg);
         }
-        this.log.debug("data sent: " + msg);
     }
 
     /** Verbindung zum HEOS System herstellen **/
@@ -2395,16 +1400,23 @@ class Heos extends utils.Adapter {
             this.registerChangeEvents(false);
             this.net_client.destroy();
             this.net_client.unref();
+            this.net_client = undefined;
         }
         if (typeof this.nodessdp_client !== 'undefined') {
             this.nodessdp_client.stop();
+            this.nodessdp_client = undefined;
         }
         this.setState("error", false);
         this.setState("last_error", "");
         this.setState("connected", false);
         this.setState('signed_in', false);
         this.setState('signed_in_user', "");
+
         this.state = States.Disconnected;
+        this.ip = '';
+        this.msgs = [];
+        this.unfinishedResponses = '';
+
         this.setStateChanged('info.connection', false, true);
         this.log.info('disconnected from HEOS');
 	}
@@ -2420,7 +1432,6 @@ class Heos extends utils.Adapter {
             this.reconnectTimeout = undefined;
         }
         this.reconnectTimeout = setTimeout(() => {
-            this.init();
             this.connect();
         }, this.config.reconnectTimeout);
     }
@@ -2434,10 +1445,11 @@ class Heos extends utils.Adapter {
 if (module.parent) {
 	// Export the constructor in compact mode
 	/**
+     * @type Heos
 	 * @param {Partial<utils.AdapterOptions>} [options={}]
 	 */
 	module.exports = (options) => new Heos(options);
 } else {
 	// otherwise start the instance directly
-	new Heos();
+    new Heos();
 }
