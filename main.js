@@ -1199,7 +1199,7 @@ class Heos extends utils.Adapter {
 
     //Alle Player stoppen
     stopPlayers() {
-        this.log.debug("try to stop players:" + JSON.stringify(this.players.keys()));
+        this.log.debug("try to stop players:" + Array.from(this.players.keys()).join(','));
         for (let [pid, player] of this.players) {
             this.stopPlayer(pid);
         }
