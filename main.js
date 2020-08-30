@@ -1259,7 +1259,7 @@ class Heos extends utils.Adapter {
 
     groupAll() {
         if (this.state == States.Connected) {
-            let pids = Object.keys(this.players).join(',');
+            let pids = Array.from(this.players.keys()).join(',');
             this.msgs.push('heos://group/set_group?pid=' + pids);
             this.sendNextMsg();
         }
