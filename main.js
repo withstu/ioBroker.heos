@@ -1106,6 +1106,7 @@ class Heos extends utils.Adapter {
                             for (let [pid, player] of this.players) {
                                 await player.setGroupName('');
                                 await player.setGroupPid('');
+                                await player.setGroupLeaderPid('');
                                 await player.setGroupLeader(false);
                                 await player.setGroupMember(false);
                             }
@@ -1224,10 +1225,10 @@ class Heos extends utils.Adapter {
                 let pid = pids[i];
                 let player = this.players.get(pid);
                 if (player) {
-                    player.group_leader_pid = pids[0];
                     await player.setGroupName((group.hasOwnProperty('name') ? group.name : ''));
                     await player.setGroupPid(group.pid);
                     await player.setGroupLeader((i == 0) && (pids.length > 1));
+                    await player.setGroupLeaderPid(pids[0]);
                     await player.setGroupMember(pids.length > 1);
                 }
             }
