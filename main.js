@@ -150,6 +150,7 @@ class Heos extends utils.Adapter {
         this.subscribeStates('players.*.repeat');
         this.subscribeStates('players.*.shuffle');
         this.subscribeStates('players.*.state');
+        this.subscribeStates('players.*.state_simple');
         this.subscribeStates('players.*.volume');
         this.subscribeStates('players.*.volume_up');
         this.subscribeStates('players.*.volume_down');
@@ -217,6 +218,12 @@ class Heos extends utils.Adapter {
                         player.sendCommand('set_play_mode&shuffle=' + (state.val === true ? 'on' : 'off'));
                     } else if(id.state === 'state'){
                         player.sendCommand('set_play_state&state=' + state.val);
+                    } else if(id.state === 'state_simple'){
+                        if(state.val === true){
+                            player.sendCommand('set_play_state&state=play');
+                        } else {
+                            player.sendCommand('set_play_state&state=pause');
+                        }
                     } else if(id.state === 'volume'){
                         player.sendCommand('set_volume&level=' + state.val);
                     } else if(id.state === 'group_volume'){
