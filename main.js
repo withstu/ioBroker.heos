@@ -54,6 +54,9 @@ class Heos extends utils.Adapter {
     }
 
 	async onReady() {
+        // Reset the connection indicator during startup
+        this.setState("info.connection", false, true);
+        
 		await this.setObjectNotExistsAsync('players', {
             type: 'device',
 			common: {
