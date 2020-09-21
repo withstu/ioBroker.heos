@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.0.0",
+		"version": "1.0.1",
 		"news": {
+			"1.0.1": {
+				"en": "remove connected state",
+				"de": "Verbundenen Zustand entfernen",
+				"ru": "удалить подключенное состояние",
+				"pt": "remover estado conectado",
+				"nl": "verwijder de verbonden staat",
+				"fr": "supprimer l'état connecté",
+				"it": "rimuovere lo stato connesso",
+				"es": "eliminar estado conectado",
+				"pl": "usuń stan połączony",
+				"zh-cn": "删除连接状态"
+			},
 			"1.0.0": {
 				"en": "initial release",
 				"de": "Erstveröffentlichung",
