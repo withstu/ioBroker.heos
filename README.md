@@ -48,7 +48,7 @@ Note: Multiple commands are possible, if they are separated with the pipe e.g. s
 
 ## Changelog
 
-### 0.0.1
+### 1.0.0 (2020-09-21)
 * (withstu) initial release
 
 ## License
