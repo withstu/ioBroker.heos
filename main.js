@@ -77,19 +77,6 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
         });
-        await this.setObjectNotExistsAsync('connected', {
-			type: 'state',
-			common: {
-                name: 'Connection status',
-                desc: 'True, if a connection to one HEOS player exists',
-				type: 'boolean',
-				role: 'command',
-				read: true,
-                write: false,
-                def: false
-			},
-			native: {},
-        });
         await this.setObjectNotExistsAsync('signed_in', {
 			type: 'state',
 			common: {
@@ -286,7 +273,6 @@ class Heos extends utils.Adapter {
                     });
 
                     this.net_client.on('connect', async () => {
-                        await this.setStateAsync("connected", true);
                         this.setStateChanged('info.connection', true, true);
 
                         this.state = States.Connected;
@@ -1381,7 +1367,7 @@ class Heos extends utils.Adapter {
     connect() {
         try {
             this.log.info("searching for HEOS devices ...")
-            this.setState("connected", false);
+            this.setStateChanged('info.connection', false, true);
 			this.state = States.Searching;
 			
             const NodeSSDP = require('node-ssdp').Client;
@@ -1421,7 +1407,6 @@ class Heos extends utils.Adapter {
         }
         this.setState("error", false);
         this.setState("last_error", "");
-        this.setState("connected", false);
         this.setState('signed_in', false);
         this.setState('signed_in_user', "");
 
