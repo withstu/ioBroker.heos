@@ -841,7 +841,12 @@ class Heos extends utils.Adapter {
      **/
     async parseResponse(response) {
         try {
-            this.log.debug('parseResponse: ' + response);
+            if(response.includes('sign_in')){
+                this.log.silly('parseResponse: ' + response);
+                this.log.debug('parseResponse: sign_in - sensitive data hidden');
+            } else {
+                this.log.debug('parseResponse: ' + response);
+            }
 
             if (response.indexOf("command under process") > 0)
                 return
@@ -1359,7 +1364,12 @@ class Heos extends utils.Adapter {
                 this.log.error('sendMsg: ' + err.message);
                 this.reconnect();
             }
-            this.log.debug("data sent: " + msg);
+            if(msg.includes('sign_in')){
+                this.log.silly("data sent: " + msg);
+                this.log.debug("data sent: sign_in - sensitive data hidden");
+            } else {
+                this.log.debug("data sent: " + msg);
+            }
         }
     }
 

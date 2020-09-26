@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.0.1",
+		"version": "1.1.0",
 		"news": {
+			"1.1.0": {
+				"en": "encrypt password",
+				"de": "Passwort verschlüsseln",
+				"ru": "зашифровать пароль",
+				"pt": "criptografar senha",
+				"nl": "codeer wachtwoord",
+				"fr": "crypter le mot de passe",
+				"it": "crittografare la password",
+				"es": "cifrar contraseña",
+				"pl": "zaszyfruj hasło",
+				"zh-cn": "加密密码"
+			},
 			"1.0.1": {
 				"en": "remove connected state",
 				"de": "Verbundenen Zustand entfernen",
@@ -76,10 +88,16 @@
 		"materialize": true,
 		"dependencies": [
 			{
-				"js-controller": ">=1.4.2"
+				"js-controller": ">=3.0.0"
 			}
 		]
 	},
+	"protectedNative": [
+		"password"
+	],
+	"encryptedNative": [
+		"password"
+	],
 	"native": {
 		"username": "",
 		"password": "",
