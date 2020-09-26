@@ -48,6 +48,9 @@ Note: Multiple commands are possible, if they are separated with the pipe e.g. s
 
 ## Changelog
 
+### 1.1.2 (2020-09-26)
+* (withstu) log browse parameters
+
 ### 1.1.1 (2020-09-26)
 * (withstu) add source browse feature (Click the button in the sources. You can find the possible next commands in the log.)
 
