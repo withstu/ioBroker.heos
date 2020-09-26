@@ -1078,7 +1078,7 @@ class Heos extends utils.Adapter {
                                     default:
                                         let source = this.sources.get(sid);
                                         let sname = source ? source.name : sid;
-                                        this.log.info("[BROWSE] [" + sname + "]");
+                                        this.log.info("[BROWSE] [" + sname + "] " + JSON.stringify(jmsg));
                                         for (i = 0; i < jdata.payload.length; i++) {
                                             this.log.info("[BROWSE] [" + sname + "] [" + unescape(jdata.payload[i].name) + "] " + this.browse2Command(jmsg, jdata.payload[i]));
                                         }
