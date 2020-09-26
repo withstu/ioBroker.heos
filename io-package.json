@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.1.0",
+		"version": "1.1.1",
 		"news": {
+			"1.1.1": {
+				"en": "add source browse feature",
+				"de": "Funktion zum Durchsuchen von Quellen hinzufügen",
+				"ru": "добавить функцию просмотра источника",
+				"pt": "adicionar recurso de navegação na fonte",
+				"nl": "voeg bronbladerfunctie toe",
+				"fr": "ajouter une fonction de navigation source",
+				"it": "aggiungere la funzione di ricerca della fonte",
+				"es": "agregar la función de exploración de fuentes",
+				"pl": "dodać funkcję przeglądania źródeł",
+				"zh-cn": "添加源浏览功能"
+			},
 			"1.1.0": {
 				"en": "encrypt password",
 				"de": "Passwort verschlüsseln",
