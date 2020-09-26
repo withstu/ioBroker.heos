@@ -38,6 +38,7 @@ class Heos extends utils.Adapter {
 
         /** @type {Map<String,HeosPlayer>} */
         this.players = new Map();
+        this.sources = new Map();
         this.ip = '';
         this.state = States.Disconnected;
         
@@ -83,7 +84,7 @@ class Heos extends utils.Adapter {
                 name: 'Sign-in status',
                 desc: 'True, if a user is signed in',
 				type: 'boolean',
-				role: 'command',
+				role: 'indicator',
 				read: true,
                 write: false,
                 def: false
@@ -96,7 +97,7 @@ class Heos extends utils.Adapter {
                 name: 'Signed-in user',
                 desc: 'Username of the signed in user',
 				type: 'string',
-				role: 'command',
+				role: 'text',
 				read: true,
                 write: false
 			},
@@ -108,7 +109,7 @@ class Heos extends utils.Adapter {
                 name: 'Error status',
                 desc: 'True, if an error exists',
 				type: 'boolean',
-				role: 'command',
+				role: 'indicator',
 				read: true,
                 write: false,
                 def: false
@@ -121,7 +122,7 @@ class Heos extends utils.Adapter {
                 name: 'Last error messages',
                 desc: 'Last 4 error messages',
 				type: 'string',
-				role: 'command',
+				role: 'text',
 				read: true,
                 write: false
 			},
@@ -134,6 +135,9 @@ class Heos extends utils.Adapter {
         //Presets|Playlists
         this.subscribeStates('presets.*.play')
         this.subscribeStates('playlists.*.play')
+
+        //Sources
+        this.subscribeStates('sources.*.browse');
 
         //Players
         this.subscribeStates('players.*.muted');
@@ -197,6 +201,8 @@ class Heos extends utils.Adapter {
                 this.sendCommandToAllPlayers('add_to_queue&sid=1025&aid=4&cid=' + id.channel, true);
             } else if (id.device === 'presets' && id.channel && id.state === 'play') {
                 this.sendCommandToAllPlayers('play_preset&preset=' + id.channel, true);
+            } else if (id.device === 'sources' && id.channel && id.state === 'browse') {
+                this.browse(id.channel);
             } else if (id.device === 'players' && id.channel && id.state && this.players.has(id.channel)) {
                 let player = this.players.get(id.channel);
                 if(player) {
@@ -520,11 +526,41 @@ class Heos extends utils.Adapter {
             },
             native: {},
         });
+        await this.setObjectNotExistsAsync(statePath + 'available', {
+            type: 'state',
+            common: {
+                name: 'Available',
+                desc: 'Source is available',
+                type: 'boolean',
+                role: 'media.available',
+                read: true,
+                write: false,
+                def: false
+            },
+            native: {},
+        });
+        if(source.available == "true"){
+            await this.setObjectNotExistsAsync(statePath + 'browse', {
+                type: 'state',
+                common: {
+                    name: 'Browse Source',
+                    desc: 'Browse Source. Output is written to log',
+                    type: 'boolean',
+                    role: 'button',
+                    read: true,
+                    write: true,
+                    def: false
+                },
+                native: {},
+            });
+        }
 
         await this.setStateAsync(statePath + 'sid', source.sid, true);
         await this.setStateAsync(statePath + 'name', source.name, true);
         await this.setStateAsync(statePath + 'type', source.type, true);
         await this.setStateAsync(statePath + 'image_url', source.image_url, true);
+        await this.setStateAsync(statePath + 'available', (source.available == 'true' ? true : false), true);
+        this.sources.set(source.sid, source);
 
         //Browse Playlists & Favorites
         if ([1025, 1028].includes(source.sid)) {
@@ -1005,7 +1041,8 @@ class Heos extends utils.Adapter {
                         //  "options": [{"browse": [{"id": 20, "name": "Remove from HEOS Favorites"}]}]}                    
                         case 'browse':
                             if ((jdata.hasOwnProperty('payload'))) {
-                                switch(parseInt(jmsg.sid, 10)){
+                                let sid = parseInt(jmsg.sid, 10);
+                                switch(sid){
                                     case 1025:
                                         var devicePath = 'playlists'
                                         //Device
@@ -1036,6 +1073,14 @@ class Heos extends utils.Adapter {
                                         for (i = 0; i < jdata.payload.length; i++) {
                                             var itemId = (i + 1);
                                             await this.createPreset(devicePath, itemId, jdata.payload[i]);
+                                        }
+                                        break;
+                                    default:
+                                        let source = this.sources.get(sid);
+                                        let sname = source ? source.name : sid;
+                                        this.log.info("[BROWSE] [" + sname + "]");
+                                        for (i = 0; i < jdata.payload.length; i++) {
+                                            this.log.info("[BROWSE] [" + sname + "] [" + unescape(jdata.payload[i].name) + "] " + this.browse2Command(jmsg, jdata.payload[i]));
                                         }
                                         break;
                                 }
@@ -1152,6 +1197,81 @@ class Heos extends utils.Adapter {
             }
 
 		} catch (err) { this.log.error('parseResponse: ' + err.message + '\n ' + response); }
+    }
+
+    browse2Command(message, payload){
+        let cmd = [];
+        let msid;
+        let psid;
+        let mcid;
+        let pcid;
+        let mid;
+        let playable = false;
+        let container = false;
+        let type;
+
+        if (message.hasOwnProperty('sid')) {
+            msid = message.sid;
+        }
+        if (payload.hasOwnProperty('sid')) {
+            psid = payload.sid;
+        }
+        if (message.hasOwnProperty('cid')) {
+            mcid = message.cid;
+        }
+        if (payload.hasOwnProperty('cid')) {
+            pcid = payload.cid;
+        }
+        if (payload.hasOwnProperty('mid')) {
+            mid = payload.mid;
+        }
+        if (payload.hasOwnProperty('type')) {
+            type = payload.type;
+        }
+        if (payload.hasOwnProperty('playable')) {
+            playable = payload.playable == "yes" ? true : false;
+        }
+        if (payload.hasOwnProperty('container')) {
+            container = payload.container == "yes" ? true : false;
+        }
+
+        //browse
+        if(psid){
+            cmd.push("browse/browse?sid=" + psid);
+        } else if (container){
+            let cmd_tmp = [];
+            if(msid){
+                cmd_tmp.push("sid=" + msid);
+            }
+            if(pcid){
+                cmd_tmp.push("cid=" + pcid);
+            } else if(mcid){
+                cmd_tmp.push("cid=" + mcid);
+            }
+            
+            if(cmd_tmp.length > 0){
+                cmd.push("browse/browse?" + cmd_tmp.join("&"));
+            }
+        }
+
+        //playable
+        if(playable && type){
+            if (type == 'station' && mid){      
+                if(mid.includes("inputs/")){
+                    cmd.push("player/play_input&input=" + mid);
+                } else if(mcid){
+                    cmd.push("player/play_stream&sid=" + msid + "&cid=" + mcid + "&mid=" + mid);
+                } else {
+                    cmd.push("player/play_stream&sid=" + msid + "&mid=" + mid);
+                }
+            } else if(container && pcid){
+                cmd.push("player/add_to_queue&sid=" + msid + "&cid=" + pcid + "&aid=4");
+            } else if(mcid && mid){
+                cmd.push("player/add_to_queue&sid=" + msid + "&cid=" + mcid + "&mid=" + mid + "&aid=4");
+            }
+        }
+
+        return cmd.length > 0 ? "Possible Commands: " + cmd.join('|') : "No commands found for payload";
     }
 
     sendCommandToAllPlayers(cmd, leaderOnly){
