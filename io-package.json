@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.1.1",
+		"version": "1.1.2",
 		"news": {
+			"1.1.2": {
+				"en": "log browse parameters",
+				"de": "Protokoll durchsuchen Parameter",
+				"ru": "параметры просмотра журнала",
+				"pt": "parâmetros de navegação de log",
+				"nl": "log bladerparameters",
+				"fr": "paramètres de navigation dans les journaux",
+				"it": "parametri di navigazione del registro",
+				"es": "parámetros de exploración de registros",
+				"pl": "parametry przeglądania dziennika",
+				"zh-cn": "日志浏览参数"
+			},
 			"1.1.1": {
 				"en": "add source browse feature",
 				"de": "Funktion zum Durchsuchen von Quellen hinzufügen",
