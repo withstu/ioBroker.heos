@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.1.2",
+		"version": "1.2.0",
 		"news": {
+			"1.2.0": {
+				"en": "restructure playlists/presets",
+				"de": "Wiedergabelisten / Voreinstellungen neu strukturieren",
+				"ru": "реструктурировать плейлисты / пресеты",
+				"pt": "reestruturar listas de reprodução / predefinições",
+				"nl": "herstructureer afspeellijsten / presets",
+				"fr": "restructurer les listes de lecture / préréglages",
+				"it": "ristrutturare playlist / preset",
+				"es": "reestructurar listas de reproducción / presets",
+				"pl": "przebudować listy odtwarzania / ustawienia wstępne",
+				"zh-cn": "重组播放列表/预设"
+			},
 			"1.1.2": {
 				"en": "log browse parameters",
 				"de": "Protokoll durchsuchen Parameter",
