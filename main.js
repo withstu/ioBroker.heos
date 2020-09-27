@@ -1,9 +1,9 @@
 /**
- *      ioBroker HEOS Adapter
- *      Copyright (c) 2020 withstu <withstu@gmx.de>
- *      MIT License
+ * ioBroker HEOS Adapter
+ * Copyright (c) 2020 withstu <withstu@gmx.de>
+ * MIT License
  *
- *      derived from https://forum.iobroker.net/topic/10420/vorlage-denon-heos-script by Uwe Uhula
+ * derived from https://forum.iobroker.net/topic/10420/vorlage-denon-heos-script by Uwe Uhula
  */
 'use strict';
 
@@ -310,7 +310,6 @@ class Heos extends utils.Adapter {
 	
 	executeCommand(cmd) {
 		//('command: '+cmd);
-
 		// cmd auswerten
 		cmd = cmd.split('/');
 		var cmd_group = null;
