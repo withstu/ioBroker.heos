@@ -133,8 +133,7 @@ class Heos extends utils.Adapter {
 		this.subscribeStates('command');
 
 		//Presets|Playlists
-		this.subscribeStates('presets.*.play')
-		this.subscribeStates('playlists.*.play')
+		this.subscribeStates('sources.*.play')
 
 		//Sources
 		this.subscribeStates('sources.*.browse');
@@ -183,6 +182,9 @@ class Heos extends utils.Adapter {
 	onStateChange(_id, state) {
 		if (!state || state.ack) return;
 		const id = this.idToDCS(_id);
+		const fullId = _id.split('.');
+
+		this.log.debug("State change - ID: " + _id + " | DCS: " + JSON.stringify(id));
 
 		if(id){
 			if (state.val === 'false') {
@@ -194,13 +196,12 @@ class Heos extends utils.Adapter {
 			if (parseInt(state.val) == state.val) {
 				state.val = parseInt(state.val);
 			}
-
 			if(id.device === 'command'){
 				this.executeCommand(state.val);
-			} else if (id.device === 'playlists' && id.channel && id.state === 'play') {
-				this.sendCommandToAllPlayers('add_to_queue&sid=1025&aid=4&cid=' + id.channel, true);
-			} else if (id.device === 'presets' && id.channel && id.state === 'play') {
-				this.sendCommandToAllPlayers('play_preset&preset=' + id.channel, true);
+			} else if (id.device === 'sources' && id.channel === '1025' && id.state && fullId[fullId.length-1] === 'play') {
+				this.sendCommandToAllPlayers('add_to_queue&sid=1025&aid=4&cid=' + id.state, true);
+			} else if (id.device === 'sources' && id.channel === '1028' && id.state && fullId[fullId.length-1] === 'play') {
+				this.sendCommandToAllPlayers('play_preset&preset=' + id.state, true);
 			} else if (id.device === 'sources' && id.channel && id.state === 'browse') {
 				this.browse(id.channel);
 			} else if (id.device === 'players' && id.channel && id.state && this.players.has(id.channel)) {
@@ -462,9 +463,9 @@ class Heos extends utils.Adapter {
 	async createSource(devicePath, source){
 		var baseStatePath = devicePath + '.' + source.sid;
 		var statePath = baseStatePath + '.';
-		//Channel
+		//Folder
 		await this.setObjectNotExistsAsync(baseStatePath, {
-			type: 'channel',
+			type: 'folder',
 			common: {
 				name: source.name,
 				role: 'media.source'
@@ -567,13 +568,13 @@ class Heos extends utils.Adapter {
 		}
 	}
 
-	async createPlaylist(devicePath, payload){
+	async createPlaylist(folderPath, payload){
 		var itemId = payload.cid;
-		var baseStatePath = devicePath + '.' + itemId;
+		var baseStatePath = folderPath + '.' + itemId;
 		var statePath = baseStatePath + '.';
-		//Channel
+		//Folder
 		await this.setObjectNotExistsAsync(baseStatePath, {
-			type: 'channel',
+			type: 'folder',
 			common: {
 				name: payload.name || 'Playlist ' + itemId,
 				role: 'media.playlist'
@@ -720,13 +721,13 @@ class Heos extends utils.Adapter {
 		}
 	}
 
-	async createPreset(devicePath, itemId, payload){
-		var baseStatePath = devicePath + '.' + itemId;
+	async createPreset(folderPath, itemId, payload){
+		var baseStatePath = folderPath + '.' + itemId;
 		var statePath = baseStatePath + '.';
 
-		//Channel
+		//Folder
 		await this.setObjectNotExistsAsync(baseStatePath, {
-			type: 'channel',
+			type: 'folder',
 			common: {
 				name: 'Preset ' + itemId,
 				role: 'media.preset'
@@ -1017,7 +1018,7 @@ class Heos extends utils.Adapter {
 								var devicePath = 'sources'
 								//Device
 								await this.setObjectNotExistsAsync(devicePath, {
-									type: 'device',
+									type: 'folder',
 									common: {
 										name: 'Sources',
 										role: 'media.sources'
@@ -1043,35 +1044,34 @@ class Heos extends utils.Adapter {
 								let sid = parseInt(jmsg.sid, 10);
 								switch(sid){
 									case 1025:
-										var devicePath = 'playlists'
-										//Device
-										await this.setObjectNotExistsAsync(devicePath, {
-											type: 'device',
+										var folderPath = 'sources.1025'
+										//Folder
+										/*await this.setObjectNotExistsAsync(folderPath, {
+											type: 'folder',
 											common: {
 												name: 'Playlists',
 												role: 'media.playlists'
 											},
 											native: {},
-										});
+										});*/
 										for (i = 0; i < jdata.payload.length; i++) {
-											await this.createPlaylist(devicePath, jdata.payload[i]);
+											await this.createPlaylist(folderPath, jdata.payload[i]);
 										}
 										break;
 									case 1028:
-										var devicePath = 'presets'
-										//Device
-										await this.setObjectNotExistsAsync(devicePath, {
-											type: 'device',
+										var folderPath = 'sources.1028'
+										//Folder
+										/*await this.setObjectNotExistsAsync(folderPath, {
+											type: 'folder',
 											common: {
 												name: 'Presets',
 												role: 'media.presets'
 											},
 											native: {},
-										});
-
+										});*/
 										for (i = 0; i < jdata.payload.length; i++) {
 											var itemId = (i + 1);
-											await this.createPreset(devicePath, itemId, jdata.payload[i]);
+											await this.createPreset(folderPath, itemId, jdata.payload[i]);
 										}
 										break;
 									default:

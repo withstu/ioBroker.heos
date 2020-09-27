@@ -14,6 +14,11 @@
 
 The adapter lets control HEOS from ioBroker
 
+## Configuration
+
+* "AutoPlay": Automatically plays music after the player is connected or on unmute. Can be configured globally in configuration. If it is enabled globally you can disable it for one specific player with the state auto_play
+* "ignore_broadcast_cmd": This player state configures, if the player should ignore commands to all players e.g. player/set_mute&state=on or pressing the play button for presets/playlists 
+
 ## Command
 
 HEOS CLI specification: http://rn.dmglobal.com/euheos/HEOS_CLI_ProtocolSpecification.pdf
@@ -39,14 +44,21 @@ Note: Multiple commands are possible, if they are separated with the pipe e.g. s
 * "set_play_state&state=play|pause|stop": Set the player state
 * "set_play_mode&repeat=on_all|on_one|off&shuffle=on|off": Set Repeat and Shuffle mode
 * "set_mute&state=on|off": Mute player
-* "volume_down&step=1..10": Lower volume   
+* "volume_down&step=1..10": Lower volume
 * "volume_up&step=1..10": Raise volume
 * "play_next": Play next
 * "play_previous": Play previous
 * "play_preset&preset=1|2|..|n": Play preset n
 * "play_stream&url=url_path": Play URL-Stream
+* "add_to_queue&sid=1025&aid=4&cid=[CID]": Play playlist with [CID] on player (aid: 1 – play now; 2 – play next; 3 – add to end; 4 – replace and play)
+
+## Browse Sources
+To reduce the state amount in ioBroker, only playlists and the presets are automatically stored in the states. You can find and control them in the "sources" folder. If you want to browse the music of a source, just press the browse button. Except for playlists and presets you'll find the browse result in the ioBroker log. There are also commands provided to navigate deeper or play a resource. Just paste the commands in the global HEOS command field. If it is a browse command you'll find the result in the log.
 
 ## Changelog
+
+### 1.2.0 (2020-09-27)
+* (withstu) Breaking change: restructure playlists/presets (you should delete the devices playlists, presets and sources before installation)
 
 ### 1.1.2 (2020-09-26)
 * (withstu) log browse parameters
