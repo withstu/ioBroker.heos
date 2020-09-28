@@ -448,7 +448,11 @@ class Heos extends utils.Adapter {
 			var params = message.split('&');
 			for (var i = 0; i < params.length; i++) {
 				var entry = params[i];
-				entry = decodeURI(entry);
+				try {
+					entry = decodeURI(entry); 
+				} catch (e) {
+					// ignore a malformed URI
+				}
 				var param = entry.split('=');
 				if(param.length > 1){
 					result[param[0]] = param[1];
@@ -460,8 +464,8 @@ class Heos extends utils.Adapter {
 		return result;
 	}
 
-	async createSource(devicePath, source){
-		var baseStatePath = devicePath + '.' + source.sid;
+	async createSource(folderPath, source){
+		var baseStatePath = folderPath + '.' + source.sid;
 		var statePath = baseStatePath + '.';
 		//Folder
 		await this.setObjectNotExistsAsync(baseStatePath, {
@@ -539,7 +543,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		if(source.available == "true"){
+		if(source.available == "true" && ![1025, 1028].includes(source.sid)){
 			await this.setObjectNotExistsAsync(statePath + 'browse', {
 				type: 'state',
 				common: {
@@ -1015,9 +1019,9 @@ class Heos extends utils.Adapter {
 					switch (cmd) {
 						case 'get_music_sources':
 							if ((jdata.hasOwnProperty('payload'))) {
-								var devicePath = 'sources'
-								//Device
-								await this.setObjectNotExistsAsync(devicePath, {
+								var folderPath = 'sources'
+								//Folder
+								await this.setObjectNotExistsAsync(folderPath, {
 									type: 'folder',
 									common: {
 										name: 'Sources',
@@ -1025,9 +1029,22 @@ class Heos extends utils.Adapter {
 									},
 									native: {},
 								});
+								await this.setObjectNotExistsAsync(folderPath + '.' + 'browse_result', {
+									type: 'state',
+									common: {
+										name: 'Browse result',
+										desc: 'Result of the browse command',
+										type: 'string',
+										role: 'text',
+										read: true,
+										write: false,
+										def: ''
+									},
+									native: {},
+								});
 								
 								for (i = 0; i < jdata.payload.length; i++) {
-									await this.createSource(devicePath, jdata.payload[i]);
+									await this.createSource(folderPath, jdata.payload[i]);
 								}
 							}
 							break;
@@ -1077,10 +1094,51 @@ class Heos extends utils.Adapter {
 									default:
 										let source = this.sources.get(sid);
 										let sname = source ? source.name : sid;
-										this.log.info("[BROWSE] [" + sname + "] " + JSON.stringify(jmsg));
-										for (i = 0; i < jdata.payload.length; i++) {
-											this.log.info("[BROWSE] [" + sname + "] [" + unescape(jdata.payload[i].name) + "] " + this.browse2Command(jmsg, jdata.payload[i]));
+										let browseResult = {
+											"sid": sid,
+											"name": sname,
+											"parameter": jmsg,
+											"payload": []
+										};
+										//Add Top
+										browseResult["payload"].push(
+											{
+												"name": "Navigate to top",
+												"commands" : {
+													"navigate": "browse/browse?sid=" + sid
+												}
+											}
+										);
+										
+										//Add Play all
+										if ((jdata.hasOwnProperty('options'))) {
+											let options = jdata.options[0].browse;
+											for(i = 0; i < options.length; i++){
+												if(options[i].id == 21){
+													browseResult["payload"].push(
+														{
+															"name": "Play all",
+															"commands": {
+																"play": "player/add_to_queue&sid=" + sid + "&cid=" + jmsg.cid + "&aid=4"
+															}
+														}
+													);
+												}
+											}
 										}
+										
+										//this.log.info("[BROWSE] [" + sname + "] " + JSON.stringify(jmsg));
+										for (i = 0; i < jdata.payload.length; i++) {
+											//this.log.info("[BROWSE] [" + sname + "] [" + unescape(jdata.payload[i].name) + "] " 
+											browseResult["payload"].push(
+												{
+													"name": unescape(jdata.payload[i].name),
+													"commands": this.browse2Commands(jmsg, jdata.payload[i])
+												}
+											)
+										}
+										//cmd.length > 0 ? "Possible Commands: " + cmd.join('|') : "No commands found for payload"
+										this.setState("sources.browse_result", JSON.stringify(browseResult));
 										break;
 								}
 							}
@@ -1198,8 +1256,8 @@ class Heos extends utils.Adapter {
 		} catch (err) { this.log.error('parseResponse: ' + err.message + '\n ' + response); }
 	}
 
-	browse2Command(message, payload){
-		let cmd = [];
+	browse2Commands(message, payload){
+		let cmd = {};
 		let msid;
 		let psid;
 		let mcid;
@@ -1236,7 +1294,7 @@ class Heos extends utils.Adapter {
 
 		//browse
 		if(psid){
-			cmd.push("browse/browse?sid=" + psid);
+			cmd.browse = "browse/browse?sid=" + psid;
 		} else if (container){
 			let cmd_tmp = [];
 			if(msid){
@@ -1249,7 +1307,7 @@ class Heos extends utils.Adapter {
 			}
 			
 			if(cmd_tmp.length > 0){
-				cmd.push("browse/browse?" + cmd_tmp.join("&"));
+				cmd.browse = "browse/browse?" + cmd_tmp.join("&");
 			}
 		}
 
@@ -1257,20 +1315,20 @@ class Heos extends utils.Adapter {
 		if(playable && type){
 			if (type == 'station' && mid){      
 				if(mid.includes("inputs/")){
-					cmd.push("player/play_input&input=" + mid);
+					cmd.play = "player/play_input&input=" + mid;
 				} else if(mcid){
-					cmd.push("player/play_stream&sid=" + msid + "&cid=" + mcid + "&mid=" + mid);
+					cmd.play = "player/play_stream&sid=" + msid + "&cid=" + mcid + "&mid=" + mid;
 				} else {
-					cmd.push("player/play_stream&sid=" + msid + "&mid=" + mid);
+					cmd.play = "player/play_stream&sid=" + msid + "&mid=" + mid;
 				}
 			} else if(container && pcid){
-				cmd.push("player/add_to_queue&sid=" + msid + "&cid=" + pcid + "&aid=4");
+				cmd.play = "player/add_to_queue&sid=" + msid + "&cid=" + pcid + "&aid=4";
 			} else if(mcid && mid){
-				cmd.push("player/add_to_queue&sid=" + msid + "&cid=" + mcid + "&mid=" + mid + "&aid=4");
+				cmd.play = "player/add_to_queue&sid=" + msid + "&cid=" + mcid + "&mid=" + mid + "&aid=4";
 			}
 		}
 
-		return cmd.length > 0 ? "Possible Commands: " + cmd.join('|') : "No commands found for payload";
+		return cmd;
 	}
 
 	sendCommandToAllPlayers(cmd, leaderOnly){

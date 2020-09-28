@@ -53,9 +53,12 @@ Note: Multiple commands are possible, if they are separated with the pipe e.g. s
 * "add_to_queue&sid=1025&aid=4&cid=[CID]": Play playlist with [CID] on player (aid: 1 – play now; 2 – play next; 3 – add to end; 4 – replace and play)
 
 ## Browse Sources
-To reduce the state amount in ioBroker, only playlists and the presets are automatically stored in the states. You can find and control them in the "sources" folder. If you want to browse the music of a source, just press the browse button. Except for playlists and presets you'll find the browse result in the ioBroker log. There are also commands provided to navigate deeper or play a resource. Just paste the commands in the global HEOS command field. If it is a browse command you'll find the result in the log.
+To reduce the state amount in ioBroker, only playlists and the presets are automatically stored in the states. You can find and control them in the "sources" folder. If you want to browse the music of a source, just press the browse button. Except for playlists and presets you'll find the browse result in the sources.browse_result state. There are also commands provided to navigate deeper or play a resource. Just paste the commands in the global HEOS command field. If it is a browse command you'll find the result in the browse_result state.
 
 ## Changelog
+
+### 1.2.1 (2020-09-28)
+* (withstu) introduce browse_result state
 
 ### 1.2.0 (2020-09-27)
 * (withstu) Breaking change: restructure playlists/presets (you should delete the devices playlists, presets and sources before installation)
