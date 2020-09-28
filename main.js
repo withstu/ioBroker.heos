@@ -1105,7 +1105,7 @@ class Heos extends utils.Adapter {
 											{
 												"name": "Navigate to top",
 												"commands" : {
-													"navigate": "browse/browse?sid=" + sid
+													"browse": "browse/browse?sid=" + sid
 												}
 											}
 										);
