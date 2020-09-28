@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.2.1",
+		"version": "1.2.2",
 		"news": {
+			"1.2.2": {
+				"en": "rename browse command",
+				"de": "Befehl zum Durchsuchen umbenennen",
+				"ru": "переименовать команду просмотра",
+				"pt": "renomear comando de navegação",
+				"nl": "hernoem bladeropdracht",
+				"fr": "renommer la commande de navigation",
+				"it": "rinomina il comando Browse",
+				"es": "cambiar el nombre del comando de exploración",
+				"pl": "zmień nazwę polecenia przeglądania",
+				"zh-cn": "重命名浏览命令"
+			},
 			"1.2.1": {
 				"en": "introduce browse_result state",
 				"de": "den Status browse_result einführen",

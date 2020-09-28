@@ -57,6 +57,9 @@ To reduce the state amount in ioBroker, only playlists and the presets are autom
 
 ## Changelog
 
+### 1.2.2 (2020-09-28)
+* (withstu) rename browse command
+
 ### 1.2.1 (2020-09-28)
 * (withstu) introduce browse_result state
 
