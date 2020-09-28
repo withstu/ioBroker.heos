@@ -203,7 +203,7 @@ class Heos extends utils.Adapter {
 			} else if (id.device === 'sources' && id.channel === '1028' && id.state && fullId[fullId.length-1] === 'play') {
 				this.sendCommandToAllPlayers('play_preset&preset=' + id.state, true);
 			} else if (id.device === 'sources' && id.channel && id.state === 'browse') {
-				this.browse(id.channel);
+				this.browseSource(id.channel);
 			} else if (id.device === 'players' && id.channel && id.state && this.players.has(id.channel)) {
 				let player = this.players.get(id.channel);
 				if(player) {
@@ -564,7 +564,7 @@ class Heos extends utils.Adapter {
 
 		//Browse Playlists & Favorites
 		if ([1025, 1028].includes(source.sid)) {
-			this.browse(source.sid);
+			this.browseSource(source.sid);
 		}
 	}
 
@@ -1416,7 +1416,7 @@ class Heos extends utils.Adapter {
 		}
 	}
 
-	browse(sid) {
+	browseSource(sid) {
 		if (this.state == States.Connected) {
 			// heos://browse/browse?sid=source_id
 			this.msgs.push('heos://browse/browse?sid=' + sid);
