@@ -36,9 +36,8 @@ class Heos extends utils.Adapter {
 		this.on('stateChange', this.onStateChange.bind(this));
 		this.on('unload', this.onUnload.bind(this));
 
-		/** @type {Map<String,HeosPlayer>} */
-		this.players = new Map();
-		this.sources = new Map();
+		this.players = {};
+		this.browseMap = {};
 		this.ip = '';
 		this.state = States.Disconnected;
 		
@@ -204,8 +203,8 @@ class Heos extends utils.Adapter {
 				this.sendCommandToAllPlayers('play_preset&preset=' + id.state, true);
 			} else if (id.device === 'sources' && id.channel && id.state === 'browse') {
 				this.browseSource(id.channel);
-			} else if (id.device === 'players' && id.channel && id.state && this.players.has(id.channel)) {
-				let player = this.players.get(id.channel);
+			} else if (id.device === 'players' && id.channel && id.state && id.channel in this.players) {
+				let player = this.players[id.channel];
 				if(player) {
 					if(id.state === 'muted'){
 						player.sendCommand('set_mute&state=' + (state.val === true ? 'on' : 'off'));
@@ -415,7 +414,12 @@ class Heos extends utils.Adapter {
 	 *        {"container": "no", "mid": "catalog/stations/A1W7U8U71CGE50/#chunk"
 	 **/
 	onData(data) {
-		this.log.debug("onData: " + data.toString())
+		if(data.toString().includes('sign_in')){
+			this.log.silly("onData: " + data.toString());
+			this.log.debug("onData: sign_in - sensitive data hidden");
+		} else {
+			this.log.debug("onData: " + data.toString());
+		}
 		try {
 			data = data.toString();
 			data = data.replace(/[\n\r]/g, '');    // Steuerzeichen "CR" entfernen   
@@ -431,7 +435,12 @@ class Heos extends utils.Adapter {
 						JSON.parse(responses[r]); // check ob korrektes JSON Array
 						this.parseResponse(responses[r]);
 					} catch (e) {
-						this.log.debug('onData: invalid json (error: ' + e.message + '): ' + responses[r]);
+						if(responses[r].includes('sign_in')){
+							this.log.silly('onData: invalid json (error: ' + e.message + '): ' + responses[r]);
+							this.log.debug("onData: sign_in - sensitive data hidden");
+						} else {
+							this.log.debug('onData: invalid json (error: ' + e.message + '): ' + responses[r]);
+						}
 						this.unfinishedResponses += responses[r];
 					}
 				}
@@ -462,6 +471,24 @@ class Heos extends utils.Adapter {
 			}
 		}
 		return result;
+	}
+
+	mapBrowse(command, name, image_url){
+		let entry;
+		command = command.replace(/&returned.*/, "")
+		if(command in this.browseMap){
+			entry = this.browseMap[command];
+		} else {
+			entry = {
+				"name": name,
+				"image_url": image_url
+			};
+			if(name.length > 0){
+				this.browseMap[command] = entry;
+			}
+		}
+		this.log.silly("BrowseMap: " + JSON.stringify(this.browseMap));
+		return entry;
 	}
 
 	async createSource(folderPath, source){
@@ -543,7 +570,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		if(source.available == "true" && ![1025, 1028].includes(source.sid)){
+		if(source.available == "true"){
 			await this.setObjectNotExistsAsync(statePath + 'browse', {
 				type: 'state',
 				common: {
@@ -564,12 +591,11 @@ class Heos extends utils.Adapter {
 		await this.setStateAsync(statePath + 'type', source.type, true);
 		await this.setStateAsync(statePath + 'image_url', source.image_url, true);
 		await this.setStateAsync(statePath + 'available', (source.available == 'true' ? true : false), true);
-		this.sources.set(source.sid, source);
 
 		//Browse Playlists & Favorites
-		if ([1025, 1028].includes(source.sid)) {
-			this.browseSource(source.sid);
-		}
+		//if ([1025, 1028].includes(source.sid)) {
+		//	this.browseSource(source.sid);
+		//}
 	}
 
 	async createPlaylist(folderPath, payload){
@@ -896,6 +922,10 @@ class Heos extends utils.Adapter {
 			if (!jdata.hasOwnProperty('heos') || !jdata.heos.hasOwnProperty('command'))
 				return;
 
+			var command = jdata.heos.command;
+			if(jdata.heos.message.length > 0){
+				command += "?" + jdata.heos.message;
+			}
 			// msg auswerten
 			var jmsg = this.parseMessage(jdata.heos.message);
 
@@ -963,12 +993,12 @@ class Heos extends utils.Adapter {
 							// "heos": {"command": "event/group_volume_changed ","message": "gid='group_id'&level='vol_level'&mute='on_or_off'"}
 							if (jmsg.hasOwnProperty('gid')) {
 								if (jmsg.hasOwnProperty('level')) {
-									let leadHeosPlayer = this.players.get(jmsg.gid);
+									let leadHeosPlayer = this.players[jmsg.gid];
 									if (leadHeosPlayer) {
 										var memberPids = leadHeosPlayer.group_pid.split(',');
 										for (let i = 0; i < memberPids.length; i++) {
 											let pid = memberPids[i];
-											let heosPlayer = this.players.get(pid);
+											let heosPlayer = this.players[pid];
 											if (heosPlayer) {
 												heosPlayer.setGroupVolume(jmsg.level);
 											}
@@ -976,12 +1006,12 @@ class Heos extends utils.Adapter {
 									}
 								}
 								if (jmsg.hasOwnProperty('mute')) {
-									let leadHeosPlayer = this.players.get(jmsg.gid);
+									let leadHeosPlayer = this.players[jmsg.gid];
 									if (leadHeosPlayer) {
 										var memberPids = leadHeosPlayer.group_pid.split(',');
 										for (let i = 0; i < memberPids.length; i++) {
 											let pid = memberPids[i];
-											let heosPlayer = this.players.get(pid);
+											let heosPlayer = this.players[pid];
 											if (heosPlayer) {
 												heosPlayer.setGroupMuted(jmsg.mute == 'on' ? true : false)
 											}
@@ -1042,10 +1072,33 @@ class Heos extends utils.Adapter {
 									},
 									native: {},
 								});
+								//Clear browse Map to reduce memory;
+								this.browseMap = {};
 								
+								let sources = this.mapBrowse(command, "Sources", "");
+								let browseResult = {
+									"sid": "",
+									"name": sources.name,
+									"image_url": sources.image_url,
+									"parameter": jmsg,
+									"payload": []
+								};
 								for (i = 0; i < jdata.payload.length; i++) {
-									await this.createSource(folderPath, jdata.payload[i]);
+									let payload = jdata.payload[i];
+									let browse = "browse/browse?sid=" + payload.sid;
+									let source = this.mapBrowse(browse, payload.name, payload.image_url);
+									this.createSource(folderPath, payload);
+									browseResult["payload"].push(
+										{
+											"name": source.name,
+											"image_url": source.image_url,
+											"commands": {
+												"browse": browse
+											}
+										}
+									);
 								}
+								this.setState("sources.browse_result", JSON.stringify(browseResult));
 							}
 							break;
 
@@ -1059,6 +1112,44 @@ class Heos extends utils.Adapter {
 						case 'browse':
 							if ((jdata.hasOwnProperty('payload'))) {
 								let sid = parseInt(jmsg.sid, 10);
+								let source = this.mapBrowse(command, "", "");
+								let browseResult = {
+									"sid": sid,
+									"name": source.name,
+									"image_url": source.image_url,
+									"parameter": jmsg,
+									"payload": []
+								};
+								//Add top
+								let sources = this.mapBrowse("browse/get_music_sources", "", "");
+								browseResult["payload"].push(
+									{
+										"name": sources.name,
+										"image_url": sources.image_url,
+										"commands" : {
+											"browse": "browse/get_music_sources"
+										}
+									}
+								);
+								
+								//Add play all
+								if ((jdata.hasOwnProperty('options'))) {
+									let options = jdata.options[0].browse;
+									for(i = 0; i < options.length; i++){
+										if(options[i].id == 21){
+											browseResult["payload"].push(
+												{
+													"name": "Play all",
+													"image_url": "",
+													"commands": {
+														"play": "player/add_to_queue&sid=" + sid + "&cid=" + jmsg.cid + "&aid=4"
+													}
+												}
+											);
+										}
+									}
+								}
+
 								switch(sid){
 									case 1025:
 										var folderPath = 'sources.1025'
@@ -1072,7 +1163,17 @@ class Heos extends utils.Adapter {
 											native: {},
 										});*/
 										for (i = 0; i < jdata.payload.length; i++) {
-											await this.createPlaylist(folderPath, jdata.payload[i]);
+											let payload = jdata.payload[i];
+											this.createPlaylist(folderPath, payload);
+											browseResult["payload"].push(
+												{
+													"name": unescape(payload.name),
+													"image_url": payload.image_url,
+													"commands": {
+														"play": "player/add_to_queue&sid=1025&aid=4&cid=" + payload.cid
+													}
+												}
+											);
 										}
 										break;
 									case 1028:
@@ -1087,60 +1188,35 @@ class Heos extends utils.Adapter {
 											native: {},
 										});*/
 										for (i = 0; i < jdata.payload.length; i++) {
+											let payload = jdata.payload[i];
 											var itemId = (i + 1);
-											await this.createPreset(folderPath, itemId, jdata.payload[i]);
+											this.createPreset(folderPath, itemId, payload);
+											browseResult["payload"].push(
+												{
+													"name": unescape(payload.name),
+													"image_url": payload.image_url,
+													"commands": {
+														"play": "player/play_preset&preset=" + itemId
+													}
+												}
+											);
 										}
 										break;
 									default:
-										let source = this.sources.get(sid);
-										let sname = source ? source.name : sid;
-										let browseResult = {
-											"sid": sid,
-											"name": sname,
-											"parameter": jmsg,
-											"payload": []
-										};
-										//Add Top
-										browseResult["payload"].push(
-											{
-												"name": "Navigate to top",
-												"commands" : {
-													"browse": "browse/browse?sid=" + sid
-												}
-											}
-										);
-										
-										//Add Play all
-										if ((jdata.hasOwnProperty('options'))) {
-											let options = jdata.options[0].browse;
-											for(i = 0; i < options.length; i++){
-												if(options[i].id == 21){
-													browseResult["payload"].push(
-														{
-															"name": "Play all",
-															"commands": {
-																"play": "player/add_to_queue&sid=" + sid + "&cid=" + jmsg.cid + "&aid=4"
-															}
-														}
-													);
-												}
-											}
-										}
-										
-										//this.log.info("[BROWSE] [" + sname + "] " + JSON.stringify(jmsg));
+										//Add payload items
 										for (i = 0; i < jdata.payload.length; i++) {
-											//this.log.info("[BROWSE] [" + sname + "] [" + unescape(jdata.payload[i].name) + "] " 
+											let payload = jdata.payload[i];
+											var itemId = (i + 1);
 											browseResult["payload"].push(
 												{
-													"name": unescape(jdata.payload[i].name),
-													"commands": this.browse2Commands(jmsg, jdata.payload[i])
+													"name": unescape(payload.name),
+													"image_url": payload.image_url,
+													"commands": this.browse2Commands(jmsg, payload)
 												}
 											)
 										}
-										//cmd.length > 0 ? "Possible Commands: " + cmd.join('|') : "No commands found for payload"
-										this.setState("sources.browse_result", JSON.stringify(browseResult));
-										break;
 								}
+								this.setState("sources.browse_result", JSON.stringify(browseResult));
 							}
 							break;
 					}
@@ -1161,12 +1237,12 @@ class Heos extends utils.Adapter {
 						case 'get_volume':
 							if (jmsg.hasOwnProperty('gid')) {
 								if (jmsg.hasOwnProperty('level')) {
-									let leadHeosPlayer = this.players.get(jmsg.gid);
+									let leadHeosPlayer = this.players[jmsg.gid];
 									if (leadHeosPlayer) {
 										var memberPids = leadHeosPlayer.group_pid.split(',');
 										for (let i = 0; i < memberPids.length; i++) {
 											let pid = memberPids[i];
-											let heosPlayer = this.players.get(pid);
+											let heosPlayer = this.players[pid];
 											if (heosPlayer) {
 												heosPlayer.setGroupVolume(jmsg.level);
 											}
@@ -1180,12 +1256,12 @@ class Heos extends utils.Adapter {
 						case 'get_mute':
 							if (jmsg.hasOwnProperty('gid')) {
 								if (jmsg.hasOwnProperty('state')) {
-									let leadHeosPlayer = this.players.get(jmsg.gid);
+									let leadHeosPlayer = this.players[jmsg.gid];
 									if (leadHeosPlayer) {
 										var memberPids = leadHeosPlayer.group_pid.split(',');
 										for (let i = 0; i < memberPids.length; i++) {
 											let pid = memberPids[i];
-											let heosPlayer = this.players.get(pid);
+											let heosPlayer = this.players[pid];
 											if (heosPlayer) {
 												heosPlayer.setGroupMuted(jmsg.state == 'on' ? true : false);
 											}
@@ -1206,7 +1282,8 @@ class Heos extends utils.Adapter {
 						//                "players":[{"name":"player name ... 
 						case 'get_groups':
 							// bisherige groups leeren
-							for (let [pid, player] of this.players) {
+							for(var pid in this.players) {
+								let player = this.players[pid];
 								await player.setGroupName('');
 								await player.setGroupPid('');
 								await player.setGroupLeaderPid('');
@@ -1247,7 +1324,7 @@ class Heos extends utils.Adapter {
 
 			// an die zugehörigen Player weiterleiten
 			if (jmsg.hasOwnProperty('pid')) {
-				let heosPlayer = this.players.get(jmsg.pid);
+				let heosPlayer = this.players[jmsg.pid];
 				if (heosPlayer) {
 					heosPlayer.parseResponse(jdata, jmsg, cmd_group, cmd)
 				}
@@ -1311,6 +1388,10 @@ class Heos extends utils.Adapter {
 			}
 		}
 
+		if("browse" in cmd){
+			this.mapBrowse(cmd.browse, payload.name, payload.image_url);
+		}
+
 		//playable
 		if(playable && type){
 			if (type == 'station' && mid){      
@@ -1333,7 +1414,8 @@ class Heos extends utils.Adapter {
 
 	sendCommandToAllPlayers(cmd, leaderOnly){
 		if (this.state == States.Connected) {
-			for (let [pid, player] of this.players) {
+			for (var pid in this.players){
+				let player = this.players[pid];
 				if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerLeader()))){
 					player.sendCommand(cmd);
 				}
@@ -1346,12 +1428,12 @@ class Heos extends utils.Adapter {
 	 * @param {String} pid 
 	 */
 	async stopPlayer(pid){
-		let player = this.players.get(pid);
+		let player = this.players[pid];
 		if(player){
 			await player.disconnect();
 		}
 		// player leeren
-		this.players.delete(pid);
+		delete this.players[pid];
 	}
 
 	// Für die gefundenen HEOS Player entsprechende class HeosPlayer Instanzen bilden und nicht mehr verbundene Player stoppen
@@ -1361,15 +1443,15 @@ class Heos extends utils.Adapter {
 			for (var i = 0; i < payload.length; i++) {
 				var player = payload[i];
 				var pid = player.pid + ''; //Convert to String
-				if(!(this.players.has(pid))){
+				if(!(pid in this.players)){
 					let heosPlayer = new HeosPlayer(this, player);
-					this.players.set(pid, heosPlayer);
+					this.players[pid] = heosPlayer;
 					await heosPlayer.connect();
 				}
 				connectedPlayers.push(pid);
 			}
 			//Remove disconnected players
-			for (let [pid, player] of this.players) {
+			for(var pid in this.players){
 				if(!connectedPlayers.includes(pid)){
 					this.stopPlayer(pid);
 				}
@@ -1380,8 +1462,8 @@ class Heos extends utils.Adapter {
 
 	//Alle Player stoppen
 	stopPlayers() {
-		this.log.debug("try to stop players:" + Array.from(this.players.keys()).join(','));
-		for (let [pid, player] of this.players) {
+		this.log.debug("try to stop players:" + Object.keys(this.players).join(','));
+		for (var pid in this.players){
 			this.stopPlayer(pid);
 		}
 	}
@@ -1401,7 +1483,7 @@ class Heos extends utils.Adapter {
 
 			for (var i = 0; i < pids.length; i++) {
 				let pid = pids[i];
-				let player = this.players.get(pid);
+				let player = this.players[pid];
 				if (player) {
 					await player.setGroupName((group.hasOwnProperty('name') ? group.name : ''));
 					await player.setGroupPid(group.pid);
@@ -1429,7 +1511,8 @@ class Heos extends utils.Adapter {
 
 	ungroupAll() {
 		if (this.state == States.Connected) {
-			for (let [pid, player] of this.players) {
+			for(var pid in this.players){
+				let player = this.players[pid];
 				if(player.group_leader === true){
 					this.msgs.push('heos://group/set_group?pid=' + pid);
 					this.sendNextMsg();
@@ -1440,7 +1523,7 @@ class Heos extends utils.Adapter {
 
 	groupAll() {
 		if (this.state == States.Connected) {
-			let pids = Array.from(this.players.keys()).join(',');
+			let pids = Object.keys(this.players).join(',');
 			this.msgs.push('heos://group/set_group?pid=' + pids);
 			this.sendNextMsg();
 		}
