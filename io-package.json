@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.2.2",
+		"version": "1.2.3",
 		"news": {
+			"1.2.3": {
+				"en": "improve browse feature",
+				"de": "die Suchfunktion verbessern",
+				"ru": "улучшить функцию просмотра",
+				"pt": "melhorar o recurso de navegação",
+				"nl": "de browse-functie verbeteren",
+				"fr": "améliorer la fonctionnalité de navigation",
+				"it": "migliorare la funzionalità di navigazione",
+				"es": "mejorar la función de navegación",
+				"pl": "ulepszyć funkcję przeglądania",
+				"zh-cn": "改善浏览功能"
+			},
 			"1.2.2": {
 				"en": "rename browse command",
 				"de": "Befehl zum Durchsuchen umbenennen",

@@ -53,9 +53,40 @@ Note: Multiple commands are possible, if they are separated with the pipe e.g. s
 * "add_to_queue&sid=1025&aid=4&cid=[CID]": Play playlist with [CID] on player (aid: 1 – play now; 2 – play next; 3 – add to end; 4 – replace and play)
 
 ## Browse Sources
-To reduce the state amount in ioBroker, only playlists and the presets are automatically stored in the states. You can find and control them in the "sources" folder. If you want to browse the music of a source, just press the browse button. Except for playlists and presets you'll find the browse result in the sources.browse_result state. There are also commands provided to navigate deeper or play a resource. Just paste the commands in the global HEOS command field. If it is a browse command you'll find the result in the browse_result state.
+To reduce the state amount in ioBroker, only playlists and the presets are automatically stored in the states. However at first you have to click the browse button in the playlists or presets folder. You can find and control them in the "sources" folder. If you want to browse the music of a source, just press the browse button. You'll find the browse result in the sources.browse_result state. There are also commands provided to navigate deeper or play a resource. Just paste the commands in the global HEOS command field. If it is a browse command you'll find the result in the browse_result state.
+
+For VIS integration you can use the browse_result and the following script to generate a html table (It is not integrated in the adapter, so that you have the chance to style it):
+
+```
+on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
+    let data = JSON.parse(obj.state.val);
+    let html = ""
+    if(data){
+        html += "<div style=\"background-color:#3b3b3b;color:#fff\"><h1><img src=\"" + data.image_url + "\" height=\"30px\">" + data.name + "</h1>"
+        html += "<table>"
+        for (let i = 0; i < data.payload.length; i++) {
+            let payload = data.payload[i];
+            html += "<tr>";
+            html += "<td><img src=\"" + payload.image_url + "\" height=\"30px\"></td>";
+            html += "<td>" + payload.name + "</td>";
+            html += "<td>";
+            for (let key in payload.commands) {
+                let command = payload.commands[key];
+                html += "<button class=\"ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only\" onClick=\"servConn.setState('heos.0.command','" + command +"')\"><span class=\"ui-button-text\">" + key + "</span></button>";
+            }
+            html += "</td>";
+            html += "</tr>";
+        }
+        html += "</table></div>";
+    }
+    setState("0_userdata.0.scriptData.HeosBrowseTable", html);
+});
+```
 
 ## Changelog
+
+### 1.2.3 (2020-09-29)
+* (withstu) improve browse feature (add pictures and sources view)
 
 ### 1.2.2 (2020-09-28)
 * (withstu) rename browse command
