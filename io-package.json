@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.2.3",
+		"version": "1.2.4",
 		"news": {
+			"1.2.4": {
+				"en": "minor bugfix",
+				"de": "kleiner Bugfix",
+				"ru": "незначительное исправление",
+				"pt": "pequena correção de bug",
+				"nl": "kleine bugfix",
+				"fr": "correction de bogue mineur",
+				"it": "bugfix minore",
+				"es": "corrección de errores menores",
+				"pl": "drobne poprawki",
+				"zh-cn": "小错误修正"
+			},
 			"1.2.3": {
 				"en": "improve browse feature",
 				"de": "die Suchfunktion verbessern",

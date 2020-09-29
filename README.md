@@ -57,7 +57,7 @@ To reduce the state amount in ioBroker, only playlists and the presets are autom
 
 For VIS integration you can use the browse_result and the following script to generate a html table (It is not integrated in the adapter, so that you have the chance to style it):
 
-```
+```javascript
 on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
     let data = JSON.parse(obj.state.val);
     let html = ""
@@ -84,6 +84,9 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
 ```
 
 ## Changelog
+
+### 1.2.4 (2020-09-29)
+* (withstu) minor bugfix
 
 ### 1.2.3 (2020-09-29)
 * (withstu) improve browse feature (add pictures and sources view)

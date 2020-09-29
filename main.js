@@ -923,7 +923,7 @@ class Heos extends utils.Adapter {
 				return;
 
 			var command = jdata.heos.command;
-			if(jdata.heos.message.length > 0){
+			if(jdata.heos.message != null && jdata.heos.message.trim().length > 0){
 				command += "?" + jdata.heos.message;
 			}
 			// msg auswerten
@@ -1074,7 +1074,7 @@ class Heos extends utils.Adapter {
 								});
 								//Clear browse Map to reduce memory;
 								this.browseMap = {};
-								
+
 								let sources = this.mapBrowse(command, "Sources", "");
 								let browseResult = {
 									"sid": "",
