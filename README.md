@@ -62,7 +62,11 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
   let data = JSON.parse(obj.state.val);
   let html = ""
   if(data){
-      html += "<div style=\"background-color:#3b3b3b;color:#fff\"><h1><img src=\"" + data.image_url + "\" height=\"30px\">" + (data.name == "sources" ? "Overview" : data.name) + "</h1>"
+      html += "<div style=\"background-color:#3b3b3b;color:#fff\"><h1>"
+      if(data.image_url.length > 0){
+        html += "<img src=\"" + data.image_url + "\" height=\"30px\">";
+      }
+      html += (data.name == "sources" ? "Overview" : data.name) + "</h1>"
       html += "<table>"
       for (let i = 0; i < data.payload.length; i++) {
           let payload = data.payload[i];
@@ -71,7 +75,11 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
             html += " style=\"color:#ffa500\"";
           }
           html += ">";
-          html += "<td><img src=\"" + payload.image_url + "\" height=\"30px\"></td>";
+          html += "<td>";
+          if(payload.image_url.length > 0){
+            html += "<img src=\"" + payload.image_url + "\" height=\"30px\">";
+          }
+          html += "</td>";
           html += "<td>"
           if(payload.type == "control"){
             switch(payload.name){
