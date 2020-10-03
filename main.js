@@ -146,6 +146,7 @@ class Heos extends utils.Adapter {
 		this.subscribeStates('players.*.volume');
 		this.subscribeStates('players.*.volume_up');
 		this.subscribeStates('players.*.volume_down');
+		this.subscribeStates('players.*.clear_queue');
 		this.subscribeStates('players.*.group_volume');
 		this.subscribeStates('players.*.group_muted');
 		this.subscribeStates('players.*.command');
@@ -242,6 +243,8 @@ class Heos extends utils.Adapter {
 						player.sendCommand('volume_up&step=' + this.config.volumeStepLevel);
 					} else if(id.state === 'volume_down'){
 						player.sendCommand('volume_down&step=' + this.config.volumeStepLevel);
+					} else if(id.state === 'clear_queue'){
+						player.sendCommand('clear_queue');
 					} else if(id.state === 'auto_play'){
 						player.auto_play = state.val;
 					} else if(id.state === 'ignore_broadcast_cmd'){
@@ -475,7 +478,7 @@ class Heos extends utils.Adapter {
 
 	mapBrowse(command, name, image_url){
 		let entry;
-		command = command.replace(/&returned.*/, "")
+		command = command.replace(/&range.*/, "").replace(/&count.*/, "").replace(/&returned.*/, "");
 		if(command in this.browseMap){
 			entry = this.browseMap[command];
 		} else {
@@ -977,6 +980,7 @@ class Heos extends utils.Adapter {
 							if('signed_in' in jmsg){
 								await this.setStateAsync('signed_in', true, true);
 								await this.setStateAsync('signed_in_user', jmsg.un, true);
+								this.getMusicSources();
 							} else {
 								await this.setStateAsync('signed_in', false, true);
 								await this.setStateAsync('signed_in_user', "", true);
@@ -1068,7 +1072,7 @@ class Heos extends utils.Adapter {
 										role: 'text',
 										read: true,
 										write: false,
-										def: ''
+										def: '{}'
 									},
 									native: {},
 								});
@@ -1077,26 +1081,30 @@ class Heos extends utils.Adapter {
 
 								let sources = this.mapBrowse(command, "Sources", "");
 								let browseResult = {
-									"sid": "",
 									"name": sources.name,
 									"image_url": sources.image_url,
 									"parameter": jmsg,
 									"payload": []
 								};
+								jdata.payload.sort(function(a, b) {
+									return a.name.localeCompare(b.name);
+								});
 								for (i = 0; i < jdata.payload.length; i++) {
 									let payload = jdata.payload[i];
 									let browse = "browse/browse?sid=" + payload.sid;
 									let source = this.mapBrowse(browse, payload.name, payload.image_url);
 									this.createSource(folderPath, payload);
-									browseResult["payload"].push(
-										{
-											"name": source.name,
-											"image_url": source.image_url,
-											"commands": {
-												"browse": browse
+									if(payload.available == 'true'){
+										browseResult["payload"].push(
+											{
+												"name": source.name,
+												"image_url": source.image_url,
+												"commands": {
+													"browse": browse
+												}
 											}
-										}
-									);
+										);
+									}
 								}
 								this.setState("sources.browse_result", JSON.stringify(browseResult));
 							}
@@ -1113,13 +1121,21 @@ class Heos extends utils.Adapter {
 							if ((jdata.hasOwnProperty('payload'))) {
 								let sid = parseInt(jmsg.sid, 10);
 								let source = this.mapBrowse(command, "", "");
+								if(jmsg.hasOwnProperty("count")){
+									jmsg.count = parseInt(jmsg.count);
+								}
+								if(jmsg.hasOwnProperty("returned")){
+									jmsg.returned = parseInt(jmsg.returned);
+								}
 								let browseResult = {
-									"sid": sid,
 									"name": source.name,
 									"image_url": source.image_url,
 									"parameter": jmsg,
 									"payload": []
 								};
+								jdata.payload.sort(function(a, b) {
+									return a.name.localeCompare(b.name);
+								});
 								//Add top
 								let sources = this.mapBrowse("browse/get_music_sources", "", "");
 								browseResult["payload"].push(
@@ -1133,7 +1149,7 @@ class Heos extends utils.Adapter {
 								);
 								
 								//Add play all
-								if ((jdata.hasOwnProperty('options'))) {
+								if (jdata.hasOwnProperty('options')) {
 									let options = jdata.options[0].browse;
 									for(i = 0; i < options.length; i++){
 										if(options[i].id == 21){
@@ -1143,6 +1159,42 @@ class Heos extends utils.Adapter {
 													"image_url": "",
 													"commands": {
 														"play": "player/add_to_queue&sid=" + sid + "&cid=" + jmsg.cid + "&aid=4"
+													}
+												}
+											);
+										}
+									}
+								}
+
+								//Load previous
+								if (jmsg.returned < jmsg.count) {
+									var start = 1;
+									var end = 50;
+									var pageCmd = "";
+									if(jmsg.hasOwnProperty('range')){
+										let range = jmsg.range.split(',');
+										start = parseInt(range[0]) + 1;
+										end = parseInt(range[1]) + 1;
+									}
+									if(start > 1){
+										end = start - 1;
+										start = end - 50;
+										if(start < 1) {
+											start = 0;
+										}
+										for(let key in jmsg){
+											if(!["range", "returned", "count"].includes(key)){
+												pageCmd += (pageCmd.length > 0 ? "&" : "") + key + "=" + jmsg[key];
+											}
+										}
+										if(pageCmd.length > 0){
+											pageCmd = "browse/browse?" + pageCmd + "&range=" + (start - 1) + "," + (end - 1);
+											browseResult["payload"].push(
+												{
+													"name": "Load previous",
+													"image_url": "",
+													"commands": {
+														"browse": pageCmd
 													}
 												}
 											);
@@ -1215,6 +1267,42 @@ class Heos extends utils.Adapter {
 												}
 											)
 										}
+								}
+
+								//Load next
+								if (jmsg.returned < jmsg.count) {
+									var start = 1;
+									var end = 50;
+									var pageCmd = "";
+									if(jmsg.hasOwnProperty('range')){
+										let range = jmsg.range.split(',');
+										start = parseInt(range[0]) + 1;
+										end = parseInt(range[1]) + 1;
+									}
+									if(end < jmsg.count){
+										start = end + 1;
+										end = start + 50;
+										if(end > jmsg.count) {
+											end = jmsg.count;
+										}
+										for(let key in jmsg){
+											if(!["range", "returned", "count"].includes(key)){
+												pageCmd += (pageCmd.length > 0 ? "&" : "") + key + "=" + jmsg[key];
+											}
+										}
+										if(pageCmd.length > 0){
+											pageCmd = "browse/browse?" + pageCmd + "&range=" + (start - 1) + "," + (end - 1);
+											browseResult["payload"].push(
+												{
+													"name": "Load next",
+													"image_url": "",
+													"commands": {
+														"browse": pageCmd
+													}
+												}
+											);
+										}
+									}
 								}
 								this.setState("sources.browse_result", JSON.stringify(browseResult));
 							}
@@ -1381,6 +1469,9 @@ class Heos extends utils.Adapter {
 				cmd_tmp.push("cid=" + pcid);
 			} else if(mcid){
 				cmd_tmp.push("cid=" + mcid);
+			}
+			if(pcid || mcid){
+				cmd_tmp.push("range=0,49");
 			}
 			
 			if(cmd_tmp.length > 0){
