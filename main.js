@@ -476,7 +476,7 @@ class Heos extends utils.Adapter {
 		return result;
 	}
 
-	mapBrowse(command, name, image_url){
+	mapBrowse(command, name, image_url, parent){
 		let entry;
 		command = command.replace(/&range.*/, "").replace(/&count.*/, "").replace(/&returned.*/, "");
 		if(command in this.browseMap){
@@ -484,7 +484,8 @@ class Heos extends utils.Adapter {
 		} else {
 			entry = {
 				"name": name,
-				"image_url": image_url
+				"image_url": image_url,
+				"parent": parent
 			};
 			if(name.length > 0){
 				this.browseMap[command] = entry;
@@ -1079,7 +1080,7 @@ class Heos extends utils.Adapter {
 								//Clear browse Map to reduce memory;
 								this.browseMap = {};
 
-								let sources = this.mapBrowse(command, "Sources", "");
+								let sources = this.mapBrowse(command, "sources", "", "");
 								let browseResult = {
 									"name": sources.name,
 									"image_url": sources.image_url,
@@ -1092,13 +1093,14 @@ class Heos extends utils.Adapter {
 								for (i = 0; i < jdata.payload.length; i++) {
 									let payload = jdata.payload[i];
 									let browse = "browse/browse?sid=" + payload.sid;
-									let source = this.mapBrowse(browse, payload.name, payload.image_url);
+									let source = this.mapBrowse(browse, payload.name, payload.image_url, "browse/get_music_sources");
 									this.createSource(folderPath, payload);
 									if(payload.available == 'true'){
 										browseResult["payload"].push(
 											{
 												"name": source.name,
 												"image_url": source.image_url,
+												"type": "media",
 												"commands": {
 													"browse": browse
 												}
@@ -1120,7 +1122,7 @@ class Heos extends utils.Adapter {
 						case 'browse':
 							if ((jdata.hasOwnProperty('payload'))) {
 								let sid = parseInt(jmsg.sid, 10);
-								let source = this.mapBrowse(command, "", "");
+								let source = this.mapBrowse(command, "", "", "");
 								if(jmsg.hasOwnProperty("count")){
 									jmsg.count = parseInt(jmsg.count);
 								}
@@ -1137,16 +1139,31 @@ class Heos extends utils.Adapter {
 									return a.name.localeCompare(b.name);
 								});
 								//Add top
-								let sources = this.mapBrowse("browse/get_music_sources", "", "");
+								let sources = this.mapBrowse("browse/get_music_sources", "", "", "");
 								browseResult["payload"].push(
 									{
 										"name": sources.name,
 										"image_url": sources.image_url,
+										"type": "control",
 										"commands" : {
 											"browse": "browse/get_music_sources"
 										}
 									}
 								);
+
+								//Back button
+								if(source.parent.length > 0){
+									browseResult["payload"].push(
+										{
+											"name": "back",
+											"image_url": "",
+											"type": "control",
+											"commands" : {
+												"browse": source.parent
+											}
+										}
+									);
+								}
 								
 								//Add play all
 								if (jdata.hasOwnProperty('options')) {
@@ -1155,8 +1172,9 @@ class Heos extends utils.Adapter {
 										if(options[i].id == 21){
 											browseResult["payload"].push(
 												{
-													"name": "Play all",
+													"name": "play_all",
 													"image_url": "",
+													"type": "control",
 													"commands": {
 														"play": "player/add_to_queue&sid=" + sid + "&cid=" + jmsg.cid + "&aid=4"
 													}
@@ -1191,8 +1209,9 @@ class Heos extends utils.Adapter {
 											pageCmd = "browse/browse?" + pageCmd + "&range=" + (start - 1) + "," + (end - 1);
 											browseResult["payload"].push(
 												{
-													"name": "Load previous",
+													"name": "load_prev",
 													"image_url": "",
+													"type": "control",
 													"commands": {
 														"browse": pageCmd
 													}
@@ -1216,11 +1235,15 @@ class Heos extends utils.Adapter {
 										});*/
 										for (i = 0; i < jdata.payload.length; i++) {
 											let payload = jdata.payload[i];
+											if (payload.name.length == 0){
+												payload.name = "Unknown"
+											}
 											this.createPlaylist(folderPath, payload);
 											browseResult["payload"].push(
 												{
 													"name": unescape(payload.name),
 													"image_url": payload.image_url,
+													"type": "media",
 													"commands": {
 														"play": "player/add_to_queue&sid=1025&aid=4&cid=" + payload.cid
 													}
@@ -1241,12 +1264,16 @@ class Heos extends utils.Adapter {
 										});*/
 										for (i = 0; i < jdata.payload.length; i++) {
 											let payload = jdata.payload[i];
+											if (payload.name.length == 0){
+												payload.name = "Unknown"
+											}
 											var itemId = (i + 1);
 											this.createPreset(folderPath, itemId, payload);
 											browseResult["payload"].push(
 												{
 													"name": unescape(payload.name),
 													"image_url": payload.image_url,
+													"type": "media",
 													"commands": {
 														"play": "player/play_preset&preset=" + itemId
 													}
@@ -1258,11 +1285,14 @@ class Heos extends utils.Adapter {
 										//Add payload items
 										for (i = 0; i < jdata.payload.length; i++) {
 											let payload = jdata.payload[i];
-											var itemId = (i + 1);
+											if (payload.name.length == 0){
+												payload.name = "Unknown"
+											}
 											browseResult["payload"].push(
 												{
 													"name": unescape(payload.name),
 													"image_url": payload.image_url,
+													"type": "media",
 													"commands": this.browse2Commands(jmsg, payload)
 												}
 											)
@@ -1294,8 +1324,9 @@ class Heos extends utils.Adapter {
 											pageCmd = "browse/browse?" + pageCmd + "&range=" + (start - 1) + "," + (end - 1);
 											browseResult["payload"].push(
 												{
-													"name": "Load next",
+													"name": "load_next",
 													"image_url": "",
+													"type": "control",
 													"commands": {
 														"browse": pageCmd
 													}
@@ -1421,6 +1452,8 @@ class Heos extends utils.Adapter {
 		} catch (err) { this.log.error('parseResponse: ' + err.message + '\n ' + response); }
 	}
 
+
+
 	browse2Commands(message, payload){
 		let cmd = {};
 		let msid;
@@ -1461,26 +1494,40 @@ class Heos extends utils.Adapter {
 		if(psid){
 			cmd.browse = "browse/browse?sid=" + psid;
 		} else if (container){
-			let cmd_tmp = [];
+			let cmdTmp = [];
 			if(msid){
-				cmd_tmp.push("sid=" + msid);
+				cmdTmp.push("sid=" + msid);
 			}
 			if(pcid){
-				cmd_tmp.push("cid=" + pcid);
+				cmdTmp.push("cid=" + pcid);
 			} else if(mcid){
-				cmd_tmp.push("cid=" + mcid);
+				cmdTmp.push("cid=" + mcid);
 			}
 			if(pcid || mcid){
-				cmd_tmp.push("range=0,49");
+				cmdTmp.push("range=0,49");
 			}
 			
-			if(cmd_tmp.length > 0){
-				cmd.browse = "browse/browse?" + cmd_tmp.join("&");
+			if(cmdTmp.length > 0){
+				cmd.browse = "browse/browse?" + cmdTmp.join("&");
 			}
+
+		}
+
+		//Parent
+		let parentCmd = "";
+		let parentCmdTmp = [];
+		if(msid){
+			parentCmdTmp.push("sid=" + msid);
+		}
+		if(mcid){
+			parentCmdTmp.push("cid=" + mcid);
+		}
+		if(parentCmdTmp.length > 0){
+			parentCmd = "browse/browse?" + parentCmdTmp.join("&");
 		}
 
 		if("browse" in cmd){
-			this.mapBrowse(cmd.browse, payload.name, payload.image_url);
+			this.mapBrowse(cmd.browse, payload.name, payload.image_url, parentCmd);
 		}
 
 		//playable
