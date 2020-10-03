@@ -85,6 +85,9 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
 
 ## Changelog
 
+### 1.3.0 (2020-10-03)
+* (withstu) add queue and some browse improvements
+
 ### 1.2.4 (2020-09-29)
 * (withstu) minor bugfix
 

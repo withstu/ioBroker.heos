@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.2.4",
+		"version": "1.3.0",
 		"news": {
+			"1.3.0": {
+				"en": "add queue and some browse improvements",
+				"de": "Warteschlange hinzufügen und einige Verbesserungen beim Durchsuchen",
+				"ru": "добавить очередь и некоторые улучшения просмотра",
+				"pt": "adicionar fila e algumas melhorias de navegação",
+				"nl": "wachtrij toevoegen en enkele browse-verbeteringen",
+				"fr": "ajouter une file d'attente et quelques améliorations de navigation",
+				"it": "aggiungere coda e alcuni miglioramenti alla navigazione",
+				"es": "agregar cola y algunas mejoras de navegación",
+				"pl": "dodać kolejkę i kilka ulepszeń przeglądania",
+				"zh-cn": "添加队列和一些浏览器改进"
+			},
 			"1.2.4": {
 				"en": "minor bugfix",
 				"de": "kleiner Bugfix",
