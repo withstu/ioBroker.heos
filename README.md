@@ -59,31 +59,69 @@ For VIS integration you can use the browse_result and the following script to ge
 
 ```javascript
 on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
-    let data = JSON.parse(obj.state.val);
-    let html = ""
-    if(data){
-        html += "<div style=\"background-color:#3b3b3b;color:#fff\"><h1><img src=\"" + data.image_url + "\" height=\"30px\">" + data.name + "</h1>"
-        html += "<table>"
-        for (let i = 0; i < data.payload.length; i++) {
-            let payload = data.payload[i];
-            html += "<tr>";
-            html += "<td><img src=\"" + payload.image_url + "\" height=\"30px\"></td>";
-            html += "<td>" + payload.name + "</td>";
-            html += "<td>";
-            for (let key in payload.commands) {
-                let command = payload.commands[key];
-                html += "<button class=\"ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only\" onClick=\"servConn.setState('heos.0.command','" + command +"')\"><span class=\"ui-button-text\">" + key + "</span></button>";
+  let data = JSON.parse(obj.state.val);
+  let html = ""
+  if(data){
+      html += "<div style=\"background-color:#3b3b3b;color:#fff\"><h1><img src=\"" + data.image_url + "\" height=\"30px\">" + (data.name == "sources" ? "Overview" : data.name) + "</h1>"
+      html += "<table>"
+      for (let i = 0; i < data.payload.length; i++) {
+          let payload = data.payload[i];
+          html += "<tr";
+          if(payload.type == "control"){
+            html += " style=\"color:#ffa500\"";
+          }
+          html += ">";
+          html += "<td><img src=\"" + payload.image_url + "\" height=\"30px\"></td>";
+          html += "<td>"
+          if(payload.type == "control"){
+            switch(payload.name){
+              case "load_next":
+                html += "Next page";
+                break;
+              case "load_prev":
+                html += "Previous page";
+                break;
+              case "play_all":
+                html += "Play all";
+                break;
+              case "back":
+                html += "Back";
+                break;
+              case "sources":
+                html += "Overview";
+                break;
             }
-            html += "</td>";
-            html += "</tr>";
-        }
-        html += "</table></div>";
-    }
-    setState("0_userdata.0.scriptData.HeosBrowseTable", html);
+          } else {
+            html += payload.name;
+          }
+          html +="</td>";
+          html += "<td>";
+          for (let key in payload.commands) {
+              let command = payload.commands[key];
+              html += "<button class=\"ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only\" onClick=\"servConn.setState('heos.0.command','" + command +"')\"><span class=\"ui-button-text\">" 
+              switch(key){
+                case "play":
+                  html += "Play";
+                  break;
+                case "browse":
+                  html += "Browse";
+                  break;
+              }
+              html += "</span></button>";
+          }
+          html += "</td>";
+          html += "</tr>";
+      }
+      html += "</table></div>";
+  }
+  setState("0_userdata.0.scriptData.HeosBrowseTable", html);
 });
 ```
 
 ## Changelog
+
+### 1.3.1 (2020-10-03)
+* (withstu) add back button to browse feature
 
 ### 1.3.0 (2020-10-03)
 * (withstu) add queue and some browse improvements
