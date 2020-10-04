@@ -63,7 +63,7 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
   let html = ""
   if(data){
       html += "<div style=\"background-color:#3b3b3b;color:#fff\"><h1>"
-      if(data.image_url.length > 0){
+      if(data.image_url.length){
         html += "<img src=\"" + data.image_url + "\" height=\"30px\">";
       }
       html += (data.name == "sources" ? "Overview" : data.name) + "</h1>"
@@ -76,7 +76,7 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
           }
           html += ">";
           html += "<td>";
-          if(payload.image_url.length > 0){
+          if(payload.image_url.length){
             html += "<img src=\"" + payload.image_url + "\" height=\"30px\">";
           }
           html += "</td>";
@@ -128,7 +128,10 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
 
 ## Changelog
 
-### 1.3.2 (2020-10-03)
+### 1.3.3 (2020-10-04)
+* (withstu) fix previous page button in browse feature
+
+### 1.3.2 (2020-10-04)
 * (withstu) fix preset sorting
 
 ### 1.3.1 (2020-10-03)
