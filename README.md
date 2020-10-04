@@ -60,27 +60,108 @@ For VIS integration you can use the browse_result and the following script to ge
 ```javascript
 on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
   let data = JSON.parse(obj.state.val);
-  let html = ""
+  let html = `<style>
+  .heos-browse {
+      background-color: #333333;
+      color: #eaeaea;
+  }
+  .heos-browse table {
+      width: 100%;
+      border-collapse: collapse;
+  }
+  .heos-browse table, th, td {
+      border: 1px solid #929292;
+      border-width:1px 0;
+  }
+  .heos-browse th {
+      font-size: 2em;
+      border: 1px solid #c50000;
+      border-width: 0 0 1px 0;
+      text-align: center;
+  }
+  .heos-browse th,td {
+      padding: 15px;
+  }
+  .heos-browse-btn {
+      color: #fff;
+      background-color: Transparent;
+      background-repeat:no-repeat;
+      border: none;
+      cursor:pointer;
+      overflow: hidden;
+      outline:none;
+      margin: 0;
+      padding: 0;
+      font-size: 30px !important;
+      line-height: 30px;
+      width: 60px;
+      height: 60px;
+  }
+  .heos-browse-btn-multi {
+      border-right: 1px solid #929292;
+  }
+  .heos-browse-row-media {
+
+  }
+  .heos-browse-row-control {
+      color: #d60000;
+  }
+  .heos-browse-image {
+      white-space: nowrap;
+      padding: 0;
+      text-align: right;
+      font-size: 0;
+  }
+  .heos-browse-image img {
+      height: 60px;
+  }
+  .heos-browse-name {
+      width: 100%;
+      text-align: left;
+  }
+  .heos-browse-control {
+      padding: 0;
+      margin: 0;
+      white-space: nowrap;
+      font-size: 0;
+      text-align: right;
+  }
+  </style>`;
   if(data){
-      html += "<div style=\"background-color:#3b3b3b;color:#fff\"><h1>"
-      if(data.image_url.length){
-        html += "<img src=\"" + data.image_url + "\" height=\"30px\">";
-      }
-      html += (data.name == "sources" ? "Overview" : data.name) + "</h1>"
+      html += "<div class=\"heos-browse\">"
       html += "<table>"
+      html += "<tr><th>";
+      if(data.image_url.length){
+          html += "<img src=\"" + data.image_url + "\" height=\"30px\">";
+      }
+      html += "</th><th>" + (data.name == "sources" ? "Overview" : data.name) + "</th><th></th></tr>";
       for (let i = 0; i < data.payload.length; i++) {
           let payload = data.payload[i];
-          html += "<tr";
+          html += "<tr class=\"";
           if(payload.type == "control"){
-            html += " style=\"color:#ffa500\"";
+            html += "heos-browse-row-control";
+          } else {
+              html += "heos-browse-row-media"
           }
-          html += ">";
-          html += "<td>";
+          html += "\">";
+          html += "<td class=\"heos-browse-image\"";
+          if("browse" in payload.commands){
+              html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands["browse"] +"')\"";
+          } else if(Object.keys(payload.commands).length == 1){
+              html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands[Object.keys(payload.commands)[0]] +"')\"";
+          }
+          html += ">"
           if(payload.image_url.length){
-            html += "<img src=\"" + payload.image_url + "\" height=\"30px\">";
+            html += "<img src=\"" + payload.image_url + "\">";
           }
           html += "</td>";
-          html += "<td>"
+          html += "<td class=\"heos-browse-name\"";
+          if("browse" in payload.commands){
+              html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands["browse"] +"')\"";
+          } else if(Object.keys(payload.commands).length == 1){
+              html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands[Object.keys(payload.commands)[0]] +"')\"";
+          }
+          html += ">"
           if(payload.type == "control"){
             switch(payload.name){
               case "load_next":
@@ -103,19 +184,23 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
             html += payload.name;
           }
           html +="</td>";
-          html += "<td>";
+          html += "<td class=\"heos-browse-control\">";
           for (let key in payload.commands) {
-              let command = payload.commands[key];
-              html += "<button class=\"ui-button ui-widget ui-state-default ui-corner-all ui-button-text-only\" onClick=\"servConn.setState('heos.0.command','" + command +"')\"><span class=\"ui-button-text\">" 
-              switch(key){
+            let command = payload.commands[key];
+            html += "<button class=\"heos-browse-btn"
+            if(Object.keys(payload.commands).length > 1){
+                html += " heos-browse-btn-multi"
+            }
+            html += "\" onClick=\"servConn.setState('heos.0.command','" + command +"')\">" 
+            switch(key){
                 case "play":
-                  html += "Play";
-                  break;
+                html += "►";
+                break;
                 case "browse":
-                  html += "Browse";
-                  break;
-              }
-              html += "</span></button>";
+                html += ">";
+                break;
+            }
+            html += "</button>";
           }
           html += "</td>";
           html += "</tr>";
