@@ -1138,7 +1138,7 @@ class Heos extends utils.Adapter {
 								//Save index before sorting
 								for (i = 0; i < jdata.payload.length; i++) {
 									let payload = jdata.payload[i];
-									payload.index = (i + 1);
+									payload.index = i;
 								}
 								//Sort by name
 								jdata.payload.sort(function(a, b) {
@@ -1274,14 +1274,15 @@ class Heos extends utils.Adapter {
 											if (payload.name.length == 0){
 												payload.name = "Unknown"
 											}
-											this.createPreset(folderPath, payload.index, payload);
+											let presetId = payload.index + 1
+											this.createPreset(folderPath, presetId, payload);
 											browseResult["payload"].push(
 												{
 													"name": unescape(payload.name),
 													"image_url": payload.image_url,
 													"type": "media",
 													"commands": {
-														"play": "player/play_preset&preset=" + payload.index
+														"play": "player/play_preset&preset=" + presetId
 													}
 												}
 											);
