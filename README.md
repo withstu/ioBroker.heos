@@ -25,15 +25,16 @@ HEOS CLI specification: http://rn.dmglobal.com/euheos/HEOS_CLI_ProtocolSpecifica
 
 ### HEOS Command State
 
-* "connect": Try to Connect to HEOS
-* "disconnect": Disconnect from HEOS
-* "reconnect": Disconnect and Connect
-* "load_sources": Reload sources
+* "system/connect": Try to Connect to HEOS
+* "system/disconnect": Disconnect from HEOS
+* "system/reconnect": Disconnect and Connect
+* "system/load_sources": Reload sources
 * "group/set_group?pid=<pid1>,<pid2>,...": Set group with the list of player ids e.g. "group/set_group?pid=12345678,12345679".
 * "group/set_group?pid=<pid1>" : Delete existing group e.g. "group/set_group?pid=12345678"
 * "group/ungroup_all" : Delete all groups
 * "group/group_all" : Group all player in one group
 * "player/[cmd]": Send the command to all players. e.g. player/set_mute&state=on 
+* "leader/[cmd]": Send the command to all leading players. e.g. player/set_mute&state=on
 * "...": All other commands are tried to send to HEOS
 
 ### Player Command State
@@ -212,6 +213,9 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
 ```
 
 ## Changelog
+
+### 1.3.4 (2020-10-04)
+* (withstu) remove sorting and available filter and fix browse play
 
 ### 1.3.3 (2020-10-04)
 * (withstu) fix previous page button in browse feature
