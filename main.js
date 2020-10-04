@@ -366,6 +366,9 @@ class Heos extends utils.Adapter {
 			case 'player':
 				this.sendCommandToAllPlayers(cmd, false);
 				break;
+			case 'leader':
+				this.sendCommandToAllPlayers(cmd, true);
+				break;
 			default:
 				commandFallback = true;
 				break;
@@ -574,21 +577,19 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		if(source.available == "true"){
-			await this.setObjectNotExistsAsync(statePath + 'browse', {
-				type: 'state',
-				common: {
-					name: 'Browse Source',
-					desc: 'Browse Source. Output is written to log',
-					type: 'boolean',
-					role: 'button',
-					read: true,
-					write: true,
-					def: false
-				},
-				native: {},
-			});
-		}
+		await this.setObjectNotExistsAsync(statePath + 'browse', {
+			type: 'state',
+			common: {
+				name: 'Browse Source',
+				desc: 'Browse Source. Output is written to browse_result.',
+				type: 'boolean',
+				role: 'button',
+				read: true,
+				write: true,
+				def: false
+			},
+			native: {},
+		});
 
 		await this.setStateAsync(statePath + 'sid', source.sid, true);
 		await this.setStateAsync(statePath + 'name', source.name, true);
@@ -1087,26 +1088,25 @@ class Heos extends utils.Adapter {
 									"parameter": jmsg,
 									"payload": []
 								};
-								jdata.payload.sort(function(a, b) {
-									return a.name.localeCompare(b.name);
-								});
+								//jdata.payload.sort(function(a, b) {
+								//	return a.name.localeCompare(b.name);
+								//});
 								for (i = 0; i < jdata.payload.length; i++) {
 									let payload = jdata.payload[i];
 									let browse = "browse/browse?sid=" + payload.sid;
 									let source = this.mapBrowse(browse, payload.name, payload.image_url, "browse/get_music_sources");
 									this.createSource(folderPath, payload);
-									if(payload.available == 'true'){
-										browseResult["payload"].push(
-											{
-												"name": source.name,
-												"image_url": source.image_url,
-												"type": "media",
-												"commands": {
-													"browse": browse
-												}
+									browseResult["payload"].push(
+										{
+											"name": source.name,
+											"image_url": source.image_url,
+											"type": "media",
+											"available": (payload.available == 'true' ? true : false),
+											"commands": {
+												"browse": browse
 											}
-										);
-									}
+										}
+									);
 								}
 								this.setState("sources.browse_result", JSON.stringify(browseResult));
 							}
@@ -1141,9 +1141,9 @@ class Heos extends utils.Adapter {
 									payload.index = i;
 								}
 								//Sort by name
-								jdata.payload.sort(function(a, b) {
-									return a.name.localeCompare(b.name);
-								});
+								//jdata.payload.sort(function(a, b) {
+								//	return a.name.localeCompare(b.name);
+								//});
 
 								//Add top
 								let sources = this.mapBrowse("browse/get_music_sources", "", "", "");
@@ -1152,6 +1152,7 @@ class Heos extends utils.Adapter {
 										"name": sources.name,
 										"image_url": sources.image_url,
 										"type": "control",
+										"available": true,
 										"commands" : {
 											"browse": "browse/get_music_sources"
 										}
@@ -1165,6 +1166,7 @@ class Heos extends utils.Adapter {
 											"name": "back",
 											"image_url": "",
 											"type": "control",
+											"available": true,
 											"commands" : {
 												"browse": source.parent
 											}
@@ -1182,8 +1184,9 @@ class Heos extends utils.Adapter {
 													"name": "play_all",
 													"image_url": "",
 													"type": "control",
+													"available": true,
 													"commands": {
-														"play": "player/add_to_queue&sid=" + sid + "&cid=" + jmsg.cid + "&aid=4"
+														"play": "leader/add_to_queue&sid=" + sid + "&cid=" + jmsg.cid + "&aid=4"
 													}
 												}
 											);
@@ -1219,6 +1222,7 @@ class Heos extends utils.Adapter {
 													"name": "load_prev",
 													"image_url": "",
 													"type": "control",
+													"available": true,
 													"commands": {
 														"browse": pageCmd
 													}
@@ -1251,8 +1255,9 @@ class Heos extends utils.Adapter {
 													"name": unescape(payload.name),
 													"image_url": payload.image_url,
 													"type": "media",
+													"available": true,
 													"commands": {
-														"play": "player/add_to_queue&sid=1025&aid=4&cid=" + payload.cid
+														"play": "leader/add_to_queue&sid=1025&aid=4&cid=" + payload.cid
 													}
 												}
 											);
@@ -1281,8 +1286,9 @@ class Heos extends utils.Adapter {
 													"name": unescape(payload.name),
 													"image_url": payload.image_url,
 													"type": "media",
+													"available": true,
 													"commands": {
-														"play": "player/play_preset&preset=" + presetId
+														"play": "leader/play_preset&preset=" + presetId
 													}
 												}
 											);
@@ -1300,6 +1306,7 @@ class Heos extends utils.Adapter {
 													"name": unescape(payload.name),
 													"image_url": payload.image_url,
 													"type": "media",
+													"available": true,
 													"commands": this.browse2Commands(jmsg, payload)
 												}
 											)
@@ -1334,6 +1341,7 @@ class Heos extends utils.Adapter {
 													"name": "load_next",
 													"image_url": "",
 													"type": "control",
+													"available": true,
 													"commands": {
 														"browse": pageCmd
 													}
@@ -1396,7 +1404,6 @@ class Heos extends utils.Adapter {
 								}
 							}
 							break;
-
 
 						// { "heos": { "command": "player/get_groups", "result": "success", "message": "" },
 						//   "payload": [{"name":"'group name 1'", "gid": "group id 1'",
@@ -1539,16 +1546,16 @@ class Heos extends utils.Adapter {
 		if(playable && type){
 			if (type == 'station' && mid){      
 				if(mid.includes("inputs/")){
-					cmd.play = "player/play_input&input=" + mid;
+					cmd.play = "leader/play_input&input=" + mid;
 				} else if(mcid){
-					cmd.play = "player/play_stream&sid=" + msid + "&cid=" + mcid + "&mid=" + mid;
+					cmd.play = "leader/play_stream&sid=" + msid + "&cid=" + mcid + "&mid=" + mid;
 				} else {
-					cmd.play = "player/play_stream&sid=" + msid + "&mid=" + mid;
+					cmd.play = "leader/play_stream&sid=" + msid + "&mid=" + mid;
 				}
 			} else if(container && pcid){
-				cmd.play = "player/add_to_queue&sid=" + msid + "&cid=" + pcid + "&aid=4";
+				cmd.play = "leader/add_to_queue&sid=" + msid + "&cid=" + pcid + "&aid=4";
 			} else if(mcid && mid){
-				cmd.play = "player/add_to_queue&sid=" + msid + "&cid=" + mcid + "&mid=" + mid + "&aid=4";
+				cmd.play = "leader/add_to_queue&sid=" + msid + "&cid=" + mcid + "&mid=" + mid + "&aid=4";
 			}
 		}
 
