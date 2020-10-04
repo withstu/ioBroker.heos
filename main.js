@@ -1135,9 +1135,16 @@ class Heos extends utils.Adapter {
 									"parameter": jmsg,
 									"payload": []
 								};
+								//Save index before sorting
+								for (i = 0; i < jdata.payload.length; i++) {
+									let payload = jdata.payload[i];
+									payload.index = (i + 1);
+								}
+								//Sort by name
 								jdata.payload.sort(function(a, b) {
 									return a.name.localeCompare(b.name);
 								});
+
 								//Add top
 								let sources = this.mapBrowse("browse/get_music_sources", "", "", "");
 								browseResult["payload"].push(
@@ -1267,15 +1274,14 @@ class Heos extends utils.Adapter {
 											if (payload.name.length == 0){
 												payload.name = "Unknown"
 											}
-											var itemId = (i + 1);
-											this.createPreset(folderPath, itemId, payload);
+											this.createPreset(folderPath, payload.index, payload);
 											browseResult["payload"].push(
 												{
 													"name": unescape(payload.name),
 													"image_url": payload.image_url,
 													"type": "media",
 													"commands": {
-														"play": "player/play_preset&preset=" + itemId
+														"play": "player/play_preset&preset=" + payload.index
 													}
 												}
 											);
