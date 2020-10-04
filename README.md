@@ -128,6 +128,9 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
 
 ## Changelog
 
+### 1.3.2 (2020-10-03)
+* (withstu) fix preset sorting
+
 ### 1.3.1 (2020-10-03)
 * (withstu) add back button to browse feature
 
