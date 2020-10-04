@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.3.2",
+		"version": "1.3.3",
 		"news": {
+			"1.3.3": {
+				"en": "fix previous page button in browse feature",
+				"de": "Korrigieren Sie die Schaltfläche für die vorherige Seite in der Suchfunktion",
+				"ru": "исправить кнопку предыдущей страницы в функции просмотра",
+				"pt": "corrigir botão da página anterior no recurso de navegação",
+				"nl": "knop vorige pagina repareren in bladerfunctie",
+				"fr": "corriger le bouton de la page précédente dans la fonction de navigation",
+				"it": "correggere il pulsante della pagina precedente nella funzione di navigazione",
+				"es": "corregir el botón de página anterior en la función de exploración",
+				"pl": "napraw przycisk poprzedniej strony w funkcji przeglądania",
+				"zh-cn": "修复浏览功能中的上一页按钮"
+			},
 			"1.3.2": {
 				"en": "fix preset sorting",
 				"de": "voreingestellte Sortierung korrigieren",

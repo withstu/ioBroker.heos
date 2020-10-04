@@ -1205,7 +1205,7 @@ class Heos extends utils.Adapter {
 										end = start - 1;
 										start = end - 50;
 										if(start < 1) {
-											start = 0;
+											start = 1;
 										}
 										for(let key in jmsg){
 											if(!["range", "returned", "count"].includes(key)){
@@ -1458,8 +1458,6 @@ class Heos extends utils.Adapter {
 
 		} catch (err) { this.log.error('parseResponse: ' + err.message + '\n ' + response); }
 	}
-
-
 
 	browse2Commands(message, payload){
 		let cmd = {};
