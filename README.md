@@ -65,12 +65,16 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
   .heos-browse {
       background-color: #333333;
       color: #eaeaea;
+      height: 100%;
+      width: 100%;
   }
   .heos-browse table {
       width: 100%;
       border-collapse: collapse;
   }
-  .heos-browse table, th, td {
+  .heos-browse table, 
+  .heos-browse th, 
+  .heos-browse td {
       border: 1px solid #929292;
       border-width:1px 0;
   }
@@ -80,8 +84,11 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
       border-width: 0 0 1px 0;
       text-align: center;
   }
-  .heos-browse th,td {
+  .heos-browse th {
       padding: 15px;
+  }
+  .heos-browse td {
+      padding: 5px;
   }
   .heos-browse-btn {
       color: #fff;
@@ -91,8 +98,8 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
       cursor:pointer;
       overflow: hidden;
       outline:none;
-      margin: 0;
-      padding: 0;
+      margin: 0 !important;
+      padding: 0 !important;
       font-size: 30px !important;
       line-height: 30px;
       width: 60px;
@@ -109,7 +116,7 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
   }
   .heos-browse-image {
       white-space: nowrap;
-      padding: 0;
+      padding: 0 !important;
       text-align: right;
       font-size: 0;
   }
@@ -121,8 +128,8 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
       text-align: left;
   }
   .heos-browse-control {
-      padding: 0;
-      margin: 0;
+      padding: 0 !important;
+      margin: 0 !important;
       white-space: nowrap;
       font-size: 0;
       text-align: right;
