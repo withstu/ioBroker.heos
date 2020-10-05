@@ -67,6 +67,7 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
       color: #eaeaea;
       height: 100%;
       width: 100%;
+      position: absolute;
   }
   .heos-browse table {
       width: 100%;
