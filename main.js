@@ -969,9 +969,9 @@ class Heos extends utils.Adapter {
 							this.resetHeartbeatRetries(true);
 							break;
 						case 'sign_in':
-							await this.setStateAsync('signed_in', true, true);
-							await this.setStateAsync('signed_in_user', jmsg.un, true);
-							this.getMusicSources();
+							//await this.setStateAsync('signed_in', true, true);
+							//await this.setStateAsync('signed_in_user', jmsg.un, true);
+							//this.getMusicSources();
 							break;
 					}
 					break;
