@@ -1592,11 +1592,17 @@ class Heos extends utils.Adapter {
 			var connectedPlayers = [];
 			for (var i = 0; i < payload.length; i++) {
 				var player = payload[i];
+				if(!player.name && !player.hasOwnProperty("ip")){
+					this.reconnect();
+					throw new Error("HEOS responded with invalid data.");
+				}
 				var pid = player.pid + ''; //Convert to String
 				if(!(pid in this.players)){
 					let heosPlayer = new HeosPlayer(this, player);
 					this.players[pid] = heosPlayer;
 					await heosPlayer.connect();
+				} else {
+					this.players[pid].initMetaData(player);
 				}
 				connectedPlayers.push(pid);
 			}
@@ -1750,7 +1756,7 @@ class Heos extends utils.Adapter {
 	}
 
 	stopHeartbeat() {
-		this.log.debug("[HEARTBEAT] Stop interval");
+		this.log.debug("[HEARTBEAT] stop interval");
 		if (this.heartbeatInterval) {
 			clearInterval(this.heartbeatInterval);
 			this.heartbeatInterval = undefined;
@@ -1787,7 +1793,15 @@ class Heos extends utils.Adapter {
 	connect() {
 		try {
 			this.log.info("searching for HEOS devices ...")
+			//Reset connect states
 			this.setStateChanged('info.connection', false, true);
+			this.getChannels("players", (err, list) => {
+				if(list){
+					list.forEach((item) => {
+						this.setState(item._id + ".connected", false, true);
+					})
+				}
+			});
 			this.state = States.Searching;
 			
 			const NodeSSDP = require('node-ssdp').Client;
@@ -1834,7 +1848,15 @@ class Heos extends utils.Adapter {
 		this.ip = '';
 		this.msgs = [];
 		this.unfinishedResponses = '';
+		this.players = {};
 
+		this.getChannels("players", (err, list) => {
+			if(list){
+				list.forEach((item) => {
+					this.setState(item._id + ".connected", false, true);
+				})
+			}
+		});
 		this.setStateChanged('info.connection', false, true);
 		this.log.info('disconnected from HEOS');
 	}
