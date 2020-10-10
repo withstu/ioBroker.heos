@@ -35,6 +35,7 @@ HEOS CLI specification: http://rn.dmglobal.com/euheos/HEOS_CLI_ProtocolSpecifica
 * "group/group_all" : Group all player in one group
 * "player/[cmd]": Send the command to all players. e.g. player/set_mute&state=on 
 * "leader/[cmd]": Send the command to all leading players. e.g. player/set_mute&state=on
+* "scope/[cmd]": Send the command to the configured scope all players, leading players or comma separated player pids in scope_pids
 * "...": All other commands are tried to send to HEOS
 
 ### Player Command State
@@ -54,9 +55,9 @@ Note: Multiple commands are possible, if they are separated with the pipe e.g. s
 * "add_to_queue&sid=1025&aid=4&cid=[CID]": Play playlist with [CID] on player (aid: 1 – play now; 2 – play next; 3 – add to end; 4 – replace and play)
 
 ## Browse Sources
-To reduce the state amount in ioBroker, only playlists and the presets are automatically stored in the states. However at first you have to click the browse button in the playlists or presets folder. You can find and control them in the "sources" folder. If you want to browse the music of a source, just press the browse button. You'll find the browse result in the sources.browse_result state. There are also commands provided to navigate deeper or play a resource. Just paste the commands in the global HEOS command field. If it is a browse command you'll find the result in the browse_result state.
+To reduce the state amount in ioBroker, only playlists and the presets are automatically stored in the states. However at first you have to click the browse button in the playlists or presets folder. You can find and control them in the "sources" folder. If you want to browse the music of a source, just press the browse button. You'll find the browse result in the sources.browse_result state. There are also commands provided to navigate deeper or play a resource. Just paste the commands in the global HEOS command field. If it is a browse command you'll find the result in the browse_result state. In the configuration you find an option to control the scope of the play commands. With that you can control if the play commands go to all players, to all leaders and non-group players or to a list of player Ids defined in the state command_scope_pid.
 
-For VIS integration you can use the browse_result and the following script to generate a html table (It is not integrated in the adapter, so that you have the chance to style it):
+For VIS integration you can use the browse_result and the following script to generate a html table (It is not integrated in the adapter, so that you have the chance to style it). Alternative you use the script from Uhula https://forum.iobroker.net/post/498779:
 
 ```javascript
 on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
@@ -68,6 +69,7 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
       height: 100%;
       width: 100%;
       position: absolute;
+      overflow: auto;
   }
   .heos-browse table {
       width: 100%;
@@ -110,10 +112,11 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
       border-right: 1px solid #929292;
   }
   .heos-browse-row-media {
-
+      cursor: pointer;
   }
   .heos-browse-row-control {
       color: #d60000;
+      cursor: pointer;
   }
   .heos-browse-image {
       white-space: nowrap;
@@ -221,6 +224,10 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
 ```
 
 ## Changelog
+
+### 1.4.0 (2020-10-10)
+* (withstu) add more play and queue settings
+* (withstu) bugfixing for invalid heos responses (empty player name)
 
 ### 1.3.4 (2020-10-04)
 * (withstu) remove sorting and available filter and fix browse play

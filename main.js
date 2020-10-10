@@ -77,6 +77,19 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
+		await this.setObjectNotExistsAsync('command_scope_pid', {
+			type: 'state',
+			common: {
+				name: 'Command Scope Player IDs',
+				desc: 'Comma separated pid list to scope the command, if configured',
+				type: 'string',
+				role: 'text',
+				read: true,
+				write: true,
+				def: ''
+			},
+			native: {},
+		});
 		await this.setObjectNotExistsAsync('signed_in', {
 			type: 'state',
 			common: {
@@ -199,7 +212,7 @@ class Heos extends utils.Adapter {
 			if(id.device === 'command'){
 				this.executeCommand(state.val);
 			} else if (id.device === 'sources' && id.channel === '1025' && id.state && fullId[fullId.length-1] === 'play') {
-				this.sendCommandToAllPlayers('add_to_queue&sid=1025&aid=4&cid=' + id.state, true);
+				this.sendCommandToAllPlayers('add_to_queue&sid=1025&aid=' + this.config.queueMode + '&cid=' + id.state, true);
 			} else if (id.device === 'sources' && id.channel === '1028' && id.state && fullId[fullId.length-1] === 'play') {
 				this.sendCommandToAllPlayers('play_preset&preset=' + id.state, true);
 			} else if (id.device === 'sources' && id.channel && id.state === 'browse') {
@@ -368,6 +381,29 @@ class Heos extends utils.Adapter {
 				break;
 			case 'leader':
 				this.sendCommandToAllPlayers(cmd, true);
+				break;
+			case 'scope':
+				if(this.config.cmdScope == 'all'){
+					this.sendCommandToAllPlayers(cmd, false);
+				} else if(this.config.cmdScope == 'pid'){
+					this.getState('command_scope_pid',  async (err, state) => {
+						if(state && state.val){
+							let value = state.val + '';
+							let pids = value.split(',');
+							for (let i = 0; i < pids.length; i++) {
+								let pid = pids[i].trim();
+								let heosPlayer = this.players[pid];
+								if (heosPlayer) {
+									heosPlayer.sendCommand(cmd);
+								}
+							}
+						} else {
+							this.sendCommandToAllPlayers(cmd, true);
+						}
+					})
+				} else {
+					this.sendCommandToAllPlayers(cmd, true);
+				}
 				break;
 			default:
 				commandFallback = true;
@@ -1186,7 +1222,7 @@ class Heos extends utils.Adapter {
 													"type": "control",
 													"available": true,
 													"commands": {
-														"play": "leader/add_to_queue&sid=" + sid + "&cid=" + jmsg.cid + "&aid=4"
+														"play": "scope/add_to_queue&sid=" + sid + "&cid=" + jmsg.cid + "&aid=" + this.config.queueMode
 													}
 												}
 											);
@@ -1257,7 +1293,7 @@ class Heos extends utils.Adapter {
 													"type": "media",
 													"available": true,
 													"commands": {
-														"play": "leader/add_to_queue&sid=1025&aid=4&cid=" + payload.cid
+														"play": "scope/add_to_queue&sid=1025&aid=" + this.config.queueMode + "&cid=" + payload.cid
 													}
 												}
 											);
@@ -1288,7 +1324,7 @@ class Heos extends utils.Adapter {
 													"type": "media",
 													"available": true,
 													"commands": {
-														"play": "leader/play_preset&preset=" + presetId
+														"play": "scope/play_preset&preset=" + presetId
 													}
 												}
 											);
@@ -1546,16 +1582,16 @@ class Heos extends utils.Adapter {
 		if(playable && type){
 			if (type == 'station' && mid){      
 				if(mid.includes("inputs/")){
-					cmd.play = "leader/play_input&input=" + mid;
+					cmd.play = "scope/play_input&input=" + mid;
 				} else if(mcid){
-					cmd.play = "leader/play_stream&sid=" + msid + "&cid=" + mcid + "&mid=" + mid;
+					cmd.play = "scope/play_stream&sid=" + msid + "&cid=" + mcid + "&mid=" + mid;
 				} else {
-					cmd.play = "leader/play_stream&sid=" + msid + "&mid=" + mid;
+					cmd.play = "scope/play_stream&sid=" + msid + "&mid=" + mid;
 				}
 			} else if(container && pcid){
-				cmd.play = "leader/add_to_queue&sid=" + msid + "&cid=" + pcid + "&aid=4";
+				cmd.play = "scope/add_to_queue&sid=" + msid + "&cid=" + pcid + "&aid=" + this.config.queueMode;
 			} else if(mcid && mid){
-				cmd.play = "leader/add_to_queue&sid=" + msid + "&cid=" + mcid + "&mid=" + mid + "&aid=4";
+				cmd.play = "scope/add_to_queue&sid=" + msid + "&cid=" + mcid + "&mid=" + mid + "&aid=" + this.config.queueMode;
 			}
 		}
 
