@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.3.4",
+		"version": "1.4.0",
 		"news": {
+			"1.4.0": {
+				"en": "add more play and queue settings",
+				"de": "Fügen Sie weitere Einstellungen für Wiedergabe und Warteschlange hinzu",
+				"ru": "добавить дополнительные настройки воспроизведения и очереди",
+				"pt": "adicionar mais configurações de reprodução e fila",
+				"nl": "meer afspeel- en wachtrij-instellingen toevoegen",
+				"fr": "ajouter plus de paramètres de lecture et de file d'attente",
+				"it": "aggiungere altre impostazioni di riproduzione e coda",
+				"es": "agregar más configuraciones de juego y cola",
+				"pl": "dodaj więcej ustawień gry i kolejki",
+				"zh-cn": "添加更多播放和队列设置"
+			},
 			"1.3.4": {
 				"en": "remove sorting and available filter and fix browse play",
 				"de": "Entfernen Sie die Sortierung und den verfügbaren Filter und korrigieren Sie das Durchsuchen",
@@ -252,7 +264,9 @@
 		"muteSpotifyAds": true,
 		"autoPlay": true,
 		"autoPlayCmd": "set_group_volume&level=15|play_preset&preset=1",
-		"volumeStepLevel": 2
+		"volumeStepLevel": 2,
+		"queueMode": 4,
+		"cmdScope": "leader"
 	},
 	"objects": [],
 	"instanceObjects": [
