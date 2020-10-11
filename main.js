@@ -34,6 +34,7 @@ class Heos extends utils.Adapter {
 		});
 		this.on('ready', this.onReady.bind(this));
 		this.on('stateChange', this.onStateChange.bind(this));
+		this.on('message', this.onMessage.bind(this));
 		this.on('unload', this.onUnload.bind(this));
 
 		this.players = {};
@@ -157,6 +158,7 @@ class Heos extends utils.Adapter {
 		this.subscribeStates('players.*.state');
 		this.subscribeStates('players.*.state_simple');
 		this.subscribeStates('players.*.volume');
+		this.subscribeStates('players.*.volume_max');
 		this.subscribeStates('players.*.volume_up');
 		this.subscribeStates('players.*.volume_down');
 		this.subscribeStates('players.*.clear_queue');
@@ -170,6 +172,7 @@ class Heos extends utils.Adapter {
 		this.subscribeStates('players.*.prev');
 		this.subscribeStates('players.*.auto_play');
 		this.subscribeStates('players.*.ignore_broadcast_cmd');
+		this.subscribeStates('players.*.tts');
 
 		this.main();
 	}
@@ -235,7 +238,14 @@ class Heos extends utils.Adapter {
 							player.sendCommand('set_play_state&state=pause');
 						}
 					} else if(id.state === 'volume'){
-						player.sendCommand('set_volume&level=' + state.val);
+						let volume = state.val;
+						if(volume && player.volume_max < volume){
+							this.log.info("Max volume reached. Reset to: " + player.volume_max);
+							volume = player.volume_max;
+						}
+						player.sendCommand('set_volume&level=' + volume);
+					} else if(id.state === 'volume_max'){
+						player.volume_max = state.val;
 					} else if(id.state === 'group_volume'){
 						player.sendCommand('set_group_volume&level=' + state.val);
 					} else if(id.state === 'group_muted'){
@@ -262,8 +272,26 @@ class Heos extends utils.Adapter {
 						player.auto_play = state.val;
 					} else if(id.state === 'ignore_broadcast_cmd'){
 						player.ignore_broadcast_cmd = state.val;
+					} else if(id.state === 'tts'){
+						this.text2speech(state.val, player.pid, null);
 					}
 				}
+			}
+		}
+	}
+
+	/**
+	 * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
+	 * Using this method requires "common.message" property to be set to true in io-package.json
+	 * @param {ioBroker.Message} obj
+	 */
+	onMessage(obj) {
+		if (typeof obj === 'object' && obj.message) {
+			if (obj.command === 'send') {
+				obj.message && this.text2speech(obj.message);
+
+				// Send response in callback if required
+				if (obj.callback) this.sendTo(obj.from, obj.command, 'Message received', obj.callback);
 			}
 		}
 	}
@@ -981,7 +1009,7 @@ class Heos extends utils.Adapter {
 						this.signIn();
 						break;
 					case 'Processing previous command':
-						this.reboot();
+						//this.reboot();
 						break;
 				}
 				this.setLastError('result=' + result + ',text=' + jmsg.text + ",command=" + jdata.heos.command);
@@ -1606,6 +1634,55 @@ class Heos extends utils.Adapter {
 					player.sendCommand(cmd);
 				}
 			}
+		}
+	}
+
+	ttsToAllPlayers(fileName, volume, leaderOnly){
+		if (this.state == States.Connected) {
+			for (var pid in this.players){
+				let player = this.players[pid];
+				if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerLeader()))){
+					player.tts(fileName, volume);
+				}
+			}
+		}
+	}
+
+	/**
+	 * Adapted from https://github.com/ioBroker/ioBroker.sonos
+	 * @param {*} fileName 
+	 * @param {*} callback 
+	 */
+	text2speech(fileName, pid, callback) {
+		this.log.info("TTS: " + fileName + " | PID: " + pid);
+		// Extract volume
+		let volume = null;
+
+		const pos = fileName.indexOf(';');
+		if (pos !== -1) {
+			volume   = fileName.substring(0, pos);
+			fileName = fileName.substring(pos + 1);
+		}
+	
+		fileName = fileName.trim();
+
+		// play http/https urls directly on heos device
+		if (fileName && fileName.match(/^https?:\/\//)) {
+			if(pid in this.players){
+				let player = this.players[pid];
+				if(player) {
+					player.tts(fileName, volume);
+				} else {
+					this.ttsToAllPlayers(fileName, volume, true);
+				}
+			} else {
+				this.ttsToAllPlayers(fileName, volume, true);
+			}
+			
+			callback && callback();
+		} else {
+			this.log.error('invalid filename specified');
+			callback && callback('invalid filename specified');
 		}
 	}
 

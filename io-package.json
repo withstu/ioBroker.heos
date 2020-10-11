@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.4.0",
+		"version": "1.5.0",
 		"news": {
+			"1.5.0": {
+				"en": "add tts support and maximum volume",
+				"de": "tts Unterstützung und maximale Lautstärke hinzugefügt",
+				"ru": "добавить поддержку tts и максимальную громкость",
+				"pt": "adicionar suporte tts e volume máximo",
+				"nl": "voeg tts-ondersteuning en maximaal volume toe",
+				"fr": "ajouter le support tts et le volume maximum",
+				"it": "aggiungere supporto tts e volume massimo",
+				"es": "agregar soporte tts y volumen máximo",
+				"pl": "dodaj obsługę tts i maksymalną głośność",
+				"zh-cn": "添加tts支持和最大音量"
+			},
 			"1.4.0": {
 				"en": "add more play and queue settings",
 				"de": "Fügen Sie weitere Einstellungen für Wiedergabe und Warteschlange hinzu",
@@ -236,6 +248,7 @@
 		"extIcon": "https://raw.githubusercontent.com/withstu/ioBroker.heos/master/admin/heos.png",
 		"readme": "https://github.com/withstu/ioBroker.heos/blob/master/README.md",
 		"loglevel": "info",
+		"messagebox": true,
 		"mode": "daemon",
 		"type": "multimedia",
 		"compact": true,
