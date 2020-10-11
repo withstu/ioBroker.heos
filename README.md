@@ -225,6 +225,9 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
 
 ## Changelog
 
+### 1.5.0 (2020-10-10)
+* (withstu) add tts support and maximum volume
+
 ### 1.4.0 (2020-10-10)
 * (withstu) add more play and queue settings
 * (withstu) bugfixing for invalid heos responses (empty player name)
@@ -280,6 +283,7 @@ MIT License
 Copyright (c) 2020 withstu <withstu@gmx.de>
 
 derived from https://forum.iobroker.net/topic/10420/vorlage-denon-heos-script by Uwe Uhula
+TTS derived from https://github.com/ioBroker/ioBroker.sonos
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
