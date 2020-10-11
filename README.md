@@ -225,6 +225,9 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
 
 ## Changelog
 
+### 1.5.1 (2020-10-11)
+* (withstu) improve tts and don't update queue during tts
+
 ### 1.5.0 (2020-10-10)
 * (withstu) add tts support and maximum volume
 
