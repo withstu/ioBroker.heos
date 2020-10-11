@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.5.1",
+		"version": "1.5.2",
 		"news": {
+			"1.5.2": {
+				"en": "improve tts stop method",
+				"de": "Verbesserung der Stoppmethode",
+				"ru": "улучшить метод остановки tts",
+				"pt": "melhorar o método tts stop",
+				"nl": "tts stop methode verbeteren",
+				"fr": "améliorer la méthode d'arrêt tts",
+				"it": "migliorare il metodo di arresto tts",
+				"es": "mejorar el método de parada tts",
+				"pl": "poprawić metodę zatrzymania tts",
+				"zh-cn": "改进tts停止方法"
+			},
 			"1.5.1": {
 				"en": "improve tts and don't update queue during tts",
 				"de": "Verbessere tts und aktualisiere die Warteschlange nicht während tts",
