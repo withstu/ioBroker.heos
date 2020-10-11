@@ -225,6 +225,9 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
 
 ## Changelog
 
+### 1.5.2 (2020-10-11)
+* (withstu) improve tts stop method
+
 ### 1.5.1 (2020-10-11)
 * (withstu) improve tts and don't update queue during tts
 
