@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.5.0",
+		"version": "1.5.1",
 		"news": {
+			"1.5.1": {
+				"en": "improve tts and don't update queue during tts",
+				"de": "Verbessere tts und aktualisiere die Warteschlange nicht während tts",
+				"ru": "улучшить tts и не обновлять очередь во время tts",
+				"pt": "melhorar tts e não atualizar a fila durante tts",
+				"nl": "verbeter tts en update de wachtrij niet tijdens tts",
+				"fr": "améliorer tts et ne pas mettre à jour la file d'attente pendant tts",
+				"it": "migliorare tts e non aggiornare la coda durante tts",
+				"es": "mejorar tts y no actualizar la cola durante tts",
+				"pl": "poprawić tts i nie aktualizować kolejki podczas tts",
+				"zh-cn": "改善tts并在tts期间不更新队列"
+			},
 			"1.5.0": {
 				"en": "add tts support and maximum volume",
 				"de": "tts Unterstützung und maximale Lautstärke hinzugefügt",
