@@ -89,9 +89,11 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
   }
   .heos-browse th {
       padding: 15px;
+      height: 60px;
   }
   .heos-browse td {
       padding: 5px;
+      height: 60px;
   }
   .heos-browse-btn {
       color: #fff;
@@ -219,11 +221,14 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
       }
       html += "</table></div>";
   }
-  setState("0_userdata.0.scriptData.HeosBrowseTable", html);
+  setState("0_userdata.0.heos.browse_result_html", html);
 });
 ```
 
 ## Changelog
+
+### 1.5.3 (2020-10-18)
+* (withstu) minor improvements related to auto play feature
 
 ### 1.5.2 (2020-10-11)
 * (withstu) improve tts stop method
