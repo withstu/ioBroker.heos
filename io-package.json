@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.5.2",
+		"version": "1.5.3",
 		"news": {
+			"1.5.3": {
+				"en": "minor improvements related to auto play feature",
+				"de": "kleinere Verbesserungen im Zusammenhang mit der Auto-Play-Funktion",
+				"ru": "незначительные улучшения, связанные с функцией автоматического воспроизведения",
+				"pt": "pequenas melhorias relacionadas ao recurso de reprodução automática",
+				"nl": "kleine verbeteringen met betrekking tot de automatische afspeelfunctie",
+				"fr": "améliorations mineures liées à la fonction de lecture automatique",
+				"it": "piccoli miglioramenti relativi alla funzione di riproduzione automatica",
+				"es": "pequeñas mejoras relacionadas con la función de reproducción automática",
+				"pl": "drobne ulepszenia związane z funkcją automatycznego odtwarzania",
+				"zh-cn": "与自动播放功能相关的小改进"
+			},
 			"1.5.2": {
 				"en": "improve tts stop method",
 				"de": "Verbesserung der Stoppmethode",
