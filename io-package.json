@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.5.3",
+		"version": "1.5.4",
 		"news": {
+			"1.5.4": {
+				"en": "ignore invalid now playing responses",
+				"de": "Ignorieren Sie ungültige Antworten, die gerade abgespielt werden",
+				"ru": "игнорировать недопустимые ответы сейчас воспроизводятся",
+				"pt": "ignorar respostas inválidas agora em reprodução",
+				"nl": "negeer ongeldige reacties die nu worden afgespeeld",
+				"fr": "ignorer les réponses en cours de lecture invalides",
+				"it": "ignora le risposte non valide in riproduzione",
+				"es": "ignorar respuestas inválidas en reproducción",
+				"pl": "ignoruj nieprawidłowe teraz odtwarzane odpowiedzi",
+				"zh-cn": "忽略无效的正在播放的响应"
+			},
 			"1.5.3": {
 				"en": "minor improvements related to auto play feature",
 				"de": "kleinere Verbesserungen im Zusammenhang mit der Auto-Play-Funktion",
