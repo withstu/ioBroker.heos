@@ -227,6 +227,9 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
 
 ## Changelog
 
+### 1.5.4 (2020-10-24)
+* (withstu) ignore invalid now playing responses
+
 ### 1.5.3 (2020-10-18)
 * (withstu) minor improvements related to auto play feature
 
