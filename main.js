@@ -38,7 +38,8 @@ class Heos extends utils.Adapter {
 		this.on('unload', this.onUnload.bind(this));
 
 		this.players = {};
-		this.browseMap = {};
+		this.browseCmdMap = {};
+		this.sourceMap = {};
 		this.ip = '';
 		this.state = States.Disconnected;
 		
@@ -543,11 +544,11 @@ class Heos extends utils.Adapter {
 		return result;
 	}
 
-	mapBrowse(command, name, image_url, parent){
+	mapBrowseCmd(command, name, image_url, parent){
 		let entry;
 		command = command.replace(/&range.*/, "").replace(/&count.*/, "").replace(/&returned.*/, "");
-		if(command in this.browseMap){
-			entry = this.browseMap[command];
+		if(command in this.browseCmdMap){
+			entry = this.browseCmdMap[command];
 		} else {
 			entry = {
 				"name": name,
@@ -555,11 +556,19 @@ class Heos extends utils.Adapter {
 				"parent": parent
 			};
 			if(name.length > 0){
-				this.browseMap[command] = entry;
+				this.browseCmdMap[command] = entry;
 			}
 		}
-		this.log.silly("BrowseMap: " + JSON.stringify(this.browseMap));
+		this.log.silly("BrowseCmdMap: " + JSON.stringify(this.browseCmdMap));
 		return entry;
+	}
+
+	mapSource(sid){
+		let result;
+		if(sid in this.sourceMap){
+			result = this.sourceMap[sid];
+		}
+		return result;
 	}
 
 	async createSource(folderPath, source){
@@ -661,10 +670,7 @@ class Heos extends utils.Adapter {
 		await this.setStateAsync(statePath + 'image_url', source.image_url, true);
 		await this.setStateAsync(statePath + 'available', (source.available == 'true' ? true : false), true);
 
-		//Browse Playlists & Favorites
-		//if ([1025, 1028].includes(source.sid)) {
-		//	this.browseSource(source.sid);
-		//}
+		this.sourceMap[source.sid] = source;
 	}
 
 	async createPlaylist(folderPath, payload){
@@ -1054,6 +1060,7 @@ class Heos extends utils.Adapter {
 								await this.setStateAsync('signed_in_user', "", true);
 								this.signIn();
 							}
+							this.getMusicSources();
 							break;
 						case 'players_changed':
 							this.getPlayers();
@@ -1145,9 +1152,9 @@ class Heos extends utils.Adapter {
 									native: {},
 								});
 								//Clear browse Map to reduce memory;
-								this.browseMap = {};
+								this.browseCmdMap = {};
 
-								let sources = this.mapBrowse(command, "sources", "", "");
+								let sources = this.mapBrowseCmd(command, "sources", "", "");
 								let browseResult = {
 									"name": sources.name,
 									"image_url": sources.image_url,
@@ -1160,7 +1167,7 @@ class Heos extends utils.Adapter {
 								for (i = 0; i < jdata.payload.length; i++) {
 									let payload = jdata.payload[i];
 									let browse = "browse/browse?sid=" + payload.sid;
-									let source = this.mapBrowse(browse, payload.name, payload.image_url, "browse/get_music_sources");
+									let source = this.mapBrowseCmd(browse, payload.name, payload.image_url, "browse/get_music_sources");
 									this.createSource(folderPath, payload);
 									browseResult["payload"].push(
 										{
@@ -1188,7 +1195,7 @@ class Heos extends utils.Adapter {
 						case 'browse':
 							if ((jdata.hasOwnProperty('payload'))) {
 								let sid = parseInt(jmsg.sid, 10);
-								let source = this.mapBrowse(command, "", "", "");
+								let source = this.mapBrowseCmd(command, "", "", "");
 								if(jmsg.hasOwnProperty("count")){
 									jmsg.count = parseInt(jmsg.count);
 								}
@@ -1212,7 +1219,7 @@ class Heos extends utils.Adapter {
 								//});
 
 								//Add top
-								let sources = this.mapBrowse("browse/get_music_sources", "", "", "");
+								let sources = this.mapBrowseCmd("browse/get_music_sources", "", "", "");
 								browseResult["payload"].push(
 									{
 										"name": sources.name,
@@ -1605,7 +1612,7 @@ class Heos extends utils.Adapter {
 		}
 
 		if("browse" in cmd){
-			this.mapBrowse(cmd.browse, payload.name, payload.image_url, parentCmd);
+			this.mapBrowseCmd(cmd.browse, payload.name, payload.image_url, parentCmd);
 		}
 
 		//playable
