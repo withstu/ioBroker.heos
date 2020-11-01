@@ -1041,12 +1041,14 @@ class Heos extends utils.Adapter {
 					break;
 				case 'event':
 					switch (cmd) {
+						case 'sources_changed':
+							this.getMusicSources();
+							break;
 						case 'user_changed':
 							this.log.debug("sign: " + JSON.stringify(jmsg));
 							if('signed_in' in jmsg){
 								await this.setStateAsync('signed_in', true, true);
 								await this.setStateAsync('signed_in_user', jmsg.un, true);
-								this.getMusicSources();
 							} else {
 								await this.setStateAsync('signed_in', false, true);
 								await this.setStateAsync('signed_in_user', "", true);
