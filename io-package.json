@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.5.4",
+		"version": "1.5.5",
 		"news": {
+			"1.5.5": {
+				"en": "update some packages and add sources event",
+				"de": "Aktualisieren Sie einige Pakete und fügen Sie ein Quellereignis hinzu",
+				"ru": "обновить некоторые пакеты и добавить событие источника",
+				"pt": "atualizar alguns pacotes e adicionar eventos de fontes",
+				"nl": "update een aantal pakketten en voeg een source-evenement toe",
+				"fr": "mettre à jour certains packages et ajouter un événement sources",
+				"it": "aggiorna alcuni pacchetti e aggiungi eventi sorgenti",
+				"es": "actualizar algunos paquetes y agregar eventos de fuentes",
+				"pl": "zaktualizuj niektóre pakiety i dodaj zdarzenie źródeł",
+				"zh-cn": "更新一些软件包并添加源事件"
+			},
 			"1.5.4": {
 				"en": "ignore invalid now playing responses",
 				"de": "Ignorieren Sie ungültige Antworten, die gerade abgespielt werden",
@@ -230,18 +242,6 @@
 				"es": "cifrar contraseña",
 				"pl": "zaszyfruj hasło",
 				"zh-cn": "加密密码"
-			},
-			"1.0.1": {
-				"en": "remove connected state",
-				"de": "Verbundenen Zustand entfernen",
-				"ru": "удалить подключенное состояние",
-				"pt": "remover estado conectado",
-				"nl": "verwijder de verbonden staat",
-				"fr": "supprimer l'état connecté",
-				"it": "rimuovere lo stato connesso",
-				"es": "eliminar estado conectado",
-				"pl": "usuń stan połączony",
-				"zh-cn": "删除连接状态"
 			}
 		},
 		"title": "HEOS",
