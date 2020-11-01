@@ -39,7 +39,6 @@ class Heos extends utils.Adapter {
 
 		this.players = {};
 		this.browseCmdMap = {};
-		this.sourceMap = {};
 		this.ip = '';
 		this.state = States.Disconnected;
 		
@@ -53,6 +52,101 @@ class Heos extends utils.Adapter {
 		this.msgs = [];
 		this.unfinishedResponses = '';
 		this.ssdpSearchTargetName = 'urn:schemas-denon-com:device:ACT-Denon:1';
+
+		this.sourceMap = {
+			1: {
+				name: 'Pandora ',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/pandora.png'
+			},
+			2: {
+				name: 'Rhapsody',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/rhapsody.png'
+			},
+			3: {
+				name: 'TuneIn',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/tunein.png'
+			},
+			4: {
+				name: 'Spotify',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/spotify.png'
+			},
+			5: {
+				name: 'Deezer',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/deezer.png'
+			},
+			6: {
+				name: 'Napster',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/napster.png'
+			},
+			7: {
+				name: 'iHeartRadio',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/iheartradio.png'
+			},
+			8: {
+				name: 'Sirius XM',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/siriusxm.png'
+			},
+			9: {
+				name: 'Soundcloud',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/soundcloud.png'
+			},
+			10: {
+				name: 'Tidal',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/tidal.png'
+			},
+			11: {
+				name: 'Future service',
+				image_url: ''
+			},
+			12: {
+				name: 'Rdio',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/rdio.png'
+			},
+			13: {
+				name: 'Amazon Music',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/amazon.png'
+			},
+			14: {
+				name: 'Future service',
+				image_url: ''
+			},
+			15: {
+				name: 'Moodmix',
+				image_url: ''
+			},
+			16: {
+				name: 'Juke',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/juke.png'
+			},
+			17: {
+				name: 'Future service',
+				image_url: ''
+			},
+			18: {
+				name: 'QQMusic',
+				image_url: ''
+			},
+			1024: {
+				name: 'Local USB Media/ Local DLNA servers',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/musicsource_logo_servers.png'
+			},
+			1025: {
+				name: 'HEOS Playlists ',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/musicsource_logo_playlists.png'
+			},
+			1026: {
+				name: 'HEOS History',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/musicsource_logo_history.png'
+			},
+			1027: {
+				name: 'HEOS aux inputs',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/musicsource_logo_aux.png'
+			},
+			1028: {
+				name: 'HEOS Favorites',
+				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/musicsource_logo_favorites.png'
+			}
+		};
 	}
 
 	async onReady() {
