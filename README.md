@@ -160,9 +160,9 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
           html += "\">";
           html += "<td class=\"heos-browse-image\"";
           if("browse" in payload.commands){
-              html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands["browse"] +"')\"";
+              html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands["browse"].replace(/'/g, "\\'") +"')\"";
           } else if(Object.keys(payload.commands).length == 1){
-              html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands[Object.keys(payload.commands)[0]] +"')\"";
+              html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands[Object.keys(payload.commands)[0]].replace(/'/g, "\\'") +"')\"";
           }
           html += ">"
           if(payload.image_url.length){
@@ -171,9 +171,9 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
           html += "</td>";
           html += "<td class=\"heos-browse-name\"";
           if("browse" in payload.commands){
-              html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands["browse"] +"')\"";
+              html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands["browse"].replace(/'/g, "\\'") + "')\"";
           } else if(Object.keys(payload.commands).length == 1){
-              html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands[Object.keys(payload.commands)[0]] +"')\"";
+              html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands[Object.keys(payload.commands)[0]].replace(/'/g, "\\'") +"')\"";
           }
           html += ">"
           if(payload.type == "control"){
@@ -205,7 +205,7 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
             if(Object.keys(payload.commands).length > 1){
                 html += " heos-browse-btn-multi"
             }
-            html += "\" onClick=\"servConn.setState('heos.0.command','" + command +"')\">" 
+            html += "\" onClick=\"servConn.setState('heos.0.command','" + command.replace(/'/g, "\\'") +"')\">" 
             switch(key){
                 case "play":
                 html += "►";
