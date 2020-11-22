@@ -98,17 +98,29 @@ systemDictionary = {
 		"pl": "Krok głośności",
 		"zh-cn": "音量步进"
 	},
-	"Mute Spotify ads": {
-		"en": "Mute Spotify ads",
-		"de": "Spotify-Anzeigen stumm schalten",
-		"ru": "Отключить рекламу Spotify",
-		"pt": "Silenciar anúncios Spotify",
-		"nl": "Demp Spotify-advertenties",
-		"fr": "Ignorer les annonces Spotify",
-		"it": "Disattiva gli annunci Spotify",
-		"es": "Silenciar anuncios de Spotify",
-		"pl": "Wycisz reklamy Spotify",
-		"zh-cn": "使Spotify广告静音"
+	"Mute, if regex matches on song information": {
+		"en": "Mute, if regex matches on song information",
+		"de": "Stumm, wenn der reguläre Ausdruck mit den Songinformationen übereinstimmt",
+		"ru": "Отключить звук, если регулярное выражение соответствует информации о песне",
+		"pt": "Mudo, se regex corresponder às informações da música",
+		"nl": "Dempen als regex overeenkomt met nummerinformatie",
+		"fr": "Muet, si l'expression régulière correspond aux informations de la chanson",
+		"it": "Muto, se la regex corrisponde alle informazioni sul brano",
+		"es": "Silencio, si la expresión regular coincide con la información de la canción",
+		"pl": "Wycisz, jeśli wyrażenie regularne pasuje do informacji o utworze",
+		"zh-cn": "静音（如果正则表达式与歌曲信息匹配）"
+	},
+	"Regex for muting": {
+		"en": "Regex for muting",
+		"de": "Regex zum Stummschalten",
+		"ru": "Регулярное выражение для отключения звука",
+		"pt": "Regex para silenciar",
+		"nl": "Regex voor dempen",
+		"fr": "Regex pour couper le son",
+		"it": "Regex per silenziare",
+		"es": "Regex para silenciar",
+		"pl": "Regex do wyciszania",
+		"zh-cn": "正则表达式静音"
 	},
 	"Advanced settings": {
 		"en": "Advanced settings",

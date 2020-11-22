@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.5.6",
+		"version": "1.6.0",
 		"news": {
+			"1.6.0": {
+				"en": "add regex mute",
+				"de": "Regex Mute hinzufügen",
+				"ru": "добавить отключение регулярного выражения",
+				"pt": "adicionar regex mudo",
+				"nl": "regex mute toevoegen",
+				"fr": "ajouter regex mute",
+				"it": "aggiungi regex mute",
+				"es": "agregar regex mute",
+				"pl": "dodaj wyciszenie wyrażenia regularnego",
+				"zh-cn": "添加正则表达式静音"
+			},
 			"1.5.6": {
 				"en": "add source images & optimize auto play",
 				"de": "Quellbilder hinzufügen und automatische Wiedergabe optimieren",
@@ -230,18 +242,6 @@
 				"es": "parámetros de exploración de registros",
 				"pl": "parametry przeglądania dziennika",
 				"zh-cn": "日志浏览参数"
-			},
-			"1.1.1": {
-				"en": "add source browse feature",
-				"de": "Funktion zum Durchsuchen von Quellen hinzufügen",
-				"ru": "добавить функцию просмотра источника",
-				"pt": "adicionar recurso de navegação na fonte",
-				"nl": "voeg bronbladerfunctie toe",
-				"fr": "ajouter une fonction de navigation source",
-				"it": "aggiungere la funzione di ricerca della fonte",
-				"es": "agregar la función de exploración de fuentes",
-				"pl": "dodać funkcję przeglądania źródeł",
-				"zh-cn": "添加源浏览功能"
 			}
 		},
 		"title": "HEOS",
@@ -310,7 +310,8 @@
 		"searchInterval": 30000,
 		"heartbeatInterval": 15000,
 		"heartbeatRetries": 4,
-		"muteSpotifyAds": true,
+		"muteOnRegex": true,
+		"muteRegex": "spotify:ad:|Advertisement",
 		"autoPlay": true,
 		"autoPlayCmd": "set_group_volume&level=15|play_preset&preset=1",
 		"volumeStepLevel": 2,
