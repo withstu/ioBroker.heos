@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.5.5",
+		"version": "1.5.6",
 		"news": {
+			"1.5.6": {
+				"en": "add source images & optimize auto play",
+				"de": "Quellbilder hinzufügen und automatische Wiedergabe optimieren",
+				"ru": "добавить исходные изображения и оптимизировать автоматическое воспроизведение",
+				"pt": "adicione imagens de origem e otimize a reprodução automática",
+				"nl": "bronafbeeldingen toevoegen en automatisch afspelen optimaliseren",
+				"fr": "ajouter des images sources et optimiser la lecture automatique",
+				"it": "aggiungi immagini sorgente e ottimizza la riproduzione automatica",
+				"es": "agregar imágenes de origen y optimizar la reproducción automática",
+				"pl": "dodaj obrazy źródłowe i zoptymalizuj automatyczne odtwarzanie",
+				"zh-cn": "添加源图像并优化自动播放"
+			},
 			"1.5.5": {
 				"en": "update some packages and add sources event",
 				"de": "Aktualisieren Sie einige Pakete und fügen Sie ein Quellereignis hinzu",
@@ -230,18 +242,6 @@
 				"es": "agregar la función de exploración de fuentes",
 				"pl": "dodać funkcję przeglądania źródeł",
 				"zh-cn": "添加源浏览功能"
-			},
-			"1.1.0": {
-				"en": "encrypt password",
-				"de": "Passwort verschlüsseln",
-				"ru": "зашифровать пароль",
-				"pt": "criptografar senha",
-				"nl": "codeer wachtwoord",
-				"fr": "crypter le mot de passe",
-				"it": "crittografare la password",
-				"es": "cifrar contraseña",
-				"pl": "zaszyfruj hasło",
-				"zh-cn": "加密密码"
 			}
 		},
 		"title": "HEOS",
