@@ -227,6 +227,9 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
 
 ## Changelog
 
+### 1.5.6 (2020-11-01)
+* (withstu) add source images & optimize auto play
+
 ### 1.5.5 (2020-11-01)
 * (withstu) update some packages and add sources event
 
