@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.6.0",
+		"version": "1.6.1",
 		"news": {
+			"1.6.1": {
+				"en": "clear timeout and interval on unload; fix roles; remove sleep in tts module",
+				"de": "Zeitüberschreitung und Intervall beim Entladen löschen; Rollen fixieren; Schlaf im tts-Modul entfernen",
+				"ru": "очистить таймаут и интервал при разгрузке; исправить роли; удалить сон в модуле tts",
+				"pt": "limpar o tempo limite e o intervalo ao descarregar; fixar papéis; remover o sono no módulo tts",
+				"nl": "time-out en interval wissen bij uitladen; rollen vastleggen; verwijder sleep in tts module",
+				"fr": "effacer le délai d'attente et l'intervalle de déchargement; fixer les rôles; supprimer le sommeil dans le module tts",
+				"it": "cancellare il timeout e l'intervallo di scaricamento; ruoli fissi; rimuovere il sonno nel modulo tts",
+				"es": "despejar el tiempo de espera y el intervalo de descarga; arreglar roles; quitar el sueño en el módulo tts",
+				"pl": "wyczyść limit czasu i interwał podczas rozładunku; naprawić role; usuń uśpienie w module tts",
+				"zh-cn": "清除超时和卸载间隔；固定角色；删除tts模块中的睡眠"
+			},
 			"1.6.0": {
 				"en": "add regex mute",
 				"de": "Regex Mute hinzufügen",
@@ -230,18 +242,6 @@
 				"es": "reestructurar listas de reproducción / presets",
 				"pl": "przebudować listy odtwarzania / ustawienia wstępne",
 				"zh-cn": "重组播放列表/预设"
-			},
-			"1.1.2": {
-				"en": "log browse parameters",
-				"de": "Protokoll durchsuchen Parameter",
-				"ru": "параметры просмотра журнала",
-				"pt": "parâmetros de navegação de log",
-				"nl": "log bladerparameters",
-				"fr": "paramètres de navigation dans les journaux",
-				"it": "parametri di navigazione del registro",
-				"es": "parámetros de exploración de registros",
-				"pl": "parametry przeglądania dziennika",
-				"zh-cn": "日志浏览参数"
 			}
 		},
 		"title": "HEOS",
