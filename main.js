@@ -42,10 +42,12 @@ class Heos extends utils.Adapter {
 		this.ip = '';
 		this.state = States.Disconnected;
 		
-		this.heartbeatInterval = undefined;
 		this.heartbeatRetries = 0;
+		this.heartbeatInterval = undefined;
 		this.ssdpSearchInterval = undefined;
+
 		this.reconnectTimeout = undefined;
+		this.rebootTimeout = undefined;
 
 		this.net_client = undefined;
 		this.nodessdp_client = undefined;
@@ -167,7 +169,7 @@ class Heos extends utils.Adapter {
 				name: 'HEOS command',
 				desc: 'Send command to HEOS',
 				type: 'string',
-				role: 'command',
+				role: 'text',
 				read: true,
 				write: true
 			},
@@ -217,7 +219,7 @@ class Heos extends utils.Adapter {
 				name: 'Error status',
 				desc: 'True, if an error exists',
 				type: 'boolean',
-				role: 'indicator',
+				role: 'indicator.maintenance',
 				read: true,
 				write: false,
 				def: false
@@ -1925,7 +1927,7 @@ class Heos extends utils.Adapter {
 			// heos://system/reboot
 			this.msgs.push('heos://system/reboot');
 			this.sendNextMsg();
-			setTimeout(() => {
+			this.rebootTimeout = setTimeout(() => {
 				this.reconnect();
 			}, 1000)
 		}
@@ -2039,6 +2041,28 @@ class Heos extends utils.Adapter {
 		} catch (err) { this.log.error('connect: ' + err.message); }
 	}
 
+	async resetIntervals(){
+		if (this.heartbeatInterval) {
+			clearInterval(this.heartbeatInterval);
+			this.heartbeatInterval = undefined;
+		}
+		if (this.ssdpSearchInterval) {
+			clearInterval(this.ssdpSearchInterval);
+			this.ssdpSearchInterval = undefined;
+		}
+	}
+
+	async resetTimeouts(){
+		if (this.reconnectTimeout) {
+			clearTimeout(this.reconnectTimeout);
+			this.reconnectTimeout = undefined;
+		}
+		if (this.rebootTimeout) {
+			clearTimeout(this.rebootTimeout);
+			this.rebootTimeout = undefined;
+		}
+	}
+
 	/** Alle Player stoppen und die TelNet Verbindung schließen **/
 	disconnect() {
 		this.log.info('disconnecting from HEOS ...');
@@ -2046,6 +2070,9 @@ class Heos extends utils.Adapter {
 
 		this.stopHeartbeat();
 		this.stopPlayers();
+
+		this.resetTimeouts();
+		this.resetIntervals();
 
 		if (typeof this.net_client !== 'undefined') {
 			this.registerChangeEvents(false);
