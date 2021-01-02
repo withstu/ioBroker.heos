@@ -1105,7 +1105,7 @@ class Heos extends utils.Adapter {
 			if (jdata.heos.hasOwnProperty('result')) result = jdata.heos.result;
 			if (result != 'success') {
 				switch(jmsg.text){
-					case 'User_not_logged_in':
+					case 'User not logged in':
 						await this.setStateAsync('signed_in', false, true);
 						await this.setStateAsync('signed_in_user', "", true);
 						this.signIn();
