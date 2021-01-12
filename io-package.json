@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.6.1",
+		"version": "1.6.2",
 		"news": {
+			"1.6.2": {
+				"en": "fix \"user not logged in\" handling",
+				"de": "Korrektur der Behandlung \"Benutzer nicht angemeldet\"",
+				"ru": "исправлена обработка \"пользователь не вошел в систему\"",
+				"pt": "corrigir o tratamento de \"usuário não conectado\"",
+				"nl": "fix \"gebruiker niet ingelogd\" afhandeling",
+				"fr": "correction de la gestion des \"utilisateurs non connectés\"",
+				"it": "correzione della gestione \"utente non connesso\"",
+				"es": "corregir el manejo de \"usuario no conectado\"",
+				"pl": "naprawa obsługi „użytkownik niezalogowany”",
+				"zh-cn": "修复“用户未登录”处理"
+			},
 			"1.6.1": {
 				"en": "clear timeout and interval on unload; fix roles; remove sleep in tts module",
 				"de": "Zeitüberschreitung und Intervall beim Entladen löschen; Rollen fixieren; Schlaf im tts-Modul entfernen",
@@ -230,18 +242,6 @@
 				"es": "introducir el estado de resultado de exploración",
 				"pl": "wprowadź stan Browse_result",
 				"zh-cn": "引入Browse_result状态"
-			},
-			"1.2.0": {
-				"en": "restructure playlists/presets",
-				"de": "Wiedergabelisten / Voreinstellungen neu strukturieren",
-				"ru": "реструктурировать плейлисты / пресеты",
-				"pt": "reestruturar listas de reprodução / predefinições",
-				"nl": "herstructureer afspeellijsten / presets",
-				"fr": "restructurer les listes de lecture / préréglages",
-				"it": "ristrutturare playlist / preset",
-				"es": "reestructurar listas de reproducción / presets",
-				"pl": "przebudować listy odtwarzania / ustawienia wstępne",
-				"zh-cn": "重组播放列表/预设"
 			}
 		},
 		"title": "HEOS",

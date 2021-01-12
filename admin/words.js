@@ -291,15 +291,15 @@ systemDictionary = {
 		"zh-cn": "状态为command_scope_pid的玩家ID"
 	},
 	"Command scope for state scope/[cmd]": {
-		"en": "Command scope for state/[cmd]",
-		"de": "Befehlsbereich für state/[cmd]",
-		"ru": "Область действия команды для области state/[cmd]",
-		"pt": "Escopo de comando para escopo de state/[cmd]",
-		"nl": "Opdrachtbereik voor statusbereik state/[cmd]",
-		"fr": "Portée de la commande pour la portée de state/[cmd]",
-		"it": "Ambito del comando per ambito di state/[cmd]",
-		"es": "Alcance del comando para el alcance del state/[cmd]",
-		"pl": "Zakres poleceń dla zakresu state/[cmd]",
+		"en": "Command scope for scope/[cmd]",
+		"de": "Befehlsbereich für scope/[cmd]",
+		"ru": "Область действия команды для области scope/[cmd]",
+		"pt": "Escopo de comando para escopo de scope/[cmd]",
+		"nl": "Opdrachtbereik voor statusbereik scope/[cmd]",
+		"fr": "Portée de la commande pour la portée de scope/[cmd]",
+		"it": "Ambito del comando per ambito di scope/[cmd]",
+		"es": "Alcance del comando para el alcance del scope/[cmd]",
+		"pl": "Zakres poleceń dla zakresu scope/[cmd]",
 		"zh-cn": "状态范围/ [cmd]的命令范围"
 	}
 };
