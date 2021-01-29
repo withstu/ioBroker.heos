@@ -1,7 +1,7 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.6.2",
+		"version": "1.7.0",
 		"news": {
 			"1.6.2": {
 				"en": "fix \"user not logged in\" handling",
@@ -230,18 +230,6 @@
 				"es": "cambiar el nombre del comando de exploración",
 				"pl": "zmień nazwę polecenia przeglądania",
 				"zh-cn": "重命名浏览命令"
-			},
-			"1.2.1": {
-				"en": "introduce browse_result state",
-				"de": "den Status browse_result einführen",
-				"ru": "ввести состояние browse_result",
-				"pt": "introduzir o estado browse_result",
-				"nl": "introduceren browse_result state",
-				"fr": "introduire l'état de navigation_résultat",
-				"it": "introdurre lo stato browse_result",
-				"es": "introducir el estado de resultado de exploración",
-				"pl": "wprowadź stan Browse_result",
-				"zh-cn": "引入Browse_result状态"
 			}
 		},
 		"title": "HEOS",
