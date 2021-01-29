@@ -1429,7 +1429,7 @@ class Heos extends utils.Adapter {
 											this.getStates(folderPath + ".*.cid", async (err, states) => {
 												for (var id in states) {
 													if(!playlists.includes(states[id].val)){
-														this.log.info("Deleting playlist: " + states[id].val)
+														this.log.info("deleting playlist: " + states[id].val)
 														this.delObject(folderPath + "." + states[id].val, {recursive: true})
 													}
 												}
@@ -1464,7 +1464,7 @@ class Heos extends utils.Adapter {
 											this.getStates(folderPath + ".*.id", async (err, states) => {
 												for (var id in states) {
 													if(!presets.includes(states[id].val)){
-														this.log.info("Deleting preset: " + states[id].val)
+														this.log.info("deleting preset: " + states[id].val)
 														this.delObject(folderPath + "." + states[id].val, {recursive: true})
 													}
 												}
