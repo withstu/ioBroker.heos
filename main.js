@@ -1405,16 +1405,10 @@ class Heos extends utils.Adapter {
 									case 1025:
 										var folderPath = 'sources.1025'
 										//Folder
-										/*await this.setObjectNotExistsAsync(folderPath, {
-											type: 'folder',
-											common: {
-												name: 'Playlists',
-												role: 'media.playlists'
-											},
-											native: {},
-										});*/
+										let playlists = [];
 										for (i = 0; i < jdata.payload.length; i++) {
 											let payload = jdata.payload[i];
+											playlists.push(payload.cid)
 											if (payload.name.length == 0){
 												payload.name = "Unknown"
 											}
@@ -1431,24 +1425,28 @@ class Heos extends utils.Adapter {
 												}
 											);
 										}
+										if(jdata.payload.length){
+											this.getStates(folderPath + ".*.cid", async (err, states) => {
+												for (var id in states) {
+													if(!playlists.includes(states[id].val)){
+														this.log.info("Deleting playlist: " + states[id].val)
+														this.delObject(folderPath + "." + states[id].val)
+													}
+												}
+											})
+										}
 										break;
 									case 1028:
 										var folderPath = 'sources.1028'
 										//Folder
-										/*await this.setObjectNotExistsAsync(folderPath, {
-											type: 'folder',
-											common: {
-												name: 'Presets',
-												role: 'media.presets'
-											},
-											native: {},
-										});*/
+										let presets = [];
 										for (i = 0; i < jdata.payload.length; i++) {
 											let payload = jdata.payload[i];
 											if (payload.name.length == 0){
 												payload.name = "Unknown"
 											}
 											let presetId = payload.index + 1
+											presets.push(presetId)
 											this.createPreset(folderPath, presetId, payload);
 											browseResult["payload"].push(
 												{
@@ -1461,6 +1459,16 @@ class Heos extends utils.Adapter {
 													}
 												}
 											);
+										}
+										if(jdata.payload.length){
+											this.getStates(folderPath + ".*.id", async (err, states) => {
+												for (var id in states) {
+													if(!presets.includes(states[id].val)){
+														this.log.info("Deleting preset: " + states[id].val)
+														this.delObject(folderPath + "." + states[id].val)
+													}
+												}
+											})
 										}
 										break;
 									default:
