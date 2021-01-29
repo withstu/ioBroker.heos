@@ -230,6 +230,10 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
 
 ## Changelog
 
+### 1.7.0 (2021-01-29)
+* (withstu) reboot not responding players
+* (withstu) delete old presets and playlists
+
 ### 1.6.2 (2021-01-02)
 * (withstu) fix "user not logged in" handling
 
