@@ -671,7 +671,7 @@ class Heos extends utils.Adapter {
 		var baseStatePath = folderPath + '.' + source.sid;
 		var statePath = baseStatePath + '.';
 		//Folder
-		await this.setObjectNotExistsAsync(baseStatePath, {
+		await this.setObject(baseStatePath, {
 			type: 'folder',
 			common: {
 				name: source.name,
@@ -774,7 +774,7 @@ class Heos extends utils.Adapter {
 		var baseStatePath = folderPath + '.' + itemId;
 		var statePath = baseStatePath + '.';
 		//Folder
-		await this.setObjectNotExistsAsync(baseStatePath, {
+		await this.setObject(baseStatePath, {
 			type: 'folder',
 			common: {
 				name: payload.name || 'Playlist ' + itemId,
@@ -927,7 +927,7 @@ class Heos extends utils.Adapter {
 		var statePath = baseStatePath + '.';
 
 		//Folder
-		await this.setObjectNotExistsAsync(baseStatePath, {
+		await this.setObject(baseStatePath, {
 			type: 'folder',
 			common: {
 				name: 'Preset ' + itemId,
@@ -1226,7 +1226,7 @@ class Heos extends utils.Adapter {
 							if ((jdata.hasOwnProperty('payload'))) {
 								var folderPath = 'sources'
 								//Folder
-								await this.setObjectNotExistsAsync(folderPath, {
+								await this.setObject(folderPath, {
 									type: 'folder',
 									common: {
 										name: 'Sources',
@@ -1430,7 +1430,7 @@ class Heos extends utils.Adapter {
 												for (var id in states) {
 													if(!playlists.includes(states[id].val)){
 														this.log.info("Deleting playlist: " + states[id].val)
-														this.delObject(folderPath + "." + states[id].val)
+														this.delObject(folderPath + "." + states[id].val, {recursive: true})
 													}
 												}
 											})
@@ -1465,7 +1465,7 @@ class Heos extends utils.Adapter {
 												for (var id in states) {
 													if(!presets.includes(states[id].val)){
 														this.log.info("Deleting preset: " + states[id].val)
-														this.delObject(folderPath + "." + states[id].val)
+														this.delObject(folderPath + "." + states[id].val, {recursive: true})
 													}
 												}
 											})
