@@ -297,7 +297,7 @@ class Heos extends utils.Adapter {
 		const id = this.idToDCS(_id);
 		const fullId = _id.split('.');
 
-		this.log.debug("State change - ID: " + _id + " | DCS: " + JSON.stringify(id));
+		this.log.debug("State change - ID: " + _id + " | DCS: " + JSON.stringify(id) + " | State: " + JSON.stringify(state));
 
 		if(id){
 			if (state.val === 'false') {
@@ -1927,6 +1927,10 @@ class Heos extends utils.Adapter {
 			// heos://system/reboot
 			this.msgs.push('heos://system/reboot');
 			this.sendNextMsg();
+			if (this.rebootTimeout) {
+				clearTimeout(this.rebootTimeout);
+				this.rebootTimeout = undefined;
+			}
 			this.rebootTimeout = setTimeout(() => {
 				this.reconnect();
 			}, 1000)
