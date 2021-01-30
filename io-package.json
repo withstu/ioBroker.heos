@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.7.0",
+		"version": "1.7.1",
 		"news": {
+			"1.7.1": {
+				"en": "add seek",
+				"de": "Suche hinzufügen",
+				"ru": "добавить поиск",
+				"pt": "adicionar procurar",
+				"nl": "voeg zoeken toe",
+				"fr": "ajouter chercher",
+				"it": "aggiungi seek",
+				"es": "agregar buscar",
+				"pl": "dodaj szukaj",
+				"zh-cn": "增加寻道"
+			},
 			"1.7.0": {
 				"en": "reboot not responding players & delete old presets and playlists",
 				"de": "Starten Sie nicht reagierende Player neu und löschen Sie alte Voreinstellungen und Wiedergabelisten",
@@ -230,18 +242,6 @@
 				"es": "mejorar la función de navegación",
 				"pl": "ulepszyć funkcję przeglądania",
 				"zh-cn": "改善浏览功能"
-			},
-			"1.2.2": {
-				"en": "rename browse command",
-				"de": "Befehl zum Durchsuchen umbenennen",
-				"ru": "переименовать команду просмотра",
-				"pt": "renomear comando de navegação",
-				"nl": "hernoem bladeropdracht",
-				"fr": "renommer la commande de navigation",
-				"it": "rinomina il comando Browse",
-				"es": "cambiar el nombre del comando de exploración",
-				"pl": "zmień nazwę polecenia przeglądania",
-				"zh-cn": "重命名浏览命令"
 			}
 		},
 		"title": "HEOS",
