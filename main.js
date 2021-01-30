@@ -155,7 +155,7 @@ class Heos extends utils.Adapter {
 		// Reset the connection indicator during startup
 		this.setState("info.connection", false, true);
 		
-		await this.setObjectNotExistsAsync('players', {
+		await this.setObjectAsync('players', {
 			type: 'device',
 			common: {
 				name: 'List of HEOS players',
@@ -163,7 +163,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync('command', {
+		await this.setObjectAsync('command', {
 			type: 'state',
 			common: {
 				name: 'HEOS command',
@@ -175,7 +175,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync('command_scope_pid', {
+		await this.setObjectAsync('command_scope_pid', {
 			type: 'state',
 			common: {
 				name: 'Command Scope Player IDs',
@@ -188,7 +188,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync('signed_in', {
+		await this.setObjectAsync('signed_in', {
 			type: 'state',
 			common: {
 				name: 'Sign-in status',
@@ -201,7 +201,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync('signed_in_user', {
+		await this.setObjectAsync('signed_in_user', {
 			type: 'state',
 			common: {
 				name: 'Signed-in user',
@@ -213,7 +213,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync('error', {
+		await this.setObjectAsync('error', {
 			type: 'state',
 			common: {
 				name: 'Error status',
@@ -226,7 +226,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync('last_error', {
+		await this.setObjectAsync('last_error', {
 			type: 'state',
 			common: {
 				name: 'Last error messages',
@@ -258,6 +258,9 @@ class Heos extends utils.Adapter {
 		this.subscribeStates('players.*.volume_max');
 		this.subscribeStates('players.*.volume_up');
 		this.subscribeStates('players.*.volume_down');
+		this.subscribeStates('players.*.seek');
+		this.subscribeStates('players.*.current_elapsed');
+		this.subscribeStates('players.*.current_elapsed_s');
 		this.subscribeStates('players.*.clear_queue');
 		this.subscribeStates('players.*.group_volume');
 		this.subscribeStates('players.*.group_muted');
@@ -349,6 +352,35 @@ class Heos extends utils.Adapter {
 						player.sendCommand('set_group_mute&state=' + (state.val === true ? 'on' : 'off'));
 					} else if(id.state === 'command'){
 						player.sendCommand(state.val);
+					} else if(id.state === 'seek'){
+						let percent = state.val
+						if (state.val < 0)   {
+							percent = 0;
+						}
+						if (state.val > 100) {
+							percent = 100;
+						}
+						player.timeSeek(Math.round((player.current_duration * percent) / 100));
+					} else if(id.state === 'current_elapsed'){
+						player.timeSeek(state.val);
+					} else if(id.state === 'current_elapsed_s'){
+						let seconds = 0;
+						if(state.val){
+							const parts = state.val.toString().split(':');
+							if (parts.length === 3) {
+								seconds = parseInt(parts[0]) * 3600;
+								seconds += parseInt(parts[1]) * 60;
+								seconds = parseInt(parts[2]);
+							} else if (parts.length === 2) {
+								seconds = parseInt(parts[0]) * 60;
+								seconds += parseInt(parts[1]);
+							} else if (parts.length === 1) {
+								seconds = parseInt(parts[0]);
+							} else {
+								return this.log.error('Invalid elapsed time: ' + state.val);
+							}
+						}
+						player.timeSeek(seconds);
 					} else if(id.state === 'play'){
 						player.sendCommand('set_play_state&state=play');
 					} else if(id.state === 'pause'){
@@ -671,7 +703,7 @@ class Heos extends utils.Adapter {
 		var baseStatePath = folderPath + '.' + source.sid;
 		var statePath = baseStatePath + '.';
 		//Folder
-		await this.setObject(baseStatePath, {
+		await this.setObjectAsync(baseStatePath, {
 			type: 'folder',
 			common: {
 				name: source.name,
@@ -681,7 +713,7 @@ class Heos extends utils.Adapter {
 		});
 
 		//States
-		await this.setObjectNotExistsAsync(statePath + 'sid', {
+		await this.setObjectAsync(statePath + 'sid', {
 			type: 'state',
 			common: {
 				name: 'Source ID',
@@ -694,7 +726,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'name', {
+		await this.setObjectAsync(statePath + 'name', {
 			type: 'state',
 			common: {
 				name: 'Source name',
@@ -707,7 +739,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'type', {
+		await this.setObjectAsync(statePath + 'type', {
 			type: 'state',
 			common: {
 				name: 'Source type',
@@ -720,7 +752,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'image_url', {
+		await this.setObjectAsync(statePath + 'image_url', {
 			type: 'state',
 			common: {
 				name: 'Source image url',
@@ -733,7 +765,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'available', {
+		await this.setObjectAsync(statePath + 'available', {
 			type: 'state',
 			common: {
 				name: 'Available',
@@ -746,7 +778,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'browse', {
+		await this.setObjectAsync(statePath + 'browse', {
 			type: 'state',
 			common: {
 				name: 'Browse Source',
@@ -774,7 +806,7 @@ class Heos extends utils.Adapter {
 		var baseStatePath = folderPath + '.' + itemId;
 		var statePath = baseStatePath + '.';
 		//Folder
-		await this.setObject(baseStatePath, {
+		await this.setObjectAsync(baseStatePath, {
 			type: 'folder',
 			common: {
 				name: payload.name || 'Playlist ' + itemId,
@@ -784,7 +816,7 @@ class Heos extends utils.Adapter {
 		});
 
 		//States
-		await this.setObjectNotExistsAsync(statePath + 'id', {
+		await this.setObjectAsync(statePath + 'id', {
 			type: 'state',
 			common: {
 				name: 'Playlist ID',
@@ -796,7 +828,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'name', {
+		await this.setObjectAsync(statePath + 'name', {
 			type: 'state',
 			common: {
 				name: 'Playlist name',
@@ -809,7 +841,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'playable', {
+		await this.setObjectAsync(statePath + 'playable', {
 			type: 'state',
 			common: {
 				name: 'Playable',
@@ -823,7 +855,7 @@ class Heos extends utils.Adapter {
 			native: {},
 		});
 		if(payload.playable == 'yes'){
-			await this.setObjectNotExistsAsync(statePath + 'play', {
+			await this.setObjectAsync(statePath + 'play', {
 				type: 'state',
 				common: {
 					name: 'Play',
@@ -837,7 +869,7 @@ class Heos extends utils.Adapter {
 				native: {},
 			});
 		}
-		await this.setObjectNotExistsAsync(statePath + 'type', {
+		await this.setObjectAsync(statePath + 'type', {
 			type: 'state',
 			common: {
 				name: 'Playlist type',
@@ -850,7 +882,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'image_url', {
+		await this.setObjectAsync(statePath + 'image_url', {
 			type: 'state',
 			common: {
 				name: 'Playlist image url',
@@ -863,7 +895,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'container', {
+		await this.setObjectAsync(statePath + 'container', {
 			type: 'state',
 			common: {
 				name: 'Container',
@@ -877,7 +909,7 @@ class Heos extends utils.Adapter {
 			native: {},
 		});
 		if(payload.container == 'yes'){
-			await this.setObjectNotExistsAsync(statePath + 'cid', {
+			await this.setObjectAsync(statePath + 'cid', {
 				type: 'state',
 				common: {
 					name: 'Container ID',
@@ -891,7 +923,7 @@ class Heos extends utils.Adapter {
 				native: {},
 			});
 		} else {
-			await this.setObjectNotExistsAsync(statePath + 'mid', {
+			await this.setObjectAsync(statePath + 'mid', {
 				type: 'state',
 				common: {
 					name: 'Media ID',
@@ -927,7 +959,7 @@ class Heos extends utils.Adapter {
 		var statePath = baseStatePath + '.';
 
 		//Folder
-		await this.setObject(baseStatePath, {
+		await this.setObjectAsync(baseStatePath, {
 			type: 'folder',
 			common: {
 				name: 'Preset ' + itemId,
@@ -937,7 +969,7 @@ class Heos extends utils.Adapter {
 		});
 
 		//States
-		await this.setObjectNotExistsAsync(statePath + 'id', {
+		await this.setObjectAsync(statePath + 'id', {
 			type: 'state',
 			common: {
 				name: 'Preset ID',
@@ -949,7 +981,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'name', {
+		await this.setObjectAsync(statePath + 'name', {
 			type: 'state',
 			common: {
 				name: 'Preset name',
@@ -962,7 +994,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'playable', {
+		await this.setObjectAsync(statePath + 'playable', {
 			type: 'state',
 			common: {
 				name: 'Playable',
@@ -976,7 +1008,7 @@ class Heos extends utils.Adapter {
 			native: {},
 		});
 		if(payload.playable == 'yes'){
-			await this.setObjectNotExistsAsync(statePath + 'play', {
+			await this.setObjectAsync(statePath + 'play', {
 				type: 'state',
 				common: {
 					name: 'Play',
@@ -990,7 +1022,7 @@ class Heos extends utils.Adapter {
 				native: {},
 			});
 		}
-		await this.setObjectNotExistsAsync(statePath + 'type', {
+		await this.setObjectAsync(statePath + 'type', {
 			type: 'state',
 			common: {
 				name: 'Preset type',
@@ -1002,7 +1034,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'image_url', {
+		await this.setObjectAsync(statePath + 'image_url', {
 			type: 'state',
 			common: {
 				name: 'Preset image url',
@@ -1015,7 +1047,7 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
-		await this.setObjectNotExistsAsync(statePath + 'container', {
+		await this.setObjectAsync(statePath + 'container', {
 			type: 'state',
 			common: {
 				name: 'Container',
@@ -1029,7 +1061,7 @@ class Heos extends utils.Adapter {
 			native: {},
 		});
 		if(payload.container == 'yes'){
-			await this.setObjectNotExistsAsync(statePath + 'cid', {
+			await this.setObjectAsync(statePath + 'cid', {
 				type: 'state',
 				common: {
 					name: 'Container ID',
@@ -1043,7 +1075,7 @@ class Heos extends utils.Adapter {
 				native: {},
 			});
 		} else {
-			await this.setObjectNotExistsAsync(statePath + 'mid', {
+			await this.setObjectAsync(statePath + 'mid', {
 				type: 'state',
 				common: {
 					name: 'Media ID',
@@ -1226,7 +1258,7 @@ class Heos extends utils.Adapter {
 							if ((jdata.hasOwnProperty('payload'))) {
 								var folderPath = 'sources'
 								//Folder
-								await this.setObject(folderPath, {
+								await this.setObjectAsync(folderPath, {
 									type: 'folder',
 									common: {
 										name: 'Sources',
@@ -1234,7 +1266,7 @@ class Heos extends utils.Adapter {
 									},
 									native: {},
 								});
-								await this.setObjectNotExistsAsync(folderPath + '.' + 'browse_result', {
+								await this.setObjectAsync(folderPath + '.' + 'browse_result', {
 									type: 'state',
 									common: {
 										name: 'Browse result',
