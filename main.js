@@ -360,9 +360,23 @@ class Heos extends utils.Adapter {
 						if (state.val > 100) {
 							percent = 100;
 						}
-						player.timeSeek(Math.round((player.current_duration * percent) / 100));
+						if(player.isPlayerLeader()){
+							player.timeSeek(Math.round((player.current_duration * percent) / 100));
+						} else {
+							let leader = this.players[player.group_leader_pid];
+							if(leader){
+								leader.timeSeek(Math.round((leader.current_duration * percent) / 100));
+							}
+						}
 					} else if(id.state === 'current_elapsed'){
-						player.timeSeek(state.val);
+						if(player.isPlayerLeader()){
+							player.timeSeek(state.val);
+						} else {
+							let leader = this.players[player.group_leader_pid];
+							if(leader){
+								leader.timeSeek(state.val);
+							}
+						}
 					} else if(id.state === 'current_elapsed_s'){
 						let seconds = 0;
 						if(state.val){
@@ -380,7 +394,14 @@ class Heos extends utils.Adapter {
 								return this.log.error('Invalid elapsed time: ' + state.val);
 							}
 						}
-						player.timeSeek(seconds);
+						if(player.isPlayerLeader()){
+							player.timeSeek(seconds);
+						} else {
+							let leader = this.players[player.group_leader_pid];
+							if(leader){
+								leader.timeSeek(seconds);
+							}
+						}
 					} else if(id.state === 'play'){
 						player.sendCommand('set_play_state&state=play');
 					} else if(id.state === 'pause'){

@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.7.1",
+		"version": "1.7.2",
 		"news": {
+			"1.7.2": {
+				"en": "fix seek in groups",
+				"de": "Fix Suche in Gruppen",
+				"ru": "исправить поиск в группах",
+				"pt": "consertar buscar em grupos",
+				"nl": "zoeken in groepen repareren",
+				"fr": "corriger la recherche dans les groupes",
+				"it": "correzione della ricerca in gruppi",
+				"es": "arreglar buscar en grupos",
+				"pl": "napraw wyszukiwanie w grupach",
+				"zh-cn": "分组修复"
+			},
 			"1.7.1": {
 				"en": "add seek",
 				"de": "Suche hinzufügen",
@@ -230,18 +242,6 @@
 				"es": "corrección de errores menores",
 				"pl": "drobne poprawki",
 				"zh-cn": "小错误修正"
-			},
-			"1.2.3": {
-				"en": "improve browse feature",
-				"de": "die Suchfunktion verbessern",
-				"ru": "улучшить функцию просмотра",
-				"pt": "melhorar o recurso de navegação",
-				"nl": "de browse-functie verbeteren",
-				"fr": "améliorer la fonctionnalité de navigation",
-				"it": "migliorare la funzionalità di navigazione",
-				"es": "mejorar la función de navegación",
-				"pl": "ulepszyć funkcję przeglądania",
-				"zh-cn": "改善浏览功能"
 			}
 		},
 		"title": "HEOS",
