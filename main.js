@@ -1,6 +1,6 @@
 /**
  * ioBroker HEOS Adapter
- * Copyright (c) 2020 withstu <withstu@gmx.de>
+ * Copyright (c) 2021 withstu <withstu@gmx.de>
  * MIT License
  *
  * derived from https://forum.iobroker.net/topic/10420/vorlage-denon-heos-script by Uwe Uhula

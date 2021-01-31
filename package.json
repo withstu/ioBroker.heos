@@ -1,6 +1,6 @@
 {
   "name": "iobroker.heos",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "The adapter lets control HEOS from ioBroker",
   "author": {
     "name": "withstu",
@@ -24,6 +24,9 @@
   },
   "dependencies": {
     "@iobroker/adapter-core": "^2.4.0",
+    "fast-xml-parser": "^3.17.6",
+    "got": "^11.8.1",
+    "html-entities": "^2.1.0",
     "node-ssdp": "^4.0.1"
   },
   "devDependencies": {
