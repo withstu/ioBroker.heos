@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.7.2",
+		"version": "1.7.3",
 		"news": {
+			"1.7.3": {
+				"en": "add upnp module and support bitrate, audio format and sample rate",
+				"de": "Fügen Sie das Upnp-Modul hinzu und unterstützen Sie Bitrate, Audioformat und Samplerate",
+				"ru": "добавить модуль upnp и поддерживать битрейт, аудиоформат и частоту дискретизации",
+				"pt": "adicionar módulo upnp e suportar taxa de bits, formato de áudio e taxa de amostragem",
+				"nl": "voeg upnp-module toe en ondersteun bitrate, audioformaat en samplefrequentie",
+				"fr": "ajouter le module upnp et prendre en charge le débit binaire, le format audio et la fréquence d'échantillonnage",
+				"it": "aggiungere il modulo upnp e supportare bitrate, formato audio e frequenza di campionamento",
+				"es": "agregue el módulo upnp y admita bitrate, formato de audio y frecuencia de muestreo",
+				"pl": "dodaj moduł upnp i obsługuj bitrate, format audio i częstotliwość próbkowania",
+				"zh-cn": "添加upnp模块并支持比特率，音频格式和采样率"
+			},
 			"1.7.2": {
 				"en": "fix seek in groups",
 				"de": "Fix Suche in Gruppen",
@@ -230,18 +242,6 @@
 				"es": "agregar cola y algunas mejoras de navegación",
 				"pl": "dodać kolejkę i kilka ulepszeń przeglądania",
 				"zh-cn": "添加队列和一些浏览器改进"
-			},
-			"1.2.4": {
-				"en": "minor bugfix",
-				"de": "kleiner Bugfix",
-				"ru": "незначительное исправление",
-				"pt": "pequena correção de bug",
-				"nl": "kleine bugfix",
-				"fr": "correction de bogue mineur",
-				"it": "bugfix minore",
-				"es": "corrección de errores menores",
-				"pl": "drobne poprawki",
-				"zh-cn": "小错误修正"
 			}
 		},
 		"title": "HEOS",
