@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.7.3",
+		"version": "1.7.4",
 		"news": {
+			"1.7.4": {
+				"en": "fix upnp init bug",
+				"de": "Behebung des Upnp-Init-Fehlers",
+				"ru": "исправить ошибку инициализации upnp",
+				"pt": "corrigir bug upnp init",
+				"nl": "repareer upnp init-bug",
+				"fr": "correction du bogue d'initialisation upnp",
+				"it": "correggere il bug di inizializzazione di upnp",
+				"es": "corregir el error de inicio de upnp",
+				"pl": "napraw błąd init upnp",
+				"zh-cn": "修复upnp初始化错误"
+			},
 			"1.7.3": {
 				"en": "add upnp module and support bitrate, audio format and sample rate",
 				"de": "Fügen Sie das Upnp-Modul hinzu und unterstützen Sie Bitrate, Audioformat und Samplerate",
@@ -230,18 +242,6 @@
 				"es": "agregar botón de retroceso para explorar la función",
 				"pl": "dodaj przycisk Wstecz, aby przeglądać funkcję",
 				"zh-cn": "添加返回按钮浏览功能"
-			},
-			"1.3.0": {
-				"en": "add queue and some browse improvements",
-				"de": "Warteschlange hinzufügen und einige Verbesserungen beim Durchsuchen",
-				"ru": "добавить очередь и некоторые улучшения просмотра",
-				"pt": "adicionar fila e algumas melhorias de navegação",
-				"nl": "wachtrij toevoegen en enkele browse-verbeteringen",
-				"fr": "ajouter une file d'attente et quelques améliorations de navigation",
-				"it": "aggiungere coda e alcuni miglioramenti alla navigazione",
-				"es": "agregar cola y algunas mejoras de navegación",
-				"pl": "dodać kolejkę i kilka ulepszeń przeglądania",
-				"zh-cn": "添加队列和一些浏览器改进"
 			}
 		},
 		"title": "HEOS",
