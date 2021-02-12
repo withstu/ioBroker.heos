@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.7.4",
+		"version": "1.7.5",
 		"news": {
+			"1.7.5": {
+				"en": "add bit depth",
+				"de": "Bittiefe hinzufügen",
+				"ru": "добавить битовую глубину",
+				"pt": "adicionar profundidade de bits",
+				"nl": "beetje diepte toevoegen",
+				"fr": "ajouter une profondeur de bits",
+				"it": "aggiungere la profondità di bit",
+				"es": "agregar profundidad de bits",
+				"pl": "dodać głębię bitową",
+				"zh-cn": "增加位深度"
+			},
 			"1.7.4": {
 				"en": "fix upnp init bug",
 				"de": "Behebung des Upnp-Init-Fehlers",
@@ -230,18 +242,6 @@
 				"es": "arreglar la clasificación preestablecida",
 				"pl": "naprawić predefiniowane sortowanie",
 				"zh-cn": "修复预设排序"
-			},
-			"1.3.1": {
-				"en": "add back button to browse feature",
-				"de": "Schaltfläche \"Zurück\" zum Durchsuchen hinzufügen",
-				"ru": "добавить кнопку назад, чтобы просмотреть функцию",
-				"pt": "adicione o botão Voltar para navegar pelo recurso",
-				"nl": "knop terug toevoegen om door de functie te bladeren",
-				"fr": "ajouter le bouton de retour pour parcourir la fonctionnalité",
-				"it": "aggiungi il pulsante Indietro per sfogliare la funzione",
-				"es": "agregar botón de retroceso para explorar la función",
-				"pl": "dodaj przycisk Wstecz, aby przeglądać funkcję",
-				"zh-cn": "添加返回按钮浏览功能"
 			}
 		},
 		"title": "HEOS",
