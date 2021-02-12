@@ -114,6 +114,9 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 
 ## Changelog
 
+### 1.7.5 (2021-02-12)
+* (withstu) add bit depth
+
 ### 1.7.4 (2021-02-01)
 * (withstu) fix upnp init bug
 
