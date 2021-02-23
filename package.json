@@ -27,7 +27,8 @@
     "fast-xml-parser": "^3.17.6",
     "got": "^11.8.1",
     "html-entities": "^2.1.0",
-    "node-ssdp": "^4.0.1"
+    "node-ssdp": "^4.0.1",
+    "node-vibrant": "^3.1.6"
   },
   "devDependencies": {
     "@iobroker/testing": "^2.4.2",
