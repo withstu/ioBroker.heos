@@ -149,7 +149,7 @@
         "lc-border-color": "",
         "lc-border-radius": 10,
         "lc-zindex": 0,
-        "class": "mdui-label",
+        "class": "mdui-label marquee",
         "visibility-oid": "heos.0.players.123456789.current_mid"
       },
       "style": {
@@ -220,7 +220,7 @@
         "lc-border-color": "",
         "lc-border-radius": 10,
         "lc-zindex": 0,
-        "class": "mdui-label",
+        "class": "mdui-label marquee",
         "visibility-oid": "heos.0.players.123456789.current_mid"
       },
       "style": {
@@ -291,7 +291,7 @@
         "lc-border-color": "",
         "lc-border-radius": 10,
         "lc-zindex": 0,
-        "class": "mdui-value ",
+        "class": "mdui-value marquee",
         "visibility-oid": "heos.0.players.123456789.current_mid"
       },
       "style": {
@@ -1537,7 +1537,7 @@
         "lc-zindex": 0,
         "html": "{val:heos.0.players.123456789.current_audio_format; val == \"\" ? \"\": val} {val:heos.0.players.123456789.current_bitrate; val == 0 ? \"\": val + \"kbps\"} {val:heos.0.players.123456789.current_sample_rate; val == 0 ? \"\": val + \"kHz\"} {val:heos.0.players.123456789.current_bitdepth; val == 0 ? \"\": val + \"bit\"}",
         "visibility-cond": "!=",
-        "visibility-val": "",
+        "visibility-val": "0",
         "visibility-groups-action": "hide",
         "visibility-oid": "heos.0.players.123456789.current_bitrate"
       },
