@@ -1543,7 +1543,7 @@
       },
       "style": {
         "left": "50px",
-        "top": "calc(100% - 138px)",
+        "top": "calc(100% - 137px)",
         "background-color": "#FFD700",
         "z-index": "10",
         "width": "calc(100% - 100px)",
