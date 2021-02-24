@@ -149,7 +149,7 @@
         "lc-border-color": "",
         "lc-border-radius": 10,
         "lc-zindex": 0,
-        "class": "mdui-label marquee",
+        "class": "mdui-label {val:heos.0.players.123456789.current_artist; val.length > 26 ? \"marquee\": \"\"}",
         "visibility-oid": "heos.0.players.123456789.current_mid"
       },
       "style": {
@@ -220,7 +220,7 @@
         "lc-border-color": "",
         "lc-border-radius": 10,
         "lc-zindex": 0,
-        "class": "mdui-label marquee",
+        "class": "mdui-label {val:heos.0.players.123456789.current_station; val.length > 26 ? \"marquee\": \"\"}",
         "visibility-oid": "heos.0.players.123456789.current_mid"
       },
       "style": {
@@ -291,7 +291,7 @@
         "lc-border-color": "",
         "lc-border-radius": 10,
         "lc-zindex": 0,
-        "class": "mdui-value marquee",
+        "class": "mdui-value {val:heos.0.players.123456789.current_title; val.length > 26 ? \"marquee\": \"\"}",
         "visibility-oid": "heos.0.players.123456789.current_mid"
       },
       "style": {
@@ -1483,8 +1483,8 @@
     "e00021": {
       "tpl": "tplHtml",
       "data": {
-        "g_fixed": false,
-        "g_visibility": true,
+        "g_fixed": true,
+        "g_visibility": false,
         "g_css_font_text": true,
         "g_css_background": true,
         "g_css_shadow_padding": true,
@@ -1536,14 +1536,14 @@
         "lc-border-radius": 10,
         "lc-zindex": 0,
         "html": "{val:heos.0.players.123456789.current_audio_format; val == \"\" ? \"\": val} {val:heos.0.players.123456789.current_bitrate; val == 0 ? \"\": val + \"kbps\"} {val:heos.0.players.123456789.current_sample_rate; val == 0 ? \"\": val + \"kHz\"} {val:heos.0.players.123456789.current_bitdepth; val == 0 ? \"\": val + \"bit\"}",
-        "visibility-cond": "!=",
-        "visibility-val": "0",
+        "visibility-cond": "==",
+        "visibility-val": 1,
         "visibility-groups-action": "hide",
-        "visibility-oid": "heos.0.players.123456789.current_bitrate"
+        "class": ""
       },
       "style": {
         "left": "50px",
-        "top": "calc(100% - 137px)",
+        "top": "calc(100% - 138px)",
         "background-color": "#FFD700",
         "z-index": "10",
         "width": "calc(100% - 100px)",
@@ -1555,7 +1555,8 @@
         "padding-right": "",
         "text-align": "center",
         "line-height": "15px",
-        "font-size": "x-small"
+        "font-size": "x-small",
+        "opacity": "{format:heos.0.players.123456789.current_audio_format;bitrate:heos.0.players.123456789.current_bitrate;sample:heos.0.players.123456789.current_sample_rate;bitdepth:heos.0.players.123456789.current_bitdepth;format.length != 0 || bitrate != 0 || sample != 0 || bitdepth != 0 ? 1 :: 0}"
       },
       "widgetSet": "basic"
     },
