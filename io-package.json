@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.7.5",
+		"version": "1.7.6",
 		"news": {
+			"1.7.6": {
+				"en": "add image color extraction",
+				"de": "Bildfarbenextraktion hinzufügen",
+				"ru": "добавить извлечение цвета изображения",
+				"pt": "adicionar extração de cor de imagem",
+				"nl": "voeg kleurextractie toe",
+				"fr": "ajouter une extraction de couleur d'image",
+				"it": "aggiungi l'estrazione del colore dell'immagine",
+				"es": "agregar extracción de color de imagen",
+				"pl": "dodać ekstrakcję kolorów obrazu",
+				"zh-cn": "添加图像颜色提取"
+			},
 			"1.7.5": {
 				"en": "add bit depth",
 				"de": "Bittiefe hinzufügen",
@@ -230,18 +242,6 @@
 				"es": "corregir el botón de página anterior en la función de exploración",
 				"pl": "napraw przycisk poprzedniej strony w funkcji przeglądania",
 				"zh-cn": "修复浏览功能中的上一页按钮"
-			},
-			"1.3.2": {
-				"en": "fix preset sorting",
-				"de": "voreingestellte Sortierung korrigieren",
-				"ru": "исправить предустановленную сортировку",
-				"pt": "corrigir classificação predefinida",
-				"nl": "vooraf ingestelde sortering repareren",
-				"fr": "corriger le tri prédéfini",
-				"it": "correggere l'ordinamento preimpostato",
-				"es": "arreglar la clasificación preestablecida",
-				"pl": "naprawić predefiniowane sortowanie",
-				"zh-cn": "修复预设排序"
 			}
 		},
 		"title": "HEOS",

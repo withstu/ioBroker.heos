@@ -1,6 +1,6 @@
 {
   "name": "iobroker.heos",
-  "version": "1.7.5",
+  "version": "1.7.6",
   "description": "The adapter lets control HEOS from ioBroker",
   "author": {
     "name": "withstu",
