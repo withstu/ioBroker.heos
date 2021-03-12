@@ -621,6 +621,23 @@ class Heos extends utils.Adapter {
 		});
 	}
 
+	logData(prefix, data){
+		if(data.toString().includes('sign_in')){
+			this.log.silly(prefix + ": " + data.toString());
+			this.log.debug(prefix + ": sign_in - sensitive data hidden");
+		} else {
+			this.log.debug(prefix + ": " + data.toString());
+		}
+	}
+
+	getAllIndexes(arr, val) {
+		var indexes = [], i;
+		for(i = 0; i < arr.length; i++)
+			if (arr[i] === val)
+				indexes.push(i);
+		return indexes;
+	}
+
 
 	/** es liegen Antwort(en) vor
 	 * 
@@ -634,12 +651,7 @@ class Heos extends utils.Adapter {
 	 *        {"container": "no", "mid": "catalog/stations/A1W7U8U71CGE50/#chunk"
 	 **/
 	onData(data) {
-		if(data.toString().includes('sign_in')){
-			this.log.silly("onData: " + data.toString());
-			this.log.debug("onData: sign_in - sensitive data hidden");
-		} else {
-			this.log.debug("onData: " + data.toString());
-		}
+		this.logData("onData", data);
 		try {
 			data = data.toString();
 			data = data.replace(/[\n\r]/g, '');    // Steuerzeichen "CR" entfernen   
@@ -648,19 +660,21 @@ class Heos extends utils.Adapter {
 			data = this.unfinishedResponses + data;
 			this.unfinishedResponses = '';
 
+			var lastResponse = '';
 			var responses = data.split(/(?={"heos")/g);
 			for (var r = 0; r < responses.length; r++) {
 				if (responses[r].trim().length > 0) {
+					let response = responses[r].trim()
 					try {
-						JSON.parse(responses[r]); // check ob korrektes JSON Array
-						this.parseResponse(responses[r]);
-					} catch (e) {
-						if(responses[r].includes('sign_in')){
-							this.log.silly('onData: invalid json (error: ' + e.message + '): ' + responses[r]);
-							this.log.debug("onData: sign_in - sensitive data hidden");
+						JSON.parse(response); // check ob korrektes JSON Array
+						if(lastResponse !== response){
+							this.parseResponse(response);
+							lastResponse = response;
 						} else {
-							this.log.debug('onData: invalid json (error: ' + e.message + '): ' + responses[r]);
+							this.logData('Skip duplicate response' , response)
 						}
+					} catch (e) {
+						this.logData('onData: invalid json (error: ' + e.message + ')', response);
 						this.unfinishedResponses += responses[r];
 					}
 				}
