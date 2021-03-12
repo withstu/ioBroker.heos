@@ -638,7 +638,6 @@ class Heos extends utils.Adapter {
 		return indexes;
 	}
 
-
 	/** es liegen Antwort(en) vor
 	 * 
 	 * {"heos": {"command": "browse/browse", "result": "success", "message": "sid=1028&returned=9&count=9"}, 
@@ -1906,7 +1905,10 @@ class Heos extends utils.Adapter {
 				}
 			}
 			this.getGroups();
-		} catch (err) { this.log.error('startPlayers: ' + err.message); }
+		} catch (err) { 
+			this.log.error('startPlayers: ' + err.message);
+			this.reconnect();
+		}
 	}
 
 	//Alle Player stoppen
