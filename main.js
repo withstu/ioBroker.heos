@@ -55,6 +55,8 @@ class Heos extends utils.Adapter {
 		this.unfinishedResponses = '';
 		this.ssdpSearchTargetName = 'urn:schemas-denon-com:device:ACT-Denon:1';
 
+		this.reboot_ips = [];
+
 		this.sourceMap = {
 			1: {
 				name: 'Pandora ',
@@ -151,10 +153,7 @@ class Heos extends utils.Adapter {
 		};
 	}
 
-	async onReady() {
-		// Reset the connection indicator during startup
-		this.setState("info.connection", false, true);
-		
+	async onReady() {	
 		await this.setObjectAsync('players', {
 			type: 'device',
 			common: {
@@ -184,6 +183,19 @@ class Heos extends utils.Adapter {
 				role: 'text',
 				read: true,
 				write: true,
+				def: ''
+			},
+			native: {},
+		});
+		await this.setObjectAsync('connected_ip', {
+			type: 'state',
+			common: {
+				name: 'Connected IP address',
+				desc: 'IP address to which the adapter is connected to',
+				type: 'string',
+				role: 'text',
+				read: true,
+				write: false,
 				def: ''
 			},
 			native: {},
@@ -238,6 +250,10 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
+
+		// Reset the connection indicator during startup
+		this.setState('info.connection', false, true);
+		this.setState('connected_ip', '', true);
 		
 		//Root
 		this.subscribeStates('command');
@@ -262,6 +278,7 @@ class Heos extends utils.Adapter {
 		this.subscribeStates('players.*.current_elapsed');
 		this.subscribeStates('players.*.current_elapsed_s');
 		this.subscribeStates('players.*.clear_queue');
+		this.subscribeStates('players.*.reboot');
 		this.subscribeStates('players.*.group_volume');
 		this.subscribeStates('players.*.group_muted');
 		this.subscribeStates('players.*.command');
@@ -418,6 +435,8 @@ class Heos extends utils.Adapter {
 						player.sendCommand('volume_down&step=' + this.config.volumeStepLevel);
 					} else if(id.state === 'clear_queue'){
 						player.sendCommand('clear_queue');
+					} else if(id.state === 'reboot'){
+						player.reboot();
 					} else if(id.state === 'auto_play'){
 						player.auto_play = state.val;
 					} else if(id.state === 'ignore_broadcast_cmd'){
@@ -452,6 +471,8 @@ class Heos extends utils.Adapter {
 			if (typeof this.net_client == 'undefined') {
 				if (headers.ST !== this.ssdpSearchTargetName) { // korrektes SSDP
 					this.log.debug('onNodeSSDPResponse: Getting wrong SSDP entry. Keep trying...');
+				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(rinfo.address)){
+					this.log.debug('onNodeSSDPResponse: Reboot IP activated. Getting wrong SSDP entry. Keep trying...');
 				} else {
 					if (this.ssdpSearchInterval) {
 						clearInterval(this.ssdpSearchInterval);
@@ -474,6 +495,7 @@ class Heos extends utils.Adapter {
 
 					this.net_client.on('connect', async () => {
 						this.setStateChanged('info.connection', true, true);
+						this.setStateChanged('connected_ip', this.ip, true);
 
 						this.state = States.Connected;
 						this.log.info('connected to HEOS (' + this.ip + ')');
@@ -2004,6 +2026,12 @@ class Heos extends utils.Adapter {
 			// heos://system/reboot
 			this.msgs.push('heos://system/reboot');
 			this.sendNextMsg();
+			if(this.reboot_ips.includes(this.ip)){
+				var index = this.reboot_ips.indexOf(this.ip);
+				if (index > -1) {
+					this.reboot_ips.splice(index, 1);
+				}
+			}
 			if (this.rebootTimeout) {
 				clearTimeout(this.rebootTimeout);
 				this.rebootTimeout = undefined;
@@ -2096,6 +2124,7 @@ class Heos extends utils.Adapter {
 			this.log.info("searching for HEOS devices ...")
 			//Reset connect states
 			this.setStateChanged('info.connection', false, true);
+			this.setStateChanged('connected_ip', '', true);
 			this.getChannels("players", (err, list) => {
 				if(list){
 					list.forEach((item) => {
@@ -2184,6 +2213,7 @@ class Heos extends utils.Adapter {
 			}
 		});
 		this.setStateChanged('info.connection', false, true);
+		this.setStateChanged('connected_ip', '', true);
 		this.log.info('disconnected from HEOS');
 	}
 	
