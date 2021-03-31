@@ -41,10 +41,13 @@ class Heos extends utils.Adapter {
 		this.browseCmdMap = {};
 		this.ip = '';
 		this.state = States.Disconnected;
+		this.signed_in = false
+		this.offline_mode = false;
 		
 		this.heartbeatRetries = 0;
 		this.heartbeatInterval = undefined;
 		this.ssdpSearchInterval = undefined;
+		this.ssdpSearchCounter = 0;
 
 		this.reconnectTimeout = undefined;
 		this.rebootTimeout = undefined;
@@ -54,6 +57,8 @@ class Heos extends utils.Adapter {
 		this.msgs = [];
 		this.unfinishedResponses = '';
 		this.ssdpSearchTargetName = 'urn:schemas-denon-com:device:ACT-Denon:1';
+
+		this.reboot_ips = [];
 
 		this.sourceMap = {
 			1: {
@@ -151,10 +156,7 @@ class Heos extends utils.Adapter {
 		};
 	}
 
-	async onReady() {
-		// Reset the connection indicator during startup
-		this.setState("info.connection", false, true);
-		
+	async onReady() {	
 		await this.setObjectAsync('players', {
 			type: 'device',
 			common: {
@@ -184,6 +186,19 @@ class Heos extends utils.Adapter {
 				role: 'text',
 				read: true,
 				write: true,
+				def: ''
+			},
+			native: {},
+		});
+		await this.setObjectAsync('connected_ip', {
+			type: 'state',
+			common: {
+				name: 'Connected IP address',
+				desc: 'IP address to which the adapter is connected to',
+				type: 'string',
+				role: 'text',
+				read: true,
+				write: false,
 				def: ''
 			},
 			native: {},
@@ -238,9 +253,30 @@ class Heos extends utils.Adapter {
 			},
 			native: {},
 		});
+		await this.setObjectAsync('offline_mode', {
+			type: 'state',
+			common: {
+				name: 'Offline Mode',
+				desc: 'If true, heos will not sign-in',
+				type: 'boolean',
+				role: 'switch',
+				read: true,
+				write: true,
+				def: false
+			},
+			native: {},
+		});
+
+		// Reset the connection indicator during startup
+		this.setState('info.connection', false, true);
+		this.setState('connected_ip', '', true);
 		
 		//Root
 		this.subscribeStates('command');
+		this.subscribeStates('offline_mode');
+		this.getStateAsync('offline_mode', (err, state) => {
+			this.offline_mode = state.val;
+		});
 
 		//Presets|Playlists
 		this.subscribeStates('sources.*.play')
@@ -262,6 +298,7 @@ class Heos extends utils.Adapter {
 		this.subscribeStates('players.*.current_elapsed');
 		this.subscribeStates('players.*.current_elapsed_s');
 		this.subscribeStates('players.*.clear_queue');
+		this.subscribeStates('players.*.reboot');
 		this.subscribeStates('players.*.group_volume');
 		this.subscribeStates('players.*.group_muted');
 		this.subscribeStates('players.*.command');
@@ -314,6 +351,13 @@ class Heos extends utils.Adapter {
 			}
 			if(id.device === 'command'){
 				this.executeCommand(state.val);
+			} else if (id.device === 'offline_mode'){
+				this.offline_mode = state.val;
+				if(this.signed_in && state.val){
+					this.signOut();
+				} else if(!this.signed_in && !state.val) {
+					this.signIn();
+				}
 			} else if (id.device === 'sources' && id.channel === '1025' && id.state && fullId[fullId.length-1] === 'play') {
 				this.sendCommandToAllPlayers('add_to_queue&sid=1025&aid=' + this.config.queueMode + '&cid=' + id.state, true);
 			} else if (id.device === 'sources' && id.channel === '1028' && id.state && fullId[fullId.length-1] === 'play') {
@@ -418,6 +462,8 @@ class Heos extends utils.Adapter {
 						player.sendCommand('volume_down&step=' + this.config.volumeStepLevel);
 					} else if(id.state === 'clear_queue'){
 						player.sendCommand('clear_queue');
+					} else if(id.state === 'reboot'){
+						player.reboot();
 					} else if(id.state === 'auto_play'){
 						player.auto_play = state.val;
 					} else if(id.state === 'ignore_broadcast_cmd'){
@@ -452,11 +498,14 @@ class Heos extends utils.Adapter {
 			if (typeof this.net_client == 'undefined') {
 				if (headers.ST !== this.ssdpSearchTargetName) { // korrektes SSDP
 					this.log.debug('onNodeSSDPResponse: Getting wrong SSDP entry. Keep trying...');
+				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(rinfo.address)){
+					this.log.debug('onNodeSSDPResponse: Reboot IP activated. Getting wrong SSDP entry. Keep trying...');
 				} else {
 					if (this.ssdpSearchInterval) {
 						clearInterval(this.ssdpSearchInterval);
 						this.ssdpSearchInterval = undefined;
 					}
+					this.ssdpSearchCounter = 0;
 
 					this.ip = rinfo.address;
 					this.log.info('connecting to HEOS (' + this.ip + ') ...');
@@ -474,6 +523,7 @@ class Heos extends utils.Adapter {
 
 					this.net_client.on('connect', async () => {
 						this.setStateChanged('info.connection', true, true);
+						this.setStateChanged('connected_ip', this.ip, true);
 
 						this.state = States.Connected;
 						this.log.info('connected to HEOS (' + this.ip + ')');
@@ -532,6 +582,9 @@ class Heos extends utils.Adapter {
 						break;
 					case 'reboot':
 						this.reboot();
+						break;
+					case 'reboot_all':
+						this.rebootAll();
 						break;
 					default:
 						commandFallback = true;
@@ -621,6 +674,22 @@ class Heos extends utils.Adapter {
 		});
 	}
 
+	logData(prefix, data){
+		if(data.toString().includes('sign_in')){
+			this.log.silly(prefix + ": " + data.toString());
+			this.log.debug(prefix + ": sign_in - sensitive data hidden");
+		} else {
+			this.log.debug(prefix + ": " + data.toString());
+		}
+	}
+
+	getAllIndexes(arr, val) {
+		var indexes = [], i;
+		for(i = 0; i < arr.length; i++)
+			if (arr[i] === val)
+				indexes.push(i);
+		return indexes;
+	}
 
 	/** es liegen Antwort(en) vor
 	 * 
@@ -634,12 +703,7 @@ class Heos extends utils.Adapter {
 	 *        {"container": "no", "mid": "catalog/stations/A1W7U8U71CGE50/#chunk"
 	 **/
 	onData(data) {
-		if(data.toString().includes('sign_in')){
-			this.log.silly("onData: " + data.toString());
-			this.log.debug("onData: sign_in - sensitive data hidden");
-		} else {
-			this.log.debug("onData: " + data.toString());
-		}
+		this.logData("onData", data);
 		try {
 			data = data.toString();
 			data = data.replace(/[\n\r]/g, '');    // Steuerzeichen "CR" entfernen   
@@ -648,19 +712,21 @@ class Heos extends utils.Adapter {
 			data = this.unfinishedResponses + data;
 			this.unfinishedResponses = '';
 
+			var lastResponse = '';
 			var responses = data.split(/(?={"heos")/g);
 			for (var r = 0; r < responses.length; r++) {
 				if (responses[r].trim().length > 0) {
+					let response = responses[r].trim()
 					try {
-						JSON.parse(responses[r]); // check ob korrektes JSON Array
-						this.parseResponse(responses[r]);
-					} catch (e) {
-						if(responses[r].includes('sign_in')){
-							this.log.silly('onData: invalid json (error: ' + e.message + '): ' + responses[r]);
-							this.log.debug("onData: sign_in - sensitive data hidden");
+						JSON.parse(response); // check ob korrektes JSON Array
+						if(lastResponse !== response){
+							this.parseResponse(response);
+							lastResponse = response;
 						} else {
-							this.log.debug('onData: invalid json (error: ' + e.message + '): ' + responses[r]);
+							this.logData('Skip duplicate response' , response)
 						}
+					} catch (e) {
+						this.logData('onData: invalid json (error: ' + e.message + ')', response);
 						this.unfinishedResponses += responses[r];
 					}
 				}
@@ -1159,6 +1225,7 @@ class Heos extends utils.Adapter {
 			if (result != 'success') {
 				switch(jmsg.text){
 					case 'User not logged in':
+						this.signed_in = false;
 						await this.setStateAsync('signed_in', false, true);
 						await this.setStateAsync('signed_in_user', "", true);
 						this.signIn();
@@ -1202,9 +1269,11 @@ class Heos extends utils.Adapter {
 						case 'user_changed':
 							this.log.debug("sign: " + JSON.stringify(jmsg));
 							if('signed_in' in jmsg){
+								this.signed_in = true;
 								await this.setStateAsync('signed_in', true, true);
 								await this.setStateAsync('signed_in_user', jmsg.un, true);
 							} else {
+								this.signed_in = false;
 								await this.setStateAsync('signed_in', false, true);
 								await this.setStateAsync('signed_in_user', "", true);
 								this.signIn();
@@ -1892,7 +1961,10 @@ class Heos extends utils.Adapter {
 				}
 			}
 			this.getGroups();
-		} catch (err) { this.log.error('startPlayers: ' + err.message); }
+		} catch (err) { 
+			this.log.error('startPlayers: ' + err.message);
+			this.reconnect();
+		}
 	}
 
 	//Alle Player stoppen
@@ -1975,9 +2047,19 @@ class Heos extends utils.Adapter {
 	}
 	
 	signIn() {
-		if (this.state == States.Connected) {
+		if(this.offline_mode){
+			this.log.info('Skip sign in, because offline mode is activated.')
+		} else if (this.state == States.Connected) {
 			// heos://system/sign_in?un=heos_username&pw=heos_password
 			this.msgs.push('heos://system/sign_in?un=' + this.config.username + '&pw=' + this.config.password);
+			this.sendNextMsg();
+		}
+	}
+
+	signOut() {
+		if (this.state == States.Connected) {
+			// heos://system/sign_out
+			this.msgs.push('heos://system/sign_out');
 			this.sendNextMsg();
 		}
 	}
@@ -1988,6 +2070,12 @@ class Heos extends utils.Adapter {
 			// heos://system/reboot
 			this.msgs.push('heos://system/reboot');
 			this.sendNextMsg();
+			if(this.reboot_ips.includes(this.ip)){
+				var index = this.reboot_ips.indexOf(this.ip);
+				if (index > -1) {
+					this.reboot_ips.splice(index, 1);
+				}
+			}
 			if (this.rebootTimeout) {
 				clearTimeout(this.rebootTimeout);
 				this.rebootTimeout = undefined;
@@ -1996,6 +2084,15 @@ class Heos extends utils.Adapter {
 				this.reconnect();
 			}, 1000)
 		}
+	}
+
+	rebootAll() {
+		this.reboot_ips = [];
+		for (var pid in this.players){
+			let player = this.players[pid];
+			this.reboot_ips.push(player.ip);
+		}
+		this.reboot();
 	}
 
 	browseSource(sid) {
@@ -2080,6 +2177,7 @@ class Heos extends utils.Adapter {
 			this.log.info("searching for HEOS devices ...")
 			//Reset connect states
 			this.setStateChanged('info.connection', false, true);
+			this.setStateChanged('connected_ip', '', true);
 			this.getChannels("players", (err, list) => {
 				if(list){
 					list.forEach((item) => {
@@ -2100,6 +2198,10 @@ class Heos extends utils.Adapter {
 				this.ssdpSearchInterval = undefined;
 			}
 			this.ssdpSearchInterval = setInterval(() => {
+				this.ssdpSearchCounter += 1;
+				if(this.ssdpSearchCounter > 20) {
+					this.reboot_ips = [];
+				}
 				this.log.info("still searching for HEOS devices ...")
 				this.nodessdp_client.search(this.ssdpSearchTargetName);
 			}, this.config.searchInterval);
@@ -2152,6 +2254,7 @@ class Heos extends utils.Adapter {
 		this.setState("error", false);
 		this.setState("last_error", "");
 		this.setState('signed_in', false);
+		this.signed_in = false;
 		this.setState('signed_in_user', "");
 
 		this.state = States.Disconnected;
@@ -2168,6 +2271,7 @@ class Heos extends utils.Adapter {
 			}
 		});
 		this.setStateChanged('info.connection', false, true);
+		this.setStateChanged('connected_ip', '', true);
 		this.log.info('disconnected from HEOS');
 	}
 	
