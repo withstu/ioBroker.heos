@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.7.7",
+		"version": "1.7.8",
 		"news": {
+			"1.7.8": {
+				"en": "add reboot",
+				"de": "Neustart hinzufügen",
+				"ru": "добавить перезагрузку",
+				"pt": "adicionar reinicialização",
+				"nl": "voeg reboot toe",
+				"fr": "ajouter un redémarrage",
+				"it": "aggiungi riavvio",
+				"es": "agregar reinicio",
+				"pl": "dodaj restart",
+				"zh-cn": "添加重启"
+			},
 			"1.7.7": {
 				"en": "add creation of missing version state",
 				"de": "Erstellung eines fehlenden Versionsstatus hinzufügen",
@@ -230,18 +242,6 @@
 				"es": "agregar más configuraciones de juego y cola",
 				"pl": "dodaj więcej ustawień gry i kolejki",
 				"zh-cn": "添加更多播放和队列设置"
-			},
-			"1.3.4": {
-				"en": "remove sorting and available filter and fix browse play",
-				"de": "Entfernen Sie die Sortierung und den verfügbaren Filter und korrigieren Sie das Durchsuchen",
-				"ru": "убрать сортировку и доступный фильтр и исправить просмотр игры",
-				"pt": "remover a classificação e o filtro disponível e corrigir a reprodução da navegação",
-				"nl": "verwijder sortering en beschikbaar filter en herstel browse-weergave",
-				"fr": "supprimer le tri et le filtre disponible et corriger la lecture de navigation",
-				"it": "rimuovere l'ordinamento e il filtro disponibile e correggere la riproduzione sfoglia",
-				"es": "eliminar la clasificación y el filtro disponible y corregir la reproducción de navegación",
-				"pl": "usuń sortowanie i dostępny filtr oraz napraw przeglądanie gry",
-				"zh-cn": "删除排序和可用的过滤器并修复浏览播放"
 			}
 		},
 		"title": "HEOS",
