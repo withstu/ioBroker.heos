@@ -48,6 +48,10 @@ class Heos extends utils.Adapter {
 		this.heartbeatInterval = undefined;
 		this.ssdpSearchInterval = undefined;
 
+		this.ssdp_retry_counter = 0;
+		this.player_ips = [];
+		this.reboot_ips = [];
+
 		this.reconnectTimeout = undefined;
 		this.rebootTimeout = undefined;
 
@@ -57,7 +61,7 @@ class Heos extends utils.Adapter {
 		this.unfinishedResponses = '';
 		this.ssdpSearchTargetName = 'urn:schemas-denon-com:device:ACT-Denon:1';
 
-		this.reboot_ips = [];
+		
 
 		this.sourceMap = {
 			1: {
@@ -499,9 +503,9 @@ class Heos extends utils.Adapter {
 			// rinfo {"address":"192.168.2.225","family":"IPv4","port":53871,"size":430}
 			if (typeof this.net_client == 'undefined') {
 				if (headers.ST !== this.ssdpSearchTargetName) { // korrektes SSDP
-					this.log.debug('onNodeSSDPResponse: Getting wrong SSDP entry. Keep trying...');
+					this.log.debug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...');
 				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(rinfo.address)){
-					this.log.debug('onNodeSSDPResponse: Reboot IP activated. Getting wrong SSDP entry. Keep trying...');
+					this.log.debug('[onNodeSSDPResponse] Reboot IP activated. Getting wrong SSDP entry. Keep trying...');
 				} else {
 					this.connect(rinfo.address);
 				}
@@ -1505,11 +1509,17 @@ class Heos extends utils.Adapter {
 											);
 										}
 										if(jdata.payload.length){
-											this.getStates(folderPath + ".*.cid", async (err, states) => {
+											this.getStates(folderPath + ".*", async (err, states) => {
 												for (var id in states) {
-													if(!playlists.includes(states[id].val)){
-														this.log.info("deleting playlist: " + states[id].val)
-														this.delObject(folderPath + "." + states[id].val, {recursive: true})
+													if(states[id] && states[id].val){
+														var idSplit = id.split('.');
+														var state = idSplit[idSplit.length - 1];
+														if(state == 'cid'){
+															if(!playlists.includes(states[id].val)){
+																this.log.info("deleting playlist: " + states[id].val)
+																this.delObject(folderPath + "." + states[id].val, {recursive: true})
+															}
+														}
 													}
 												}
 											})
@@ -1540,11 +1550,17 @@ class Heos extends utils.Adapter {
 											);
 										}
 										if(jdata.payload.length){
-											this.getStates(folderPath + ".*.id", async (err, states) => {
+											this.getStates(folderPath + ".*", async (err, states) => {
 												for (var id in states) {
-													if(!presets.includes(states[id].val)){
-														this.log.info("deleting preset: " + states[id].val)
-														this.delObject(folderPath + "." + states[id].val, {recursive: true})
+													if(states[id] && states[id].val){
+														var idSplit = id.split('.');
+														var state = idSplit[idSplit.length - 1];
+														if(state == 'id'){
+															if(!presets.includes(states[id].val)){
+																this.log.info("deleting preset: " + states[id].val)
+																this.delObject(folderPath + "." + states[id].val, {recursive: true})
+															}
+														}
 													}
 												}
 											})
@@ -2212,13 +2228,27 @@ class Heos extends utils.Adapter {
 			});
 			this.state = States.Searching;
 
+			//Update Player IPs
+			this.getStates('players.*', async (err, states) => {
+				this.player_ips = [];
+				for (var id in states) {
+					if(states[id] && states[id].val){
+						var idSplit = id.split('.');
+						var state = idSplit[idSplit.length - 1];
+						if(state == 'ip'){
+							this.player_ips.push(states[id].val);
+						}
+					}
+				}
+			})
+
 			if(this.reboot_ips.length > 0){
 				this.log.debug('following ips need to be rebooted: ' + this.reboot_ips.join(','))
 				let ip = this.reboot_ips[0];
 				this.log.debug('connect to ' + ip + ' to reboot device')
 				this.connect(ip);
 			} else {
-				const NodeSSDP = require('node-ssdp').Client;
+				this.ssdp_retry_counter = 0;
 				this.nodessdp_client = new NodeSSDP();
 				this.nodessdp_client.explicitSocketBind = true;
 				this.nodessdp_client.on('response', (headers, statusCode, rinfo) => this.onNodeSSDPResponse(headers, statusCode, rinfo));
@@ -2229,8 +2259,17 @@ class Heos extends utils.Adapter {
 					this.ssdpSearchInterval = undefined;
 				}
 				this.ssdpSearchInterval = setInterval(() => {
-					this.log.info("still searching for HEOS devices ...")
-					this.nodessdp_client.search(this.ssdpSearchTargetName);
+					this.ssdp_retry_counter += 1;
+					if(this.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
+						this.log.info("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...")
+						for (var i = 0; i < this.player_ips.length; i++) {
+							this.reboot_ips.push(this.player_ips[i]);
+						}
+						this.reconnect();
+					} else {
+						this.log.info("still searching for HEOS devices ...")
+						this.nodessdp_client.search(this.ssdpSearchTargetName);
+					}
 				}, this.config.searchInterval);
 			}
 		} catch (err) { this.log.error('[search] ' + err.message); }
