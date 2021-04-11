@@ -41,6 +41,7 @@ class Heos extends utils.Adapter {
 		this.browseCmdMap = {};
 		this.ip = '';
 		this.state = States.Disconnected;
+		this.search_mode = false;
 		this.signed_in = false
 		this.offline_mode = false;
 		
@@ -60,8 +61,6 @@ class Heos extends utils.Adapter {
 		this.msgs = [];
 		this.unfinishedResponses = '';
 		this.ssdpSearchTargetName = 'urn:schemas-denon-com:device:ACT-Denon:1';
-
-		
 
 		this.sourceMap = {
 			1: {
@@ -157,6 +156,38 @@ class Heos extends utils.Adapter {
 				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/musicsource_logo_favorites.png'
 			}
 		};
+	}
+
+	logInfo(msg, force){
+		if(!force && this.search_mode){
+			this.log.debug(msg);
+		} else {
+			this.log.info(msg);
+		}
+	}
+
+	logWarn(msg, force){
+		if(!force && this.search_mode){
+			this.log.debug(msg);
+		} else {
+			this.log.warn(msg);
+		}
+	}
+
+	logError(msg, force){
+		if(!force && this.search_mode){
+			this.log.debug(msg);
+		} else {
+			this.log.error(msg);
+		}
+	}
+
+	logDebug(msg, force){
+		this.log.debug(msg);
+	}
+
+	logSilly(msg, force){
+		this.log.silly(msg);
 	}
 
 	async onReady() {	
@@ -341,7 +372,7 @@ class Heos extends utils.Adapter {
 		const id = this.idToDCS(_id);
 		const fullId = _id.split('.');
 
-		this.log.debug("State change - ID: " + _id + " | DCS: " + JSON.stringify(id) + " | State: " + JSON.stringify(state));
+		this.logDebug("State change - ID: " + _id + " | DCS: " + JSON.stringify(id) + " | State: " + JSON.stringify(state), false);
 
 		if(id){
 			if (state.val === 'false') {
@@ -368,9 +399,9 @@ class Heos extends utils.Adapter {
 				this.sendCommandToAllPlayers('play_preset&preset=' + id.state, true);
 			} else if (id.device === 'sources' && id.channel && id.state === 'browse') {
 				this.browseSource(id.channel);
-			} else if (id.device === 'players' && id.channel && id.state && id.channel in this.players) {
-				let player = this.players[id.channel];
-				if(player) {
+			} else if (id.device === 'players' && id.channel && id.state){ 
+				if(id.channel in this.players && this.players[id.channel]) {
+					let player = this.players[id.channel];
 					if(id.state === 'muted'){
 						player.sendCommand('set_mute&state=' + (state.val === true ? 'on' : 'off'));
 					} else if(id.state === 'repeat'){
@@ -388,7 +419,7 @@ class Heos extends utils.Adapter {
 					} else if(id.state === 'volume'){
 						let volume = state.val;
 						if(volume && player.volume_max < volume){
-							this.log.info("Max volume reached. Reset to: " + player.volume_max);
+							this.logWarn("Max volume reached. Reset to: " + player.volume_max, false);
 							volume = player.volume_max;
 						}
 						player.sendCommand('set_volume&level=' + volume);
@@ -441,7 +472,7 @@ class Heos extends utils.Adapter {
 							} else if (parts.length === 1) {
 								seconds = parseInt(parts[0]);
 							} else {
-								return this.log.error('invalid elapsed time: ' + state.val);
+								return this.logError('invalid elapsed time: ' + state.val, false);
 							}
 						}
 						if(player.isPlayerLeader()){
@@ -477,6 +508,8 @@ class Heos extends utils.Adapter {
 					} else if(id.state === 'tts'){
 						this.text2speech(state.val, player.pid, null);
 					}
+				} else {
+					this.logWarn('Player ' + id.channel + ' not connected. Can not update ' + id.state, true + '.');
 				}
 			}
 		}
@@ -503,14 +536,14 @@ class Heos extends utils.Adapter {
 			// rinfo {"address":"192.168.2.225","family":"IPv4","port":53871,"size":430}
 			if (typeof this.net_client == 'undefined') {
 				if (headers.ST !== this.ssdpSearchTargetName) { // korrektes SSDP
-					this.log.debug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...');
+					this.logDebug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...', false);
 				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(rinfo.address)){
-					this.log.debug('[onNodeSSDPResponse] Reboot IP activated. Getting wrong SSDP entry. Keep trying...');
+					this.logDebug('[onNodeSSDPResponse] Reboot IP activated. Getting wrong SSDP entry. Keep trying...', false);
 				} else {
 					this.connect(rinfo.address);
 				}
 			}
-		} catch (err) { this.log.error('[onNodeSSDPResponse] ' + err.message); }
+		} catch (err) { this.logError('[onNodeSSDPResponse] ' + err.message, false); }
 	}
 	
 	executeCommand(cmd) {
@@ -621,7 +654,7 @@ class Heos extends utils.Adapter {
 		this.getState('last_error',  async (err, state) => {
 			if(state) {
 				try {
-					this.log.warn(error);
+					this.logWarn('[setLastError] ' + error, false);
 					let val = state.val + '';
 					let lines = val.split('\n');
 					if(lines.includes(error))
@@ -630,17 +663,17 @@ class Heos extends utils.Adapter {
 						lines.pop();
 					lines.unshift(error);
 					await this.setStateAsync('last_error', lines.join('\n'), true);
-				} catch (e) { this.log.error('[setLastError] ' + e.message); }
+				} catch (e) { this.logError('[setLastError] ' + e.message, false); }
 			}
 		});
 	}
 
 	logData(prefix, data){
 		if(data.toString().includes('sign_in')){
-			this.log.silly(prefix + ": " + data.toString());
-			this.log.debug(prefix + ": sign_in - sensitive data hidden");
+			this.logSilly(prefix + ": " + data.toString(), false);
+			this.logDebug(prefix + ": sign_in - sensitive data hidden", false);
 		} else {
-			this.log.debug(prefix + ": " + data.toString());
+			this.logDebug(prefix + ": " + data.toString(), false);
 		}
 	}
 
@@ -695,7 +728,7 @@ class Heos extends utils.Adapter {
 			// wenn weitere Msg zum Senden vorhanden sind, die nächste senden
 			if (this.msgs.length > 0)
 				this.sendNextMsg();
-		} catch (err) { this.log.error('[onData] ' + err.message); }
+		} catch (err) { this.logError('[onData] ' + err.message, false); }
 	}
 	
 	parseMessage(message) {
@@ -735,7 +768,7 @@ class Heos extends utils.Adapter {
 				this.browseCmdMap[command] = entry;
 			}
 		}
-		this.log.silly("BrowseCmdMap: " + JSON.stringify(this.browseCmdMap));
+		this.logSilly("BrowseCmdMap: " + JSON.stringify(this.browseCmdMap), false);
 		return entry;
 	}
 
@@ -1159,10 +1192,10 @@ class Heos extends utils.Adapter {
 	async parseResponse(response) {
 		try {
 			if(response.includes('sign_in')){
-				this.log.silly('parseResponse: ' + response);
-				this.log.debug('parseResponse: sign_in - sensitive data hidden');
+				this.logSilly('parseResponse: ' + response, false);
+				this.logDebug('parseResponse: sign_in - sensitive data hidden', false);
 			} else {
-				this.log.debug('parseResponse: ' + response);
+				this.logDebug('parseResponse: ' + response, false);
 			}
 
 			if (response.indexOf("command under process") > 0)
@@ -1228,7 +1261,7 @@ class Heos extends utils.Adapter {
 							this.getMusicSources();
 							break;
 						case 'user_changed':
-							this.log.debug("sign: " + JSON.stringify(jmsg));
+							this.logDebug("sign: " + JSON.stringify(jmsg), false);
 							if('signed_in' in jmsg){
 								this.signed_in = true;
 								await this.setStateAsync('signed_in', true, true);
@@ -1516,7 +1549,7 @@ class Heos extends utils.Adapter {
 														var state = idSplit[idSplit.length - 1];
 														if(state == 'cid'){
 															if(!playlists.includes(states[id].val)){
-																this.log.info("deleting playlist: " + states[id].val)
+																this.logWarn("deleting playlist: " + states[id].val, false)
 																this.delObject(folderPath + "." + states[id].val, {recursive: true})
 															}
 														}
@@ -1557,7 +1590,7 @@ class Heos extends utils.Adapter {
 														var state = idSplit[idSplit.length - 1];
 														if(state == 'id'){
 															if(!presets.includes(states[id].val)){
-																this.log.info("deleting preset: " + states[id].val)
+																this.logWarn("deleting preset: " + states[id].val, false)
 																this.delObject(folderPath + "." + states[id].val, {recursive: true})
 															}
 														}
@@ -1721,7 +1754,7 @@ class Heos extends utils.Adapter {
 				case 'system':
 					switch (cmd) {
 						case 'sign_in':
-							this.log.info('signed in: ' + jdata.heos.result);
+							this.logInfo('signed in: ' + jdata.heos.result, false);
 							break;
 					}
 					break;
@@ -1735,7 +1768,7 @@ class Heos extends utils.Adapter {
 				}
 			}
 
-		} catch (err) { this.log.error('[parseResponse] ' + err.message + '\n ' + response); }
+		} catch (err) { this.logError('[parseResponse] ' + err.message + '\n ' + response); }
 	}
 
 	browse2Commands(message, payload){
@@ -1862,7 +1895,7 @@ class Heos extends utils.Adapter {
 	 * @param {*} callback 
 	 */
 	text2speech(fileName, pid, callback) {
-		this.log.info("TTS: " + fileName + " | PID: " + pid);
+		this.logInfo("TTS: " + fileName + " | PID: " + pid, false);
 		// Extract volume
 		let volume = null;
 
@@ -1889,7 +1922,7 @@ class Heos extends utils.Adapter {
 			
 			callback && callback();
 		} else {
-			this.log.error('invalid filename specified');
+			this.logError('invalid filename specified');
 			callback && callback('invalid filename specified');
 		}
 	}
@@ -1927,7 +1960,7 @@ class Heos extends utils.Adapter {
 					try {
 						await heosPlayer.connect();
 					} catch (err){
-						this.log.warn("can't connect player " + player.name + " (" + player.ip + "). Skip.");
+						this.logWarn("can't connect player " + player.name + " (" + player.ip + "). Skip.");
 						playerConnected = false;
 					}
 				} else {
@@ -1945,7 +1978,7 @@ class Heos extends utils.Adapter {
 			}
 			this.getGroups();
 		} catch (err) { 
-			this.log.error('[startPlayers] ' + err.message);
+			this.logError('[startPlayers] ' + err.message);
 			this.reconnect();
 		}
 	}
@@ -1953,7 +1986,7 @@ class Heos extends utils.Adapter {
 	//Alle Player stoppen
 	stopPlayers() {
 		if(Object.keys(this.players).length){
-			this.log.debug("try to stop players:" + Object.keys(this.players).join(','));
+			this.logDebug("try to stop players:" + Object.keys(this.players).join(','));
 		}
 		for (var pid in this.players){
 			this.stopPlayer(pid);
@@ -2031,7 +2064,7 @@ class Heos extends utils.Adapter {
 	
 	signIn() {
 		if(this.offline_mode){
-			this.log.info('Skip sign in, because offline mode is activated.')
+			this.logInfo('Skip sign in, because offline mode is activated.', false)
 		} else if (this.state == States.Connected) {
 			// heos://system/sign_in?un=heos_username&pw=heos_password
 			this.msgs.push('heos://system/sign_in?un=' + this.config.username + '&pw=' + this.config.password);
@@ -2058,7 +2091,7 @@ class Heos extends utils.Adapter {
 
 	reboot() {
 		if (this.state == States.Connected || this.state == States.Reconnecting || this.state == States.Disconnecting) {
-			this.log.warn("rebooting player " + this.ip);
+			this.logWarn("rebooting player " + this.ip);
 			// heos://system/reboot
 			this.msgs.push('heos://system/reboot');
 			this.sendNextMsg();
@@ -2074,7 +2107,7 @@ class Heos extends utils.Adapter {
 	}
 
 	rebootAll() {
-		this.log.warn("rebooting all players");
+		this.logWarn("rebooting all players", false);
 		this.reboot_ips = [];
 		for (var pid in this.players){
 			let player = this.players[pid];
@@ -2101,14 +2134,14 @@ class Heos extends utils.Adapter {
 	
 	startHeartbeat() {
 		if (this.state == States.Connected) {
-			this.log.debug("[HEARTBEAT] start interval");
+			this.logDebug("[HEARTBEAT] start interval", false);
 			this.heartbeatInterval = setInterval(() => {
-				this.log.debug("[HEARTBEAT] ping")
+				this.logDebug("[HEARTBEAT] ping", false)
 				this.msgs.push('heos://system/heart_beat');
 				this.sendNextMsg();
 				this.heartbeatRetries += 1;
 				if(this.heartbeatRetries >= this.config.heartbeatRetries){
-					this.log.warn("[HEARTBEAT] retries exceeded");
+					this.logWarn("[HEARTBEAT] retries exceeded", false);
 					this.resetHeartbeatRetries(false);
 					this.reboot();
 				}
@@ -2118,15 +2151,15 @@ class Heos extends utils.Adapter {
 
 	resetHeartbeatRetries(pong) {
 		if(pong){
-			this.log.debug("[HEARTBEAT] pong");
+			this.logDebug("[HEARTBEAT] pong", false);
 		} else {
-			this.log.debug("[HEARTBEAT] reset retries");
+			this.logDebug("[HEARTBEAT] reset retries", false);
 		}
 		this.heartbeatRetries = 0;
 	}
 
 	stopHeartbeat() {
-		this.log.debug("[HEARTBEAT] stop interval");
+		this.logDebug("[HEARTBEAT] stop interval", false);
 		if (this.heartbeatInterval) {
 			clearInterval(this.heartbeatInterval);
 			this.heartbeatInterval = undefined;
@@ -2147,14 +2180,14 @@ class Heos extends utils.Adapter {
 			try {
 				this.net_client.write(msg + "\n");
 			} catch (err) { 
-				this.log.error('[sendMsg] ' + err.message);
+				this.logError('[sendMsg] ' + err.message, false);
 				this.reconnect();
 			}
 			if(msg.includes('sign_in')){
-				this.log.silly("data sent: " + msg);
-				this.log.debug("data sent: sign_in - sensitive data hidden");
+				this.logSilly("data sent: " + msg, false);
+				this.logDebug("data sent: sign_in - sensitive data hidden", false);
 			} else {
-				this.log.debug("data sent: " + msg);
+				this.logDebug("data sent: " + msg, false);
 			}
 		}
 	}
@@ -2166,7 +2199,7 @@ class Heos extends utils.Adapter {
 		}
 
 		this.ip = ip;
-		this.log.info('connecting to HEOS (' + this.ip + ') ...');
+		this.logInfo('connecting to HEOS (' + this.ip + ') ...', false);
 		this.net_client = net.connect({ host: this.ip, port: 1255 });
 		this.net_client.setKeepAlive(true, 60000);
 		//this.net_client.setNoDelay(true);
@@ -2175,7 +2208,7 @@ class Heos extends utils.Adapter {
 		this.state = States.Connecting;
 
 		this.net_client.on('error', (error) => {
-			this.log.error('[connect] ' + error);
+			this.logError('[connect] ' + error, false);
 			this.removeRebootIp(ip);
 			this.reconnect();
 		});
@@ -2185,10 +2218,11 @@ class Heos extends utils.Adapter {
 			this.setStateChanged('connected_ip', this.ip, true);
 
 			this.state = States.Connected;
-			this.log.info('connected to HEOS (' + this.ip + ')');
 			if(this.reboot_ips.includes(this.ip)){
 				this.reboot();
 			} else {
+				this.search_mode = false;
+				this.logInfo('connected to HEOS (' + this.ip + ')', true);
 				this.getPlayers();
 				this.registerChangeEvents(true);
 				this.signIn();
@@ -2198,13 +2232,13 @@ class Heos extends utils.Adapter {
 
 		// Gegenseite hat die Verbindung geschlossen 
 		this.net_client.on('end', () => {
-			this.log.warn('HEOS closed the connection to ' + this.ip);
+			this.logWarn('HEOS closed the connection to ' + this.ip, false);
 			this.reconnect();
 		});
 
 		// timeout
 		this.net_client.on('timeout', () => {
-			this.log.warn('timeout trying connect to ' + this.ip);
+			this.logWarn('timeout trying connect to ' + this.ip, false);
 			this.reconnect();
 		});
 
@@ -2215,7 +2249,6 @@ class Heos extends utils.Adapter {
 	/** Verbindung zum HEOS System herstellen **/
 	search() {
 		try {
-			this.log.info("searching for HEOS devices ...")
 			//Reset connect states
 			this.setStateChanged('info.connection', false, true);
 			this.setStateChanged('connected_ip', '', true);
@@ -2243,16 +2276,18 @@ class Heos extends utils.Adapter {
 			})
 
 			if(this.reboot_ips.length > 0){
-				this.log.debug('following ips need to be rebooted: ' + this.reboot_ips.join(','))
+				this.logDebug('following ips need to be rebooted: ' + this.reboot_ips.join(','), false)
 				let ip = this.reboot_ips[0];
-				this.log.debug('connect to ' + ip + ' to reboot device')
+				this.logDebug('try to connect to ' + ip + ' to reboot device', false)
 				this.connect(ip);
 			} else {
+				this.logInfo("searching for HEOS devices ...", true)
+				this.search_mode = true;
 				this.ssdp_retry_counter = 0;
 				this.nodessdp_client = new NodeSSDP();
 				this.nodessdp_client.explicitSocketBind = true;
 				this.nodessdp_client.on('response', (headers, statusCode, rinfo) => this.onNodeSSDPResponse(headers, statusCode, rinfo));
-				this.nodessdp_client.on('error', error => { this.nodessdp_client.close(); this.log.error("[nodessdp] " + error); });
+				this.nodessdp_client.on('error', error => { this.nodessdp_client.close(); this.logError("[nodessdp] " + error, false); });
 				this.nodessdp_client.search(this.ssdpSearchTargetName);
 				if (this.ssdpSearchInterval) {
 					clearInterval(this.ssdpSearchInterval);
@@ -2261,18 +2296,18 @@ class Heos extends utils.Adapter {
 				this.ssdpSearchInterval = setInterval(() => {
 					this.ssdp_retry_counter += 1;
 					if(this.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
-						this.log.info("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...")
+						this.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false)
 						for (var i = 0; i < this.player_ips.length; i++) {
 							this.reboot_ips.push(this.player_ips[i]);
 						}
 						this.reconnect();
 					} else {
-						this.log.info("still searching for HEOS devices ...")
+						this.logInfo("searching for HEOS devices ...", true)
 						this.nodessdp_client.search(this.ssdpSearchTargetName);
 					}
 				}, this.config.searchInterval);
 			}
-		} catch (err) { this.log.error('[search] ' + err.message); }
+		} catch (err) { this.logError('[search] ' + err.message, false); }
 	}
 
 	async resetIntervals(){
@@ -2299,7 +2334,7 @@ class Heos extends utils.Adapter {
 
 	/** Alle Player stoppen und die TelNet Verbindung schließen **/
 	disconnect() {
-		this.log.info('disconnecting from HEOS ...');
+		this.logInfo('disconnecting from HEOS ...', false);
 		this.state = States.Disconnecting;
 
 		this.stopHeartbeat();
@@ -2339,13 +2374,13 @@ class Heos extends utils.Adapter {
 		});
 		this.setStateChanged('info.connection', false, true);
 		this.setStateChanged('connected_ip', '', true);
-		this.log.info('disconnected from HEOS');
+		this.logInfo('disconnected from HEOS', false);
 	}
 	
 	reconnect() {
 		if(this.state == States.Reconnecting || this.state == States.Disconnecting) return;
 
-		this.log.info('reconnecting to HEOS ...');
+		this.logInfo('reconnecting to HEOS ...', false);
 		this.disconnect();
 		this.state = States.Reconnecting;
 		if (this.reconnectTimeout) {
