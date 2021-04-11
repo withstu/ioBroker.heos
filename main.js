@@ -41,7 +41,7 @@ class Heos extends utils.Adapter {
 		this.browseCmdMap = {};
 		this.ip = '';
 		this.state = States.Disconnected;
-		this.search_mode = false;
+		this.manual_search_mode = false;
 		this.signed_in = false
 		this.offline_mode = false;
 		
@@ -159,7 +159,7 @@ class Heos extends utils.Adapter {
 	}
 
 	logInfo(msg, force){
-		if(!force && this.search_mode){
+		if(!force && this.manual_search_mode){
 			this.log.debug(msg);
 		} else {
 			this.log.info(msg);
@@ -167,7 +167,7 @@ class Heos extends utils.Adapter {
 	}
 
 	logWarn(msg, force){
-		if(!force && this.search_mode){
+		if(!force && this.manual_search_mode){
 			this.log.debug(msg);
 		} else {
 			this.log.warn(msg);
@@ -175,7 +175,7 @@ class Heos extends utils.Adapter {
 	}
 
 	logError(msg, force){
-		if(!force && this.search_mode){
+		if(!force && this.manual_search_mode){
 			this.log.debug(msg);
 		} else {
 			this.log.error(msg);
@@ -2221,7 +2221,7 @@ class Heos extends utils.Adapter {
 			if(this.reboot_ips.includes(this.ip)){
 				this.reboot();
 			} else {
-				this.search_mode = false;
+				this.manual_search_mode = false;
 				this.logInfo('connected to HEOS (' + this.ip + ')', true);
 				this.getPlayers();
 				this.registerChangeEvents(true);
@@ -2282,7 +2282,6 @@ class Heos extends utils.Adapter {
 				this.connect(ip);
 			} else {
 				this.logInfo("searching for HEOS devices ...", true)
-				this.search_mode = true;
 				this.ssdp_retry_counter = 0;
 				this.nodessdp_client = new NodeSSDP();
 				this.nodessdp_client.explicitSocketBind = true;
@@ -2296,12 +2295,14 @@ class Heos extends utils.Adapter {
 				this.ssdpSearchInterval = setInterval(() => {
 					this.ssdp_retry_counter += 1;
 					if(this.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
+						this.manual_search_mode = true;
 						this.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false)
 						for (var i = 0; i < this.player_ips.length; i++) {
 							this.reboot_ips.push(this.player_ips[i]);
 						}
 						this.reconnect();
 					} else {
+						this.manual_search_mode = false;
 						this.logInfo("searching for HEOS devices ...", true)
 						this.nodessdp_client.search(this.ssdpSearchTargetName);
 					}
