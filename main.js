@@ -2281,6 +2281,7 @@ class Heos extends utils.Adapter {
 				this.logDebug('try to connect to ' + ip + ' to reboot device', false)
 				this.connect(ip);
 			} else {
+				this.manual_search_mode = false;
 				this.logInfo("searching for HEOS devices ...", true)
 				this.ssdp_retry_counter = 0;
 				this.nodessdp_client = new NodeSSDP();
@@ -2302,7 +2303,6 @@ class Heos extends utils.Adapter {
 						}
 						this.reconnect();
 					} else {
-						this.manual_search_mode = false;
 						this.logInfo("searching for HEOS devices ...", true)
 						this.nodessdp_client.search(this.ssdpSearchTargetName);
 					}
