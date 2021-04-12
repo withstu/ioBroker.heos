@@ -508,6 +508,17 @@ class Heos extends utils.Adapter {
 					} else if(id.state === 'tts'){
 						this.text2speech(state.val, player.pid, null);
 					}
+				} else if(id.state === 'reboot') {
+					this.getState(id.device + '.' + id.channel + '.ip',  async (err, state) => {
+						if(state) {
+							let val = state.val + '';
+							this.reboot_ips.push(val);
+							this.logWarn("rebooting player " + this.ip + " requested. Needs to reconnect HEOS to the correct player first.", false);
+							this.reconnect();
+						} else {
+							this.logWarn('Player ' + id.channel + ' not connected. Can not update ' + id.state, true + '.');
+						}
+					})
 				} else {
 					this.logWarn('Player ' + id.channel + ' not connected. Can not update ' + id.state, true + '.');
 				}
