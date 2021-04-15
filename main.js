@@ -1957,8 +1957,8 @@ class Heos extends utils.Adapter {
 			var connectedPlayers = [];
 			for (var i = 0; i < payload.length; i++) {
 				var player = payload[i];
-				if(!player.name && !player.hasOwnProperty("ip")){
-					this.reconnect();
+				if(!player.name || !player.hasOwnProperty("ip")){
+					this.rebootAll();
 					throw new Error("HEOS responded with invalid data.");
 				}
 				
@@ -1988,10 +1988,26 @@ class Heos extends utils.Adapter {
 				}
 			}
 			this.getGroups();
+			this.updatePlayerIPs();
 		} catch (err) { 
 			this.logError('[startPlayers] ' + err.message);
 			this.reconnect();
 		}
+	}
+
+	updatePlayerIPs(){
+		this.getStates('players.*', async (err, states) => {
+			this.player_ips = [];
+			for (var id in states) {
+				if(states[id] && states[id].val){
+					var idSplit = id.split('.');
+					var state = idSplit[idSplit.length - 1];
+					if(state == 'ip'){
+						this.player_ips.push(states[id].val);
+					}
+				}
+			}
+		})
 	}
 
 	//Alle Player stoppen
@@ -2120,9 +2136,8 @@ class Heos extends utils.Adapter {
 	rebootAll() {
 		this.logWarn("rebooting all players", false);
 		this.reboot_ips = [];
-		for (var pid in this.players){
-			let player = this.players[pid];
-			this.reboot_ips.push(player.ip);
+		for (var i = 0; i < this.player_ips.length; i++) {
+			this.reboot_ips.push(this.player_ips[i]);
 		}
 		this.reboot();
 	}
@@ -2273,18 +2288,7 @@ class Heos extends utils.Adapter {
 			this.state = States.Searching;
 
 			//Update Player IPs
-			this.getStates('players.*', async (err, states) => {
-				this.player_ips = [];
-				for (var id in states) {
-					if(states[id] && states[id].val){
-						var idSplit = id.split('.');
-						var state = idSplit[idSplit.length - 1];
-						if(state == 'ip'){
-							this.player_ips.push(states[id].val);
-						}
-					}
-				}
-			})
+			this.updatePlayerIPs();
 
 			if(this.reboot_ips.length > 0){
 				this.logDebug('following ips need to be rebooted: ' + this.reboot_ips.join(','), false)
