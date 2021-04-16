@@ -1957,7 +1957,7 @@ class Heos extends utils.Adapter {
 			var connectedPlayers = [];
 			for (var i = 0; i < payload.length; i++) {
 				var player = payload[i];
-				if(!player.name || !player.hasOwnProperty("ip")){
+				if(!player.name || !player.hasOwnProperty("ip") || player.ip == '127.0.0.1'){
 					this.rebootAll();
 					throw new Error("HEOS responded with invalid data.");
 				}
