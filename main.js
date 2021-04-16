@@ -51,6 +51,7 @@ class Heos extends utils.Adapter {
 
 		this.ssdp_retry_counter = 0;
 		this.player_ips = [];
+		this.ssdp_player_ips = [];
 		this.reboot_ips = [];
 
 		this.reconnectTimeout = undefined;
@@ -545,14 +546,20 @@ class Heos extends utils.Adapter {
 	async onNodeSSDPResponse(headers, statusCode, rinfo) {
 		try {
 			// rinfo {"address":"192.168.2.225","family":"IPv4","port":53871,"size":430}
+			var ip = rinfo.address;
+			if (headers.ST == this.ssdpSearchTargetName && !this.ssdp_player_ips.includes(ip)){
+				this.ssdp_player_ips.push(ip);
+			}
 			if (typeof this.net_client == 'undefined') {
 				if (headers.ST !== this.ssdpSearchTargetName) { // korrektes SSDP
 					this.logDebug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...', false);
-				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(rinfo.address)){
+				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(ip)){
 					this.logDebug('[onNodeSSDPResponse] Reboot IP activated. Getting wrong SSDP entry. Keep trying...', false);
 				} else {
-					this.connect(rinfo.address);
+					this.connect(ip);
 				}
+			} else {
+				//Connected
 			}
 		} catch (err) { this.logError('[onNodeSSDPResponse] ' + err.message, false); }
 	}
@@ -1955,6 +1962,7 @@ class Heos extends utils.Adapter {
 	async startPlayers(payload) {
 		try {
 			var connectedPlayers = [];
+			var foundPlayerIps = [];
 			for (var i = 0; i < payload.length; i++) {
 				var player = payload[i];
 				if(!player.name || !player.hasOwnProperty("ip") || player.ip == '127.0.0.1'){
@@ -1979,12 +1987,22 @@ class Heos extends utils.Adapter {
 				}
 				if(playerConnected){
 					connectedPlayers.push(pid);
+					foundPlayerIps.push(player.ip);
 				}
 			}
 			//Remove disconnected players
 			for(var pid in this.players){
 				if(!connectedPlayers.includes(pid)){
 					this.stopPlayer(pid);
+				}
+			}
+			//Check for players in fail state
+			for(var id in this.ssdp_player_ips){
+				let ip = this.ssdp_player_ips[id];
+				if(!foundPlayerIps.includes(ip)){
+					this.logWarn('Announced player not found by HEOS. Try to reboot device ' + ip, true);
+					this.reboot_ips.push(ip);
+					this.reconnect();
 				}
 			}
 			this.getGroups();
@@ -2219,10 +2237,10 @@ class Heos extends utils.Adapter {
 	}
 
 	connect(ip){
-		if (this.ssdpSearchInterval) {
-			clearInterval(this.ssdpSearchInterval);
-			this.ssdpSearchInterval = undefined;
-		}
+		//if (this.ssdpSearchInterval) {
+		//	clearInterval(this.ssdpSearchInterval);
+		//	this.ssdpSearchInterval = undefined;
+		//}
 
 		this.ip = ip;
 		this.logInfo('connecting to HEOS (' + this.ip + ') ...', false);
@@ -2296,6 +2314,7 @@ class Heos extends utils.Adapter {
 				this.logDebug('try to connect to ' + ip + ' to reboot device', false)
 				this.connect(ip);
 			} else {
+				this.ssdp_player_ips = [];
 				this.manual_search_mode = false;
 				this.logInfo("searching for HEOS devices ...", true)
 				this.ssdp_retry_counter = 0;
@@ -2309,7 +2328,9 @@ class Heos extends utils.Adapter {
 					this.ssdpSearchInterval = undefined;
 				}
 				this.ssdpSearchInterval = setInterval(() => {
-					this.ssdp_retry_counter += 1;
+					if (typeof this.net_client == 'undefined') {
+						this.ssdp_retry_counter += 1;
+					}
 					if(this.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
 						this.manual_search_mode = true;
 						this.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false)
@@ -2318,7 +2339,8 @@ class Heos extends utils.Adapter {
 						}
 						this.reconnect();
 					} else {
-						this.logInfo("searching for HEOS devices ...", true)
+						this.logDebug("searching for HEOS devices ...", true);
+						this.ssdp_player_ips = [];
 						this.nodessdp_client.search(this.ssdpSearchTargetName);
 					}
 				}, this.config.searchInterval);
@@ -2354,6 +2376,7 @@ class Heos extends utils.Adapter {
 		this.state = States.Disconnecting;
 
 		this.stopHeartbeat();
+		this.resetIntervals();
 		this.stopPlayers();
 
 		this.resetTimeouts();
