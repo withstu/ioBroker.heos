@@ -1966,7 +1966,12 @@ class Heos extends utils.Adapter {
 			for (var i = 0; i < payload.length; i++) {
 				var player = payload[i];
 				if(!player.name || !player.hasOwnProperty("ip") || player.ip == '127.0.0.1'){
-					this.rebootAll();
+					if(this.config.rebootOnFailure === true){
+						this.logWarn("HEOS is not responding as expected. Reboot.", false)
+						this.rebootAll();
+					} else {
+						this.logWarn('Device failure detected. Activate "reboot on failure" in the configuration or reboot manually.', true);
+					}
 					throw new Error("HEOS responded with invalid data.");
 				}
 				

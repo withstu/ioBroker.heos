@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.7.9",
+		"version": "1.8.0",
 		"news": {
+			"1.8.0": {
+				"en": "add reboot on failure configuration",
+				"de": "Fügen Sie bei einer Fehlerkonfiguration einen Neustart hinzu",
+				"ru": "добавить перезагрузку при сбое конфигурации",
+				"pt": "adicionar reinicialização em caso de falha na configuração",
+				"nl": "voeg opnieuw opstarten toe bij foutconfiguratie",
+				"fr": "ajouter un redémarrage en cas d'échec de la configuration",
+				"it": "aggiungere il riavvio in caso di errore di configurazione",
+				"es": "agregar reinicio en la configuración de falla",
+				"pl": "dodaj ponowne uruchomienie po awarii konfiguracji",
+				"zh-cn": "添加失败配置重启"
+			},
 			"1.7.9": {
 				"en": "add power state",
 				"de": "Power-Status hinzufügen",
@@ -230,18 +242,6 @@
 				"es": "mejorar tts y no actualizar la cola durante tts",
 				"pl": "poprawić tts i nie aktualizować kolejki podczas tts",
 				"zh-cn": "改善tts并在tts期间不更新队列"
-			},
-			"1.5.0": {
-				"en": "add tts support and maximum volume",
-				"de": "tts Unterstützung und maximale Lautstärke hinzugefügt",
-				"ru": "добавить поддержку tts и максимальную громкость",
-				"pt": "adicionar suporte tts e volume máximo",
-				"nl": "voeg tts-ondersteuning en maximaal volume toe",
-				"fr": "ajouter le support tts et le volume maximum",
-				"it": "aggiungere supporto tts e volume massimo",
-				"es": "agregar soporte tts y volumen máximo",
-				"pl": "dodaj obsługę tts i maksymalną głośność",
-				"zh-cn": "添加tts支持和最大音量"
 			}
 		},
 		"title": "HEOS",
@@ -310,6 +310,7 @@
 		"searchInterval": 30000,
 		"heartbeatInterval": 15000,
 		"heartbeatRetries": 4,
+		"rebootOnFailure": false,
 		"muteOnRegex": true,
 		"muteRegex": "spotify:ad:|Advertisement",
 		"autoPlay": true,

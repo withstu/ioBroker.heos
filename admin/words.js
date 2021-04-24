@@ -301,5 +301,17 @@ systemDictionary = {
 		"es": "Alcance del comando para el alcance del scope/[cmd]",
 		"pl": "Zakres poleceń dla zakresu scope/[cmd]",
 		"zh-cn": "状态范围/ [cmd]的命令范围"
+	},
+	"Reboot, if device failure is detected": {
+		"en": "Reboot, if device failure is detected",
+		"de": "Starten Sie neu, wenn ein Gerätefehler erkannt wird",
+		"ru": "Перезагрузитесь, если обнаружен сбой устройства",
+		"pt": "Reinicie, se a falha do dispositivo for detectada",
+		"nl": "Start opnieuw op als een apparaatstoring wordt gedetecteerd",
+		"fr": "Redémarrer, si une panne de périphérique est détectée",
+		"it": "Riavvia, se viene rilevato un guasto del dispositivo",
+		"es": "Reinicie, si se detecta una falla en el dispositivo",
+		"pl": "Uruchom ponownie, jeśli zostanie wykryta awaria urządzenia",
+		"zh-cn": "重新启动（如果检测到设备故障）"
 	}
 };
