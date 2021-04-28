@@ -1740,11 +1740,13 @@ class Heos extends utils.Adapter {
 							// bisherige groups leeren
 							for(var pid in this.players) {
 								let player = this.players[pid];
-								await player.setGroupName('');
-								await player.setGroupPid('');
-								await player.setGroupLeaderPid('');
-								await player.setGroupLeader(false);
-								await player.setGroupMember(false);
+								if(player) {
+									await player.setGroupName('');
+									await player.setGroupPid('');
+									await player.setGroupLeaderPid('');
+									await player.setGroupLeader(false);
+									await player.setGroupMember(false);
+								}
 							}
 
 							// payload mit den groups auswerten
