@@ -549,6 +549,7 @@ class Heos extends utils.Adapter {
 			var ip = rinfo.address;
 			if (headers.ST == this.ssdpSearchTargetName && !this.ssdp_player_ips.includes(ip)){
 				this.ssdp_player_ips.push(ip);
+				this.logDebug('SSDP Announced IPs ' + JSON.stringify(this.ssdp_player_ips), false);
 			}
 			if (typeof this.net_client == 'undefined') {
 				if (headers.ST !== this.ssdpSearchTargetName) { // korrektes SSDP
@@ -1986,7 +1987,8 @@ class Heos extends utils.Adapter {
 					try {
 						await heosPlayer.connect();
 					} catch (err){
-						this.logWarn("can't connect player " + player.name + " (" + player.ip + "). Skip.");
+						this.logDebug("can't connect error: " + err, false);
+						this.logWarn("can't connect player " + player.name + " (" + player.ip + "). Skip.", false);
 						playerConnected = false;
 					}
 				} else {
@@ -1994,8 +1996,8 @@ class Heos extends utils.Adapter {
 				}
 				if(playerConnected){
 					connectedPlayers.push(pid);
-					foundPlayerIps.push(player.ip);
 				}
+				foundPlayerIps.push(player.ip);
 			}
 			//Remove disconnected players
 			for(var pid in this.players){
@@ -2007,10 +2009,13 @@ class Heos extends utils.Adapter {
 			for(var id in this.ssdp_player_ips){
 				let ip = this.ssdp_player_ips[id];
 				if(!foundPlayerIps.includes(ip)){
+					this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps));
 					this.logWarn('Announced player not found by HEOS. Try to reboot device ' + ip, true);
 					this.reboot_ips.push(ip);
-					this.reconnect();
 				}
+			}
+			if(this.reboot_ips.length > 0){
+				this.reconnect();
 			}
 			this.getGroups();
 			this.updatePlayerIPs();
