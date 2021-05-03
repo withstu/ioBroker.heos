@@ -49,6 +49,7 @@ class Heos extends utils.Adapter {
 		this.heartbeatInterval = undefined;
 		this.ssdpSearchInterval = undefined;
 
+		this.start_players_errors = 0;
 		this.ssdp_retry_counter = 0;
 		this.player_ips = [];
 		this.ssdp_player_ips = [];
@@ -513,7 +514,7 @@ class Heos extends utils.Adapter {
 					this.getState(id.device + '.' + id.channel + '.ip',  async (err, state) => {
 						if(state) {
 							let val = state.val + '';
-							this.reboot_ips.push(val);
+							this.addRebootIp(val);
 							this.logWarn("rebooting player " + this.ip + " requested. Needs to reconnect HEOS to the correct player first.", false);
 							this.reconnect();
 						} else {
@@ -1967,37 +1968,43 @@ class Heos extends utils.Adapter {
 			var connectedPlayers = [];
 			var foundPlayerIps = [];
 			for (var i = 0; i < payload.length; i++) {
+				var playerConnected = true;
 				var player = payload[i];
+				var pid = player.pid + ''; //Convert to String
+				if(player.hasOwnProperty("ip") && player.ip != '127.0.0.1'){
+					foundPlayerIps.push(player.ip);
+				}
 				if(!player.name || !player.hasOwnProperty("ip") || player.ip == '127.0.0.1'){
-					if(this.config.rebootOnFailure === true){
-						this.logWarn("HEOS is not responding as expected. Reboot.", false)
-						this.rebootAll();
-					} else {
-						this.logWarn('Device failure detected. Activate "reboot on failure" in the configuration or reboot manually.', true);
+					this.start_players_errors += 1;
+					this.logDebug("Start players payload error: " + JSON.stringify(payload), false);
+					if(this.start_players_errors > 4){
+						this.start_players_errors = 0;
+						if(this.config.rebootOnFailure === true){
+							this.logWarn("HEOS is not responding as expected. Reboot.", false)
+							this.rebootAll();
+						} else {
+							this.logWarn('Device failure detected. Activate "reboot on failure" in the configuration or reboot manually.', true);
+						}
 					}
 					throw new Error("HEOS responded with invalid data.");
-				}
-				
-				var playerConnected = true;
-				var pid = player.pid + ''; //Convert to String
-				
-				if(!(pid in this.players)){
-					let heosPlayer = new HeosPlayer(this, player);
-					this.players[pid] = heosPlayer;
-					try {
-						await heosPlayer.connect();
-					} catch (err){
-						this.logDebug("can't connect error: " + err, false);
-						this.logWarn("can't connect player " + player.name + " (" + player.ip + "). Skip.", false);
-						playerConnected = false;
-					}
 				} else {
-					this.players[pid].initMetaData(player);
+					if(!(pid in this.players)){
+						let heosPlayer = new HeosPlayer(this, player);
+						this.players[pid] = heosPlayer;
+						try {
+							await heosPlayer.connect();
+						} catch (err){
+							this.logDebug("can't connect error: " + err, false);
+							this.logWarn("can't connect player " + player.name + " (" + player.ip + "). Skip.", false);
+							playerConnected = false;
+						}
+					} else {
+						this.players[pid].initMetaData(player);
+					}
+					if(playerConnected){
+						connectedPlayers.push(pid);
+					}
 				}
-				if(playerConnected){
-					connectedPlayers.push(pid);
-				}
-				foundPlayerIps.push(player.ip);
 			}
 			//Remove disconnected players
 			for(var pid in this.players){
@@ -2009,13 +2016,17 @@ class Heos extends utils.Adapter {
 			for(var id in this.ssdp_player_ips){
 				let ip = this.ssdp_player_ips[id];
 				if(!foundPlayerIps.includes(ip)){
-					this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps));
+					this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps) + ' | Announced Players: ' + JSON.stringify(this.ssdp_player_ips));
 					this.logWarn('Announced player not found by HEOS. Try to reboot device ' + ip, true);
-					this.reboot_ips.push(ip);
+					this.addRebootIp(ip);
 				}
 			}
 			if(this.reboot_ips.length > 0){
 				this.reconnect();
+			}
+			if(connectedPlayers.length == 0){
+				this.logWarn('Can\'t connect any players. Reboot.', true);
+				this.rebootAll();
 			}
 			this.getGroups();
 			this.updatePlayerIPs();
@@ -2146,6 +2157,13 @@ class Heos extends utils.Adapter {
 		}
 	}
 
+	addRebootIp(ip){
+		if(ip && !this.reboot_ips.includes(ip)){
+			this.reboot_ips.push(ip);
+			this.logDebug('add reboot ip ' + ip, true);
+		}
+	}
+
 	reboot() {
 		if (this.state == States.Connected || this.state == States.Reconnecting || this.state == States.Disconnecting) {
 			this.logWarn("rebooting player " + this.ip);
@@ -2167,7 +2185,7 @@ class Heos extends utils.Adapter {
 		this.logWarn("rebooting all players", false);
 		this.reboot_ips = [];
 		for (var i = 0; i < this.player_ips.length; i++) {
-			this.reboot_ips.push(this.player_ips[i]);
+			this.addRebootIp(this.player_ips[i]);
 		}
 		this.reboot();
 	}
@@ -2347,7 +2365,7 @@ class Heos extends utils.Adapter {
 						this.manual_search_mode = true;
 						this.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false)
 						for (var i = 0; i < this.player_ips.length; i++) {
-							this.reboot_ips.push(this.player_ips[i]);
+							this.addRebootIp(this.player_ips[i]);
 						}
 						this.reconnect();
 					} else {
