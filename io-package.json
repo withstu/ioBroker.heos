@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.8.0",
+		"version": "1.8.1",
 		"news": {
+			"1.8.1": {
+				"en": "fix reboot loop",
+				"de": "Reboot-Schleife korrigieren",
+				"ru": "исправить цикл перезагрузки",
+				"pt": "consertar loop de reinicialização",
+				"nl": "herstart lus repareren",
+				"fr": "réparer la boucle de redémarrage",
+				"it": "risolto il ciclo di riavvio",
+				"es": "arreglar el bucle de reinicio",
+				"pl": "naprawić pętlę restartu",
+				"zh-cn": "修复重启循环"
+			},
 			"1.8.0": {
 				"en": "add reboot on failure configuration",
 				"de": "Fügen Sie bei einer Fehlerkonfiguration einen Neustart hinzu",
@@ -230,18 +242,6 @@
 				"es": "mejorar el método de parada tts",
 				"pl": "poprawić metodę zatrzymania tts",
 				"zh-cn": "改进tts停止方法"
-			},
-			"1.5.1": {
-				"en": "improve tts and don't update queue during tts",
-				"de": "Verbessere tts und aktualisiere die Warteschlange nicht während tts",
-				"ru": "улучшить tts и не обновлять очередь во время tts",
-				"pt": "melhorar tts e não atualizar a fila durante tts",
-				"nl": "verbeter tts en update de wachtrij niet tijdens tts",
-				"fr": "améliorer tts et ne pas mettre à jour la file d'attente pendant tts",
-				"it": "migliorare tts e non aggiornare la coda durante tts",
-				"es": "mejorar tts y no actualizar la cola durante tts",
-				"pl": "poprawić tts i nie aktualizować kolejki podczas tts",
-				"zh-cn": "改善tts并在tts期间不更新队列"
 			}
 		},
 		"title": "HEOS",
