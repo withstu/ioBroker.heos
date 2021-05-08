@@ -38,16 +38,16 @@ class Heos extends utils.Adapter {
 		this.on('unload', this.onUnload.bind(this));
 
 		this.players = {};
-		this.browseCmdMap = {};
+		this.browse_cmd_map = {};
 		this.ip = '';
 		this.state = States.Disconnected;
 		this.manual_search_mode = false;
 		this.signed_in = false
 		this.offline_mode = false;
 		
-		this.heartbeatRetries = 0;
-		this.heartbeatInterval = undefined;
-		this.ssdpSearchInterval = undefined;
+		this.heartbeat_retries = 0;
+		this.heartbeat_interval = undefined;
+		this.ssdp_search_interval = undefined;
 
 		this.start_players_errors = 0;
 		this.ssdp_retry_counter = 0;
@@ -55,16 +55,16 @@ class Heos extends utils.Adapter {
 		this.ssdp_player_ips = [];
 		this.reboot_ips = [];
 
-		this.reconnectTimeout = undefined;
-		this.rebootTimeout = undefined;
+		this.reconnect_timeout = undefined;
+		this.reboot_timeout = undefined;
 
 		this.net_client = undefined;
 		this.nodessdp_client = undefined;
 		this.msgs = [];
-		this.unfinishedResponses = '';
-		this.ssdpSearchTargetName = 'urn:schemas-denon-com:device:ACT-Denon:1';
+		this.unfinished_responses = '';
+		this.ssdp_search_target_name = 'urn:schemas-denon-com:device:ACT-Denon:1';
 
-		this.sourceMap = {
+		this.source_map = {
 			1: {
 				name: 'Pandora ',
 				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/pandora.png'
@@ -327,7 +327,7 @@ class Heos extends utils.Adapter {
 		this.subscribeStates('players.*.state');
 		this.subscribeStates('players.*.state_simple');
 		this.subscribeStates('players.*.volume');
-		this.subscribeStates('players.*.volume_max');
+		this.subscribeStates('players.*.volume_limit');
 		this.subscribeStates('players.*.volume_up');
 		this.subscribeStates('players.*.volume_down');
 		this.subscribeStates('players.*.seek');
@@ -420,13 +420,13 @@ class Heos extends utils.Adapter {
 						}
 					} else if(id.state === 'volume'){
 						let volume = state.val;
-						if(volume && player.volume_max < volume){
-							this.logWarn("Max volume reached. Reset to: " + player.volume_max, false);
-							volume = player.volume_max;
+						if(volume && player.volume_limit < volume){
+							this.logWarn("Volume limit reached. Reset to: " + player.volume_limit, false);
+							volume = player.volume_limit;
 						}
 						player.sendCommand('set_volume&level=' + volume);
-					} else if(id.state === 'volume_max'){
-						player.volume_max = state.val;
+					} else if(id.state === 'volume_limit'){
+						player.volume_limit = state.val;
 					} else if(id.state === 'group_volume'){
 						player.sendCommand('set_group_volume&level=' + state.val);
 					} else if(id.state === 'group_muted'){
@@ -548,12 +548,12 @@ class Heos extends utils.Adapter {
 		try {
 			// rinfo {"address":"192.168.2.225","family":"IPv4","port":53871,"size":430}
 			var ip = rinfo.address;
-			if (headers.ST == this.ssdpSearchTargetName && !this.ssdp_player_ips.includes(ip)){
+			if (headers.ST == this.ssdp_search_target_name && !this.ssdp_player_ips.includes(ip)){
 				this.ssdp_player_ips.push(ip);
 				this.logDebug('SSDP Announced IPs ' + JSON.stringify(this.ssdp_player_ips), false);
 			}
 			if (typeof this.net_client == 'undefined') {
-				if (headers.ST !== this.ssdpSearchTargetName) { // korrektes SSDP
+				if (headers.ST !== this.ssdp_search_target_name) { // korrektes SSDP
 					this.logDebug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...', false);
 				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(ip)){
 					this.logDebug('[onNodeSSDPResponse] Reboot IP activated. Getting wrong SSDP entry. Keep trying...', false);
@@ -622,7 +622,11 @@ class Heos extends utils.Adapter {
 				}
 				break;
 			case 'player':
-				this.sendCommandToAllPlayers(cmd, false);
+				if(!cmd.includes("pid=")){
+					this.sendCommandToAllPlayers(cmd, false);
+				} else {
+					commandFallback = true;
+				}
 				break;
 			case 'leader':
 				this.sendCommandToAllPlayers(cmd, true);
@@ -723,8 +727,8 @@ class Heos extends utils.Adapter {
 			data = data.replace(/[\n\r]/g, '');    // Steuerzeichen "CR" entfernen   
 			// es können auch mehrere Antworten vorhanden sein! {"heos": ... } {"heos": ... }
 			// diese nun in einzelne Antworten zerlegen
-			data = this.unfinishedResponses + data;
-			this.unfinishedResponses = '';
+			data = this.unfinished_responses + data;
+			this.unfinished_responses = '';
 
 			var lastResponse = '';
 			var responses = data.split(/(?={"heos")/g);
@@ -741,7 +745,7 @@ class Heos extends utils.Adapter {
 						}
 					} catch (e) {
 						this.logData('onData: invalid json (error: ' + e.message + ')', response);
-						this.unfinishedResponses += responses[r];
+						this.unfinished_responses += responses[r];
 					}
 				}
 			}
@@ -776,8 +780,8 @@ class Heos extends utils.Adapter {
 	mapBrowseCmd(command, name, image_url, parent){
 		let entry;
 		command = command.replace(/&range.*/, "").replace(/&count.*/, "").replace(/&returned.*/, "");
-		if(command in this.browseCmdMap){
-			entry = this.browseCmdMap[command];
+		if(command in this.browse_cmd_map){
+			entry = this.browse_cmd_map[command];
 		} else {
 			entry = {
 				"name": name,
@@ -785,17 +789,17 @@ class Heos extends utils.Adapter {
 				"parent": parent
 			};
 			if(name.length > 0){
-				this.browseCmdMap[command] = entry;
+				this.browse_cmd_map[command] = entry;
 			}
 		}
-		this.logSilly("BrowseCmdMap: " + JSON.stringify(this.browseCmdMap), false);
+		this.logSilly("BrowseCmdMap: " + JSON.stringify(this.browse_cmd_map), false);
 		return entry;
 	}
 
 	mapSource(sid){
 		let result;
-		if(sid in this.sourceMap){
-			result = this.sourceMap[sid];
+		if(sid in this.source_map){
+			result = this.source_map[sid];
 		}
 		return result;
 	}
@@ -899,7 +903,7 @@ class Heos extends utils.Adapter {
 		await this.setStateAsync(statePath + 'image_url', source.image_url, true);
 		await this.setStateAsync(statePath + 'available', (source.available == 'true' ? true : false), true);
 
-		this.sourceMap[source.sid] = source;
+		this.source_map[source.sid] = source;
 	}
 
 	async createPlaylist(folderPath, payload){
@@ -1384,7 +1388,7 @@ class Heos extends utils.Adapter {
 									native: {},
 								});
 								//Clear browse Map to reduce memory;
-								this.browseCmdMap = {};
+								this.browse_cmd_map = {};
 
 								let sources = this.mapBrowseCmd(command, "sources", "", "");
 								let browseResult = {
@@ -2171,11 +2175,11 @@ class Heos extends utils.Adapter {
 			this.msgs.push('heos://system/reboot');
 			this.sendNextMsg();
 			this.removeRebootIp(this.ip);
-			if (this.rebootTimeout) {
-				clearTimeout(this.rebootTimeout);
-				this.rebootTimeout = undefined;
+			if (this.reboot_timeout) {
+				clearTimeout(this.reboot_timeout);
+				this.reboot_timeout = undefined;
 			}
-			this.rebootTimeout = setTimeout(() => {
+			this.reboot_timeout = setTimeout(() => {
 				this.reconnect();
 			}, 1000)
 		}
@@ -2209,12 +2213,12 @@ class Heos extends utils.Adapter {
 	startHeartbeat() {
 		if (this.state == States.Connected) {
 			this.logDebug("[HEARTBEAT] start interval", false);
-			this.heartbeatInterval = setInterval(() => {
+			this.heartbeat_interval = setInterval(() => {
 				this.logDebug("[HEARTBEAT] ping", false)
 				this.msgs.push('heos://system/heart_beat');
 				this.sendNextMsg();
-				this.heartbeatRetries += 1;
-				if(this.heartbeatRetries >= this.config.heartbeatRetries){
+				this.heartbeat_retries += 1;
+				if(this.heartbeat_retries >= this.config.heartbeatRetries){
 					this.logWarn("[HEARTBEAT] retries exceeded", false);
 					this.resetHeartbeatRetries(false);
 					this.reboot();
@@ -2229,14 +2233,14 @@ class Heos extends utils.Adapter {
 		} else {
 			this.logDebug("[HEARTBEAT] reset retries", false);
 		}
-		this.heartbeatRetries = 0;
+		this.heartbeat_retries = 0;
 	}
 
 	stopHeartbeat() {
 		this.logDebug("[HEARTBEAT] stop interval", false);
-		if (this.heartbeatInterval) {
-			clearInterval(this.heartbeatInterval);
-			this.heartbeatInterval = undefined;
+		if (this.heartbeat_interval) {
+			clearInterval(this.heartbeat_interval);
+			this.heartbeat_interval = undefined;
 		}
 		this.resetHeartbeatRetries(false);
 	}
@@ -2267,9 +2271,9 @@ class Heos extends utils.Adapter {
 	}
 
 	connect(ip){
-		//if (this.ssdpSearchInterval) {
-		//	clearInterval(this.ssdpSearchInterval);
-		//	this.ssdpSearchInterval = undefined;
+		//if (this.ssdp_search_interval) {
+		//	clearInterval(this.ssdp_search_interval);
+		//	this.ssdp_search_interval = undefined;
 		//}
 
 		this.ip = ip;
@@ -2352,12 +2356,12 @@ class Heos extends utils.Adapter {
 				this.nodessdp_client.explicitSocketBind = true;
 				this.nodessdp_client.on('response', (headers, statusCode, rinfo) => this.onNodeSSDPResponse(headers, statusCode, rinfo));
 				this.nodessdp_client.on('error', error => { this.nodessdp_client.close(); this.logError("[nodessdp] " + error, false); });
-				this.nodessdp_client.search(this.ssdpSearchTargetName);
-				if (this.ssdpSearchInterval) {
-					clearInterval(this.ssdpSearchInterval);
-					this.ssdpSearchInterval = undefined;
+				this.nodessdp_client.search(this.ssdp_search_target_name);
+				if (this.ssdp_search_interval) {
+					clearInterval(this.ssdp_search_interval);
+					this.ssdp_search_interval = undefined;
 				}
-				this.ssdpSearchInterval = setInterval(() => {
+				this.ssdp_search_interval = setInterval(() => {
 					if (typeof this.net_client == 'undefined') {
 						this.ssdp_retry_counter += 1;
 					}
@@ -2371,7 +2375,7 @@ class Heos extends utils.Adapter {
 					} else {
 						this.logDebug("searching for HEOS devices ...", true);
 						this.ssdp_player_ips = [];
-						this.nodessdp_client.search(this.ssdpSearchTargetName);
+						this.nodessdp_client.search(this.ssdp_search_target_name);
 					}
 				}, this.config.searchInterval);
 			}
@@ -2379,24 +2383,24 @@ class Heos extends utils.Adapter {
 	}
 
 	async resetIntervals(){
-		if (this.heartbeatInterval) {
-			clearInterval(this.heartbeatInterval);
-			this.heartbeatInterval = undefined;
+		if (this.heartbeat_interval) {
+			clearInterval(this.heartbeat_interval);
+			this.heartbeat_interval = undefined;
 		}
-		if (this.ssdpSearchInterval) {
-			clearInterval(this.ssdpSearchInterval);
-			this.ssdpSearchInterval = undefined;
+		if (this.ssdp_search_interval) {
+			clearInterval(this.ssdp_search_interval);
+			this.ssdp_search_interval = undefined;
 		}
 	}
 
 	async resetTimeouts(){
-		if (this.reconnectTimeout) {
-			clearTimeout(this.reconnectTimeout);
-			this.reconnectTimeout = undefined;
+		if (this.reconnect_timeout) {
+			clearTimeout(this.reconnect_timeout);
+			this.reconnect_timeout = undefined;
 		}
-		if (this.rebootTimeout) {
-			clearTimeout(this.rebootTimeout);
-			this.rebootTimeout = undefined;
+		if (this.reboot_timeout) {
+			clearTimeout(this.reboot_timeout);
+			this.reboot_timeout = undefined;
 		}
 	}
 
@@ -2431,7 +2435,7 @@ class Heos extends utils.Adapter {
 		this.state = States.Disconnected;
 		this.ip = '';
 		this.msgs = [];
-		this.unfinishedResponses = '';
+		this.unfinished_responses = '';
 		this.players = {};
 
 		this.getChannels("players", (err, list) => {
@@ -2452,11 +2456,11 @@ class Heos extends utils.Adapter {
 		this.logInfo('reconnecting to HEOS ...', false);
 		this.disconnect();
 		this.state = States.Reconnecting;
-		if (this.reconnectTimeout) {
-			clearTimeout(this.reconnectTimeout);
-			this.reconnectTimeout = undefined;
+		if (this.reconnect_timeout) {
+			clearTimeout(this.reconnect_timeout);
+			this.reconnect_timeout = undefined;
 		}
-		this.reconnectTimeout = setTimeout(() => {
+		this.reconnect_timeout = setTimeout(() => {
 			this.search();
 		}, this.config.reconnectTimeout);
 	}

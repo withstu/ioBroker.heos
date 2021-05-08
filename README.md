@@ -128,6 +128,10 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 
 ## Changelog
 
+### 1.8.x 
+* (withstu) BREAKING: add queue paging
+* (withstu) BREAKING: volume_max -> volume_limit
+
 ### 1.8.1 (2021-05-07)
 * (withstu) fix reboot loop
 
