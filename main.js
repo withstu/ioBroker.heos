@@ -54,6 +54,9 @@ class Heos extends utils.Adapter {
 		this.player_ips = [];
 		this.ssdp_player_ips = [];
 		this.reboot_ips = [];
+		this.reboot_ip_counter = {};
+		this.leader_ip_failures = {};
+		this.next_connect_ip = "";
 
 		this.reconnect_timeout = undefined;
 		this.reboot_timeout = undefined;
@@ -555,6 +558,9 @@ class Heos extends utils.Adapter {
 			if (typeof this.net_client == 'undefined') {
 				if (headers.ST !== this.ssdp_search_target_name) { // korrektes SSDP
 					this.logDebug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...', false);
+				} else if(this.getMostOfenFailureLeaderIp() == ip){
+					this.clearLeaderIPFailures(ip);
+					this.logDebug('[onNodeSSDPResponse] Skip IP with most failures. Keep trying...', false);
 				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(ip)){
 					this.logDebug('[onNodeSSDPResponse] Reboot IP activated. Getting wrong SSDP entry. Keep trying...', false);
 				} else {
@@ -1403,7 +1409,7 @@ class Heos extends utils.Adapter {
 								for (i = 0; i < jdata.payload.length; i++) {
 									let payload = jdata.payload[i];
 									let browse = "browse/browse?sid=" + payload.sid;
-									let source = this.mapBrowseCmd(browse, payload.name, payload.image_url, "browse/get_music_sources");
+									let source = this.mapBrowseCmd(browse, decodeURIComponent(payload.name), payload.image_url, "browse/get_music_sources");
 									this.createSource(folderPath, payload);
 									browseResult["payload"].push(
 										{
@@ -1555,7 +1561,7 @@ class Heos extends utils.Adapter {
 											this.createPlaylist(folderPath, payload);
 											browseResult["payload"].push(
 												{
-													"name": unescape(payload.name),
+													"name": unescape(decodeURIComponent(payload.name)),
 													"image_url": payload.image_url,
 													"type": "media",
 													"available": true,
@@ -1596,7 +1602,7 @@ class Heos extends utils.Adapter {
 											this.createPreset(folderPath, presetId, payload);
 											browseResult["payload"].push(
 												{
-													"name": unescape(payload.name),
+													"name": unescape(decodeURIComponent(payload.name)),
 													"image_url": payload.image_url,
 													"type": "media",
 													"available": true,
@@ -1632,7 +1638,7 @@ class Heos extends utils.Adapter {
 											}
 											browseResult["payload"].push(
 												{
-													"name": unescape(payload.name),
+													"name": unescape(decodeURIComponent(payload.name)),
 													"image_url": payload.image_url,
 													"type": "media",
 													"available": true,
@@ -1870,7 +1876,7 @@ class Heos extends utils.Adapter {
 		}
 
 		if("browse" in cmd){
-			this.mapBrowseCmd(cmd.browse, payload.name, payload.image_url, parentCmd);
+			this.mapBrowseCmd(cmd.browse, unescape(decodeURIComponent(payload.name)), payload.image_url, parentCmd);
 		}
 
 		//playable
@@ -2023,9 +2029,11 @@ class Heos extends utils.Adapter {
 					this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps) + ' | Announced Players: ' + JSON.stringify(this.ssdp_player_ips));
 					this.logWarn('Announced player not found by HEOS. Try to reboot device ' + ip, true);
 					this.addRebootIp(ip);
+					this.addLeaderFailure();
+					this.next_connect_ip = this.getRarestFailureLeaderIp();
 				}
 			}
-			if(this.reboot_ips.length > 0){
+			if(this.reboot_ips.length > 0 || this.next_connect_ip.length > 0){
 				this.reconnect();
 			}
 			if(connectedPlayers.length == 0){
@@ -2038,6 +2046,15 @@ class Heos extends utils.Adapter {
 			this.logError('[startPlayers] ' + err.message);
 			this.reconnect();
 		}
+	}
+
+	addLeaderFailure(){
+		if(this.leader_ip_failures[this.ip]){
+			this.leader_ip_failures[this.ip] += 1;
+		} else {
+			this.leader_ip_failures[this.ip] = 1;
+		}
+		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_ip_failures));
 	}
 
 	updatePlayerIPs(){
@@ -2345,8 +2362,18 @@ class Heos extends utils.Adapter {
 			if(this.reboot_ips.length > 0){
 				this.logDebug('following ips need to be rebooted: ' + this.reboot_ips.join(','), false)
 				let ip = this.reboot_ips[0];
-				this.logDebug('try to connect to ' + ip + ' to reboot device', false)
+				if(this.reboot_ip_counter[ip]){
+					this.reboot_ip_counter[ip] += 1;
+				} else {
+					this.reboot_ip_counter[ip] = 1;
+				}
+				this.logDebug('reboot statistics: ' + JSON.stringify(this.reboot_ip_counter));
+				this.logDebug('try to connect to ' + ip + ' to reboot device', false);
 				this.connect(ip);
+			} else if(this.next_connect_ip.length > 0) {
+				this.logDebug('try to connect to ' + this.next_connect_ip, false)
+				this.connect(this.next_connect_ip);
+				this.next_connect_ip = "";
 			} else {
 				this.ssdp_player_ips = [];
 				this.manual_search_mode = false;
@@ -2380,6 +2407,47 @@ class Heos extends utils.Adapter {
 				}, this.config.searchInterval);
 			}
 		} catch (err) { this.logError('[search] ' + err.message, false); }
+	}
+	
+	getRarestFailureLeaderIp(){
+		var ip = "";
+		var failures = 0
+
+		for (let i = 0; i < this.player_ips.length; i++) {
+			let player_ip = this.player_ips[i];
+			
+			if(this.leader_ip_failures[player_ip]){
+				if(ip.length > 0){
+					if(this.leader_ip_failures[player_ip] < failures){
+						ip = player_ip;
+						failures = this.leader_ip_failures[player_ip];
+					}
+				} else {
+					ip = player_ip;
+					failures = this.leader_ip_failures[player_ip];
+				}
+			} else {
+				return player_ip;
+			}
+		}
+		return ip;
+	}
+
+	getMostOfenFailureLeaderIp(){
+		var ip = "";
+		var failures = 0
+
+		for (let key in this.leader_ip_failures) {
+			if(this.leader_ip_failures[key] > failures){
+				ip = key;
+				failures = this.leader_ip_failures[key];
+			}
+		}
+		return ip;
+	}
+
+	clearLeaderIPFailures(ip){
+		this.leader_ip_failures[ip] = 0;
 	}
 
 	async resetIntervals(){
