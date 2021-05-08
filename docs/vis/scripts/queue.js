@@ -1,6 +1,18 @@
-on({id: '0_userdata.0.heos.queue_pid', change: 'any'}, function (obj) {
+var queueHandler;
+on({ id: '0_userdata.0.heos.queue_pid', change: 'any' }, function (obj) {
+    if(queueHandler){
+        unsubscribe(queueHandler);
+    }
     let pid = obj.state.val;
     let data = JSON.parse(getState("heos.0.players." + pid + ".queue").val);
+    updateHTML(pid, data);
+    queueHandler = on({ id: 'heos.0.players.' + pid + '.queue', change: 'any' }, function(obj){
+        updateHTML(pid, JSON.parse(obj.state.val));
+    });
+});
+
+function updateHTML(pid, data) {
+    let current_qid = getState("heos.0.players." + pid + ".current_qid").val;
     let html = `<style>
     .heos-queue {
         background-color: #333333;
@@ -32,7 +44,7 @@ on({id: '0_userdata.0.heos.queue_pid', change: 'any'}, function (obj) {
     }
     .heos-queue td {
         padding: 5px;
-        height: 60px
+        height: 60px;
     }
     .heos-queue-btn {
         color: #fff;
@@ -53,11 +65,14 @@ on({id: '0_userdata.0.heos.queue_pid', change: 'any'}, function (obj) {
         border-right: 1px solid #929292;
     }
     .heos-queue-row-media {
-        //cursor: pointer;
+        cursor: pointer;
+    }
+    .heos-queue-row-media.playing{
+        background-color: green;
     }
     .heos-queue-row-control {
         color: #d60000;
-        //cursor: pointer;
+        cursor: pointer;
     }
     .heos-queue-image {
         white-space: nowrap;
@@ -80,39 +95,78 @@ on({id: '0_userdata.0.heos.queue_pid', change: 'any'}, function (obj) {
         text-align: right;
     }
     </style>`;
-    if(data){
+    if (data) {
         html += "<div class=\"heos-queue\">"
         html += "<table>"
         html += "<tr><th>";
-        html += "</th><th>Queue</th><th></th></tr>";
-        for (var qid in data) {
-            let payload = data[qid];
-            html += "<tr class=\"heos-queue-row-media\">";
-            html += "<td class=\"heos-queue-image\">";
-            if(payload.image_url.length){
-              html += "<img src=\"" + payload.image_url + "\">";
+        html += "</th><th>" + data.name + "</th><th></th></tr>";
+        for (let i = 0; i < data.payload.length; i++) {
+            let payload = data.payload[i];
+            html += "<tr class=\"";
+            if (payload.type == "control") {
+                html += "heos-queue-row-control";
+            } else {
+                html += "heos-queue-row-media"
+                if(current_qid == payload.qid){
+                    html += " playing"
+                }
+            }
+            html += "\">";
+            html += "<td class=\"heos-queue-image\"";
+            html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands[Object.keys(payload.commands)[0]].replace(/'/g, "\\'") + "')\"";
+            html += ">"
+            if (payload.image_url.length) {
+                html += "<img src=\"" + payload.image_url + "\">";
             }
             html += "</td>";
-            html += "<td class=\"heos-queue-name\">";
+            html += "<td class=\"heos-queue-name\"";
+            html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands[Object.keys(payload.commands)[0]].replace(/'/g, "\\'") + "')\"";
+            html += ">"
             let meta = [];
-            if(payload.song){
-              meta.push(payload.song);
+            if (payload.song) {
+                meta.push(payload.song);
             }
-            if(payload.artist){
-              meta.push(payload.artist);
+            if (payload.artist) {
+                meta.push(payload.artist);
             }
-            if(payload.album){
-              meta.push(payload.album);
+            if (payload.album) {
+                meta.push(payload.album);
             }
-            if(meta.length){
-              html += meta.join(' <br> ');
+            if (payload.type == "control") {
+                switch (payload.name) {
+                    case "load_next":
+                        html += "Next page";
+                        break;
+                    case "load_prev":
+                        html += "Previous page";
+                        break;
+                }
+            } else if (meta.length) {
+                html += meta.join(' <br> ');
             }
-            html +="</td>";
+            html += "</td>";
             html += "<td class=\"heos-queue-control\">";
+            for (let key in payload.commands) {
+                let command = payload.commands[key];
+                html += "<button class=\"heos-queue-btn"
+                if (Object.keys(payload.commands).length > 1) {
+                    html += " heos-queue-btn-multi"
+                }
+                html += "\" onClick=\"servConn.setState('heos.0.command','" + command.replace(/'/g, "\\'") + "')\">"
+                switch (key) {
+                    case "play":
+                        html += "►";
+                        break;
+                    case "browse":
+                        html += ">";
+                        break;
+                }
+                html += "</button>";
+            }
             html += "</td>";
             html += "</tr>";
         }
         html += "</table></div>";
     }
     setState("0_userdata.0.heos.queue_html", html);
-  });
+};

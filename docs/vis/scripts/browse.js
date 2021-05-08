@@ -1,4 +1,4 @@
-on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
+on({ id: 'heos.0.sources.browse_result', change: 'any' }, function (obj) {
     let data = JSON.parse(obj.state.val);
     let html = `<style>
     .heos-browse {
@@ -79,80 +79,80 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
         text-align: right;
     }
     </style>`;
-    if(data){
+    if (data) {
         html += "<div class=\"heos-browse\">"
         html += "<table>"
         html += "<tr><th>";
-        if(data.image_url.length){
+        if (data.image_url.length) {
             html += "<img src=\"" + data.image_url + "\" height=\"30px\">";
         }
         html += "</th><th>" + (data.name == "sources" ? "Overview" : data.name) + "</th><th></th></tr>";
         for (let i = 0; i < data.payload.length; i++) {
             let payload = data.payload[i];
             html += "<tr class=\"";
-            if(payload.type == "control"){
-              html += "heos-browse-row-control";
+            if (payload.type == "control") {
+                html += "heos-browse-row-control";
             } else {
                 html += "heos-browse-row-media"
             }
             html += "\">";
             html += "<td class=\"heos-browse-image\"";
-            if("browse" in payload.commands){
-                html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands["browse"].replace(/'/g, "\\'") +"')\"";
-            } else if(Object.keys(payload.commands).length == 1){
-                html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands[Object.keys(payload.commands)[0]].replace(/'/g, "\\'") +"')\"";
+            if ("browse" in payload.commands) {
+                html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands["browse"].replace(/'/g, "\\'") + "')\"";
+            } else if (Object.keys(payload.commands).length == 1) {
+                html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands[Object.keys(payload.commands)[0]].replace(/'/g, "\\'") + "')\"";
             }
             html += ">"
-            if(payload.image_url.length){
-              html += "<img src=\"" + payload.image_url + "\">";
+            if (payload.image_url.length) {
+                html += "<img src=\"" + payload.image_url + "\">";
             }
             html += "</td>";
             html += "<td class=\"heos-browse-name\"";
-            if("browse" in payload.commands){
+            if ("browse" in payload.commands) {
                 html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands["browse"].replace(/'/g, "\\'") + "')\"";
-            } else if(Object.keys(payload.commands).length == 1){
-                html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands[Object.keys(payload.commands)[0]].replace(/'/g, "\\'") +"')\"";
+            } else if (Object.keys(payload.commands).length == 1) {
+                html += " onClick=\"servConn.setState('heos.0.command','" + payload.commands[Object.keys(payload.commands)[0]].replace(/'/g, "\\'") + "')\"";
             }
             html += ">"
-            if(payload.type == "control"){
-              switch(payload.name){
-                case "load_next":
-                  html += "Next page";
-                  break;
-                case "load_prev":
-                  html += "Previous page";
-                  break;
-                case "play_all":
-                  html += "Play all";
-                  break;
-                case "back":
-                  html += "Back";
-                  break;
-                case "sources":
-                  html += "Overview";
-                  break;
-              }
+            if (payload.type == "control") {
+                switch (payload.name) {
+                    case "load_next":
+                        html += "Next page";
+                        break;
+                    case "load_prev":
+                        html += "Previous page";
+                        break;
+                    case "play_all":
+                        html += "Play all";
+                        break;
+                    case "back":
+                        html += "Back";
+                        break;
+                    case "sources":
+                        html += "Overview";
+                        break;
+                }
             } else {
-              html += payload.name;
+                html += payload.name;
             }
-            html +="</td>";
+            html += "</td>";
             html += "<td class=\"heos-browse-control\">";
             for (let key in payload.commands) {
-              let command = payload.commands[key];
-              html += "<button class=\"heos-browse-btn"
-              if(Object.keys(payload.commands).length > 1){
-                  html += " heos-browse-btn-multi"
-              }
-              html += "\" onClick=\"servConn.setState('heos.0.command','" + command.replace(/'/g, "\\'") +"')\">" 
-              switch(key){
-                  case "play":
-                  html += "►";
-                  break;
-                  case "browse":
-                  html += ">";
-                  break;
-              }
-              html += "</button>";
+                let command = payload.commands[key];
+                html += "<button class=\"heos-browse-btn"
+                if (Object.keys(payload.commands).length > 1) {
+                    html += " heos-browse-btn-multi"
+                }
+                html += "\" onClick=\"servConn.setState('heos.0.command','" + command.replace(/'/g, "\\'") + "')\">"
+                switch (key) {
+                    case "play":
+                        html += "►";
+                        break;
+                    case "browse":
+                        html += ">";
+                        break;
+                }
+                html += "</button>";
             }
             html += "</td>";
             html += "</tr>";
@@ -160,4 +160,4 @@ on({id: 'heos.0.sources.browse_result', change: 'any'}, function (obj) {
         html += "</table></div>";
     }
     setState("0_userdata.0.heos.browse_result_html", html);
-  });
+});
