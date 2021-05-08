@@ -2049,10 +2049,12 @@ class Heos extends utils.Adapter {
 	}
 
 	addLeaderFailure(){
-		if(this.leader_ip_failures[this.ip]){
-			this.leader_ip_failures[this.ip] += 1;
-		} else {
-			this.leader_ip_failures[this.ip] = 1;
+		if(this.ip.length > 0){
+			if(this.leader_ip_failures[this.ip]){
+				this.leader_ip_failures[this.ip] += 1;
+			} else {
+				this.leader_ip_failures[this.ip] = 1;
+			}
 		}
 		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_ip_failures));
 	}
