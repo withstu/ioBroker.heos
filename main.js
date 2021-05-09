@@ -559,8 +559,8 @@ class Heos extends utils.Adapter {
 				if (headers.ST !== this.ssdp_search_target_name) { // korrektes SSDP
 					this.logDebug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...', false);
 				} else if(this.getMostOfenFailureLeaderIp() == ip){
-					this.clearLeaderIPFailures(ip);
-					this.logDebug('[onNodeSSDPResponse] Skip IP with most failures. Keep trying...', false);
+					this.reduceLeaderIPFailures(ip);
+					this.logDebug('[onNodeSSDPResponse] Skip IP ' + ip + ' with most failures. Keep trying...', false);
 				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(ip)){
 					this.logDebug('[onNodeSSDPResponse] Reboot IP activated. Getting wrong SSDP entry. Keep trying...', false);
 				} else {
@@ -728,37 +728,41 @@ class Heos extends utils.Adapter {
 	 **/
 	onData(data) {
 		this.logData("onData", data);
-		try {
-			data = data.toString();
-			data = data.replace(/[\n\r]/g, '');    // Steuerzeichen "CR" entfernen   
-			// es können auch mehrere Antworten vorhanden sein! {"heos": ... } {"heos": ... }
-			// diese nun in einzelne Antworten zerlegen
-			data = this.unfinished_responses + data;
-			this.unfinished_responses = '';
+			try {
+				data = data.toString();
+				data = data.replace(/[\n\r]/g, '');    // Steuerzeichen "CR" entfernen   
+				// es können auch mehrere Antworten vorhanden sein! {"heos": ... } {"heos": ... }
+				// diese nun in einzelne Antworten zerlegen
+				data = this.unfinished_responses + data;
+				this.unfinished_responses = '';
 
-			var lastResponse = '';
-			var responses = data.split(/(?={"heos")/g);
-			for (var r = 0; r < responses.length; r++) {
-				if (responses[r].trim().length > 0) {
-					let response = responses[r].trim()
-					try {
-						JSON.parse(response); // check ob korrektes JSON Array
-						if(lastResponse !== response){
-							this.parseResponse(response);
-							lastResponse = response;
-						} else {
-							this.logData('Skip duplicate response' , response)
+				var lastResponse = '';
+				var responses = data.split(/(?={"heos")/g);
+				for (var r = 0; r < responses.length; r++) {
+					if (responses[r].trim().length > 0) {
+						let response = responses[r].trim()
+						try {
+							JSON.parse(response); // check ob korrektes JSON Array
+							if(lastResponse !== response){
+								if(this.state == States.Connected){
+									this.parseResponse(response);
+									lastResponse = response;
+								} else {
+									this.logDebug('Received data in wrong state ' + this.state + '. Skip.', true);
+								}
+							} else {
+								this.logData('Skip duplicate response' , response)
+							}
+						} catch (e) {
+							this.logData('onData: invalid json (error: ' + e.message + ')', response);
+							this.unfinished_responses += responses[r];
 						}
-					} catch (e) {
-						this.logData('onData: invalid json (error: ' + e.message + ')', response);
-						this.unfinished_responses += responses[r];
 					}
 				}
-			}
-			// wenn weitere Msg zum Senden vorhanden sind, die nächste senden
-			if (this.msgs.length > 0)
-				this.sendNextMsg();
-		} catch (err) { this.logError('[onData] ' + err.message, false); }
+				// wenn weitere Msg zum Senden vorhanden sind, die nächste senden
+				if (this.msgs.length > 0)
+					this.sendNextMsg();
+			} catch (err) { this.logError('[onData] ' + err.message, false); }
 	}
 	
 	parseMessage(message) {
@@ -2029,11 +2033,11 @@ class Heos extends utils.Adapter {
 					this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps) + ' | Announced Players: ' + JSON.stringify(this.ssdp_player_ips));
 					this.logWarn('Announced player not found by HEOS. Try to reboot device ' + ip, true);
 					this.addRebootIp(ip);
-					this.addLeaderFailure();
 					this.next_connect_ip = this.getRarestFailureLeaderIp();
 				}
 			}
 			if(this.reboot_ips.length > 0 || this.next_connect_ip.length > 0){
+				this.addLeaderFailure();
 				this.reconnect();
 			}
 			if(connectedPlayers.length == 0){
@@ -2044,19 +2048,9 @@ class Heos extends utils.Adapter {
 			this.updatePlayerIPs();
 		} catch (err) { 
 			this.logError('[startPlayers] ' + err.message);
+			this.addLeaderFailure();
 			this.reconnect();
 		}
-	}
-
-	addLeaderFailure(){
-		if(this.ip.length > 0){
-			if(this.leader_ip_failures[this.ip]){
-				this.leader_ip_failures[this.ip] += 1;
-			} else {
-				this.leader_ip_failures[this.ip] = 1;
-			}
-		}
-		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_ip_failures));
 	}
 
 	updatePlayerIPs(){
@@ -2278,6 +2272,7 @@ class Heos extends utils.Adapter {
 				this.net_client.write(msg + "\n");
 			} catch (err) { 
 				this.logError('[sendMsg] ' + err.message, false);
+				this.addLeaderFailure();
 				this.reconnect();
 			}
 			if(msg.includes('sign_in')){
@@ -2290,11 +2285,6 @@ class Heos extends utils.Adapter {
 	}
 
 	connect(ip){
-		//if (this.ssdp_search_interval) {
-		//	clearInterval(this.ssdp_search_interval);
-		//	this.ssdp_search_interval = undefined;
-		//}
-
 		this.ip = ip;
 		this.logInfo('connecting to HEOS (' + this.ip + ') ...', false);
 		this.net_client = net.connect({ host: this.ip, port: 1255 });
@@ -2307,6 +2297,10 @@ class Heos extends utils.Adapter {
 		this.net_client.on('error', (error) => {
 			this.logError('[connect] ' + error, false);
 			this.removeRebootIp(ip);
+			if(this.next_connect_ip == ip){
+				this.next_connect_ip = "";
+			}
+			this.addLeaderFailure();
 			this.reconnect();
 		});
 
@@ -2315,6 +2309,9 @@ class Heos extends utils.Adapter {
 			this.setStateChanged('connected_ip', this.ip, true);
 
 			this.state = States.Connected;
+			if(this.next_connect_ip == ip){
+				this.next_connect_ip = "";
+			}
 			if(this.reboot_ips.includes(this.ip)){
 				this.reboot();
 			} else {
@@ -2375,7 +2372,6 @@ class Heos extends utils.Adapter {
 			} else if(this.next_connect_ip.length > 0) {
 				this.logDebug('try to connect to ' + this.next_connect_ip, false)
 				this.connect(this.next_connect_ip);
-				this.next_connect_ip = "";
 			} else {
 				this.ssdp_player_ips = [];
 				this.manual_search_mode = false;
@@ -2409,6 +2405,17 @@ class Heos extends utils.Adapter {
 				}, this.config.searchInterval);
 			}
 		} catch (err) { this.logError('[search] ' + err.message, false); }
+	}
+
+	addLeaderFailure(){
+		if(this.ip.length > 0){
+			if(this.leader_ip_failures[this.ip]){
+				this.leader_ip_failures[this.ip] += 1;
+			} else {
+				this.leader_ip_failures[this.ip] = 1;
+			}
+		}
+		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_ip_failures));
 	}
 	
 	getRarestFailureLeaderIp(){
@@ -2448,8 +2455,16 @@ class Heos extends utils.Adapter {
 		return ip;
 	}
 
-	clearLeaderIPFailures(ip){
-		this.leader_ip_failures[ip] = 0;
+	reduceLeaderIPFailures(ip){
+		if(this.leader_ip_failures[ip]){
+			this.leader_ip_failures[ip] -= 1;
+		} else {
+			this.leader_ip_failures[ip] = 0;
+		}
+		if(this.leader_ip_failures[ip] && this.leader_ip_failures[ip] < 0){
+			this.leader_ip_failures[ip] = 0;
+		}
+		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_ip_failures));
 	}
 
 	async resetIntervals(){
@@ -2503,7 +2518,7 @@ class Heos extends utils.Adapter {
 		this.setState('signed_in_user', "");
 
 		this.state = States.Disconnected;
-		this.ip = '';
+		//this.ip = '';
 		this.msgs = [];
 		this.unfinished_responses = '';
 		this.players = {};
