@@ -2153,8 +2153,8 @@ class Heos extends utils.Adapter {
 	}
 
 	signIn() {
-		if(this.offline_mode){
-			this.logInfo('Skip sign in, because offline mode is activated.', false);
+		if(this.offline_mode || !this.config.username || !this.config.password){
+			this.logInfo('Skip sign in, because offline mode is activated or credentials missing.', false);
 		} else if (this.state == States.Connected) {
 			// heos://system/sign_in?un=heos_username&pw=heos_password
 			this.msgs.push('heos://system/sign_in?un=' + this.config.username + '&pw=' + this.config.password);
