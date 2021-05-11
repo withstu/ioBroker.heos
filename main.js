@@ -20,10 +20,10 @@ const States = {
 	Reconnecting: 3,
 	Connecting: 4,
 	Connected: 5
-}
+};
 
 class Heos extends utils.Adapter {
-	
+
 	/**
 	 * @param {Partial<utils.AdapterOptions>} [options={}]
 	 */
@@ -42,9 +42,9 @@ class Heos extends utils.Adapter {
 		this.ip = '';
 		this.state = States.Disconnected;
 		this.manual_search_mode = false;
-		this.signed_in = false
+		this.signed_in = false;
 		this.offline_mode = false;
-		
+
 		this.heartbeat_retries = 0;
 		this.heartbeat_interval = undefined;
 		this.ssdp_search_interval = undefined;
@@ -56,7 +56,7 @@ class Heos extends utils.Adapter {
 		this.reboot_ips = [];
 		this.reboot_ip_counter = {};
 		this.leader_ip_failures = {};
-		this.next_connect_ip = "";
+		this.next_connect_ip = '';
 
 		this.reconnect_timeout = undefined;
 		this.reboot_timeout = undefined;
@@ -195,7 +195,7 @@ class Heos extends utils.Adapter {
 		this.log.silly(msg);
 	}
 
-	async onReady() {	
+	async onReady() {
 		await this.setObjectAsync('players', {
 			type: 'device',
 			common: {
@@ -309,7 +309,7 @@ class Heos extends utils.Adapter {
 		// Reset the connection indicator during startup
 		this.setState('info.connection', false, true);
 		this.setState('connected_ip', '', true);
-		
+
 		//Root
 		this.subscribeStates('command');
 		this.subscribeStates('offline_mode');
@@ -318,7 +318,7 @@ class Heos extends utils.Adapter {
 		});
 
 		//Presets|Playlists
-		this.subscribeStates('sources.*.play')
+		this.subscribeStates('sources.*.play');
 
 		//Sources
 		this.subscribeStates('sources.*.browse');
@@ -377,7 +377,7 @@ class Heos extends utils.Adapter {
 		const id = this.idToDCS(_id);
 		const fullId = _id.split('.');
 
-		this.logDebug("State change - ID: " + _id + " | DCS: " + JSON.stringify(id) + " | State: " + JSON.stringify(state), false);
+		this.logDebug('State change - ID: ' + _id + ' | DCS: ' + JSON.stringify(id) + ' | State: ' + JSON.stringify(state), false);
 
 		if(id){
 			if (state.val === 'false') {
@@ -404,9 +404,9 @@ class Heos extends utils.Adapter {
 				this.sendCommandToAllPlayers('play_preset&preset=' + id.state, true);
 			} else if (id.device === 'sources' && id.channel && id.state === 'browse') {
 				this.browseSource(id.channel);
-			} else if (id.device === 'players' && id.channel && id.state){ 
+			} else if (id.device === 'players' && id.channel && id.state){
 				if(id.channel in this.players && this.players[id.channel]) {
-					let player = this.players[id.channel];
+					const player = this.players[id.channel];
 					if(id.state === 'muted'){
 						player.sendCommand('set_mute&state=' + (state.val === true ? 'on' : 'off'));
 					} else if(id.state === 'repeat'){
@@ -424,7 +424,7 @@ class Heos extends utils.Adapter {
 					} else if(id.state === 'volume'){
 						let volume = state.val;
 						if(volume && player.volume_limit < volume){
-							this.logWarn("Volume limit reached. Reset to: " + player.volume_limit, false);
+							this.logWarn('Volume limit reached. Reset to: ' + player.volume_limit, false);
 							volume = player.volume_limit;
 						}
 						player.sendCommand('set_volume&level=' + volume);
@@ -439,7 +439,7 @@ class Heos extends utils.Adapter {
 					} else if(id.state === 'power'){
 						player.setUpnpDevicePowerState(state.val);
 					} else if(id.state === 'seek'){
-						let percent = state.val
+						let percent = state.val;
 						if (state.val < 0)   {
 							percent = 0;
 						}
@@ -449,7 +449,7 @@ class Heos extends utils.Adapter {
 						if(player.isPlayerLeader()){
 							player.timeSeek(Math.round((player.current_duration * percent) / 100));
 						} else {
-							let leader = this.players[player.group_leader_pid];
+							const leader = this.players[player.group_leader_pid];
 							if(leader){
 								leader.timeSeek(Math.round((leader.current_duration * percent) / 100));
 							}
@@ -458,7 +458,7 @@ class Heos extends utils.Adapter {
 						if(player.isPlayerLeader()){
 							player.timeSeek(state.val);
 						} else {
-							let leader = this.players[player.group_leader_pid];
+							const leader = this.players[player.group_leader_pid];
 							if(leader){
 								leader.timeSeek(state.val);
 							}
@@ -483,7 +483,7 @@ class Heos extends utils.Adapter {
 						if(player.isPlayerLeader()){
 							player.timeSeek(seconds);
 						} else {
-							let leader = this.players[player.group_leader_pid];
+							const leader = this.players[player.group_leader_pid];
 							if(leader){
 								leader.timeSeek(seconds);
 							}
@@ -516,14 +516,14 @@ class Heos extends utils.Adapter {
 				} else if(id.state === 'reboot') {
 					this.getState(id.device + '.' + id.channel + '.ip',  async (err, state) => {
 						if(state) {
-							let val = state.val + '';
+							const val = state.val + '';
 							this.addRebootIp(val);
-							this.logWarn("rebooting player " + this.ip + " requested. Needs to reconnect HEOS to the correct player first.", false);
+							this.logWarn('rebooting player ' + this.ip + ' requested. Needs to reconnect HEOS to the correct player first.', false);
 							this.reconnect();
 						} else {
 							this.logWarn('Player ' + id.channel + ' not connected. Can not update ' + id.state, true + '.');
 						}
-					})
+					});
 				} else {
 					this.logWarn('Player ' + id.channel + ' not connected. Can not update ' + id.state, true + '.');
 				}
@@ -546,11 +546,11 @@ class Heos extends utils.Adapter {
 			}
 		}
 	}
-	
+
 	async onNodeSSDPResponse(headers, statusCode, rinfo) {
 		try {
 			// rinfo {"address":"192.168.2.225","family":"IPv4","port":53871,"size":430}
-			var ip = rinfo.address;
+			const ip = rinfo.address;
 			if (headers.ST == this.ssdp_search_target_name && !this.ssdp_player_ips.includes(ip)){
 				this.ssdp_player_ips.push(ip);
 				this.logDebug('SSDP Announced IPs ' + JSON.stringify(this.ssdp_player_ips), false);
@@ -571,19 +571,19 @@ class Heos extends utils.Adapter {
 			}
 		} catch (err) { this.logError('[onNodeSSDPResponse] ' + err.message, false); }
 	}
-	
+
 	executeCommand(cmd) {
 		//('command: '+cmd);
 		// cmd auswerten
 		cmd = cmd.split('/');
-		var cmd_group = null;
+		let cmd_group = null;
 		if(cmd.length > 1){
 			cmd_group = cmd.shift();
 			cmd = cmd.join('/');
 		} else {
 			cmd = cmd[0];
 		}
-		var commandFallback = false;
+		let commandFallback = false;
 		switch (cmd_group) {
 			case 'system':
 				switch (cmd) {
@@ -628,7 +628,7 @@ class Heos extends utils.Adapter {
 				}
 				break;
 			case 'player':
-				if(!cmd.includes("pid=")){
+				if(!cmd.includes('pid=')){
 					this.sendCommandToAllPlayers(cmd, false);
 				} else {
 					commandFallback = true;
@@ -643,11 +643,11 @@ class Heos extends utils.Adapter {
 				} else if(this.config.cmdScope == 'pid'){
 					this.getState('command_scope_pid',  async (err, state) => {
 						if(state && state.val){
-							let value = state.val + '';
-							let pids = value.split(',');
+							const value = state.val + '';
+							const pids = value.split(',');
 							for (let i = 0; i < pids.length; i++) {
-								let pid = pids[i].trim();
-								let heosPlayer = this.players[pid];
+								const pid = pids[i].trim();
+								const heosPlayer = this.players[pid];
 								if (heosPlayer) {
 									heosPlayer.sendCommand(cmd);
 								}
@@ -655,7 +655,7 @@ class Heos extends utils.Adapter {
 						} else {
 							this.sendCommandToAllPlayers(cmd, true);
 						}
-					})
+					});
 				} else {
 					this.sendCommandToAllPlayers(cmd, true);
 				}
@@ -680,13 +680,13 @@ class Heos extends utils.Adapter {
 			if(state && state.val !== true){
 				await this.setStateAsync('error', true);
 			}
-		})
+		});
 		this.getState('last_error',  async (err, state) => {
 			if(state) {
 				try {
 					this.logWarn('[setLastError] ' + error, false);
-					let val = state.val + '';
-					let lines = val.split('\n');
+					const val = state.val + '';
+					const lines = val.split('\n');
 					if(lines.includes(error))
 						lines.splice(lines.indexOf(error), 1);
 					if (lines.length > 4)
@@ -700,15 +700,15 @@ class Heos extends utils.Adapter {
 
 	logData(prefix, data){
 		if(data.toString().includes('sign_in')){
-			this.logSilly(prefix + ": " + data.toString(), false);
-			this.logDebug(prefix + ": sign_in - sensitive data hidden", false);
+			this.logSilly(prefix + ': ' + data.toString(), false);
+			this.logDebug(prefix + ': sign_in - sensitive data hidden', false);
 		} else {
-			this.logDebug(prefix + ": " + data.toString(), false);
+			this.logDebug(prefix + ': ' + data.toString(), false);
 		}
 	}
 
 	getAllIndexes(arr, val) {
-		var indexes = [], i;
+		let indexes = [], i;
 		for(i = 0; i < arr.length; i++)
 			if (arr[i] === val)
 				indexes.push(i);
@@ -716,67 +716,67 @@ class Heos extends utils.Adapter {
 	}
 
 	/** es liegen Antwort(en) vor
-	 * 
-	 * {"heos": {"command": "browse/browse", "result": "success", "message": "sid=1028&returned=9&count=9"}, 
+	 *
+	 * {"heos": {"command": "browse/browse", "result": "success", "message": "sid=1028&returned=9&count=9"},
 	 *    "payload": [
-	 *        {"container": "no", "mid": "s25529", "type": "station", "playable": "yes", "name": "NDR 1 Niedersachsen (Adult Hits)", "image_url": "http://cdn-profiles.tunein.com/s25529/images/logoq.png?t=154228"}, 
-	 *        {"container": "no", "mid": "s56857", "type": "station", "playable": "yes", "name": "NDR 2 Niedersachsen 96.2 (Top 40 %26 Pop Music)", "image_url": "http://cdn-profiles.tunein.com/s56857/images/logoq.png?t=154228"}, 
-	 *        {"container": "no", "mid": "s24885", "type": "station", "playable": "yes", "name": "NDR Info", "image_url": "http://cdn-profiles.tunein.com/s24885/images/logoq.png?t=1"}, {"container": "no", "mid": "s158432", "type": "station", "playable": "yes", "name": "Absolut relax (Easy Listening Music)", "image_url": "http://cdn-radiotime-logos.tunein.com/s158432q.png"}, 
-	 *        {"container": "no", "mid": "catalog/stations/A316JYMKQTS45I/#chunk", "type": "station", "playable": "yes", "name": "Johannes Oerding", "image_url": "https://images-na.ssl-images-amazon.com/images/G/01/Gotham/DE_artist/JohannesOerding._SX200_SY200_.jpg"}, 
-	 *        {"container": "no", "mid": "catalog/stations/A1O1J39JGVQ9U1/#chunk", "type": "station", "playable": "yes", "name": "Passenger", "image_url": "https://images-na.ssl-images-amazon.com/images/I/71DsYkU4QaL._SY500_CR150,0,488,488_SX200_SY200_.jpg"}, 
+	 *        {"container": "no", "mid": "s25529", "type": "station", "playable": "yes", "name": "NDR 1 Niedersachsen (Adult Hits)", "image_url": "http://cdn-profiles.tunein.com/s25529/images/logoq.png?t=154228"},
+	 *        {"container": "no", "mid": "s56857", "type": "station", "playable": "yes", "name": "NDR 2 Niedersachsen 96.2 (Top 40 %26 Pop Music)", "image_url": "http://cdn-profiles.tunein.com/s56857/images/logoq.png?t=154228"},
+	 *        {"container": "no", "mid": "s24885", "type": "station", "playable": "yes", "name": "NDR Info", "image_url": "http://cdn-profiles.tunein.com/s24885/images/logoq.png?t=1"}, {"container": "no", "mid": "s158432", "type": "station", "playable": "yes", "name": "Absolut relax (Easy Listening Music)", "image_url": "http://cdn-radiotime-logos.tunein.com/s158432q.png"},
+	 *        {"container": "no", "mid": "catalog/stations/A316JYMKQTS45I/#chunk", "type": "station", "playable": "yes", "name": "Johannes Oerding", "image_url": "https://images-na.ssl-images-amazon.com/images/G/01/Gotham/DE_artist/JohannesOerding._SX200_SY200_.jpg"},
+	 *        {"container": "no", "mid": "catalog/stations/A1O1J39JGVQ9U1/#chunk", "type": "station", "playable": "yes", "name": "Passenger", "image_url": "https://images-na.ssl-images-amazon.com/images/I/71DsYkU4QaL._SY500_CR150,0,488,488_SX200_SY200_.jpg"},
 	 *        {"container": "no", "mid": "catalog/stations/A1W7U8U71CGE50/#chunk"
 	 **/
 	onData(data) {
-		this.logData("onData", data);
-			try {
-				data = data.toString();
-				data = data.replace(/[\n\r]/g, '');    // Steuerzeichen "CR" entfernen   
-				// es können auch mehrere Antworten vorhanden sein! {"heos": ... } {"heos": ... }
-				// diese nun in einzelne Antworten zerlegen
-				data = this.unfinished_responses + data;
-				this.unfinished_responses = '';
+		this.logData('onData', data);
+		try {
+			data = data.toString();
+			data = data.replace(/[\n\r]/g, '');    // Steuerzeichen "CR" entfernen
+			// es können auch mehrere Antworten vorhanden sein! {"heos": ... } {"heos": ... }
+			// diese nun in einzelne Antworten zerlegen
+			data = this.unfinished_responses + data;
+			this.unfinished_responses = '';
 
-				var lastResponse = '';
-				var responses = data.split(/(?={"heos")/g);
-				for (var r = 0; r < responses.length; r++) {
-					if (responses[r].trim().length > 0) {
-						let response = responses[r].trim()
-						try {
-							JSON.parse(response); // check ob korrektes JSON Array
-							if(lastResponse !== response){
-								if(this.state == States.Connected){
-									this.parseResponse(response);
-									lastResponse = response;
-								} else {
-									this.logDebug('Received data in wrong state ' + this.state + '. Skip.', true);
-								}
+			let lastResponse = '';
+			const responses = data.split(/(?={"heos")/g);
+			for (let r = 0; r < responses.length; r++) {
+				if (responses[r].trim().length > 0) {
+					const response = responses[r].trim();
+					try {
+						JSON.parse(response); // check ob korrektes JSON Array
+						if(lastResponse !== response){
+							if(this.state == States.Connected){
+								this.parseResponse(response);
+								lastResponse = response;
 							} else {
-								this.logData('Skip duplicate response' , response)
+								this.logDebug('Received data in wrong state ' + this.state + '. Skip.', true);
 							}
-						} catch (e) {
-							this.logData('onData: invalid json (error: ' + e.message + ')', response);
-							this.unfinished_responses += responses[r];
+						} else {
+							this.logData('Skip duplicate response' , response);
 						}
+					} catch (e) {
+						this.logData('onData: invalid json (error: ' + e.message + ')', response);
+						this.unfinished_responses += responses[r];
 					}
 				}
-				// wenn weitere Msg zum Senden vorhanden sind, die nächste senden
-				if (this.msgs.length > 0)
-					this.sendNextMsg();
-			} catch (err) { this.logError('[onData] ' + err.message, false); }
+			}
+			// wenn weitere Msg zum Senden vorhanden sind, die nächste senden
+			if (this.msgs.length > 0)
+				this.sendNextMsg();
+		} catch (err) { this.logError('[onData] ' + err.message, false); }
 	}
-	
+
 	parseMessage(message) {
-		var result = {};
+		const result = {};
 		if(message != null && message.trim().length > 0) {
-			var params = message.split('&');
-			for (var i = 0; i < params.length; i++) {
-				var entry = params[i];
+			const params = message.split('&');
+			for (let i = 0; i < params.length; i++) {
+				let entry = params[i];
 				try {
-					entry = decodeURI(entry); 
+					entry = decodeURI(entry);
 				} catch (e) {
 					// ignore a malformed URI
 				}
-				var param = entry.split('=');
+				const param = entry.split('=');
 				if(param.length > 1){
 					result[param[0]] = param[1];
 				} else {
@@ -789,20 +789,20 @@ class Heos extends utils.Adapter {
 
 	mapBrowseCmd(command, name, image_url, parent){
 		let entry;
-		command = command.replace(/&range.*/, "").replace(/&count.*/, "").replace(/&returned.*/, "");
+		command = command.replace(/&range.*/, '').replace(/&count.*/, '').replace(/&returned.*/, '');
 		if(command in this.browse_cmd_map){
 			entry = this.browse_cmd_map[command];
 		} else {
 			entry = {
-				"name": name,
-				"image_url": image_url,
-				"parent": parent
+				'name': name,
+				'image_url': image_url,
+				'parent': parent
 			};
 			if(name.length > 0){
 				this.browse_cmd_map[command] = entry;
 			}
 		}
-		this.logSilly("BrowseCmdMap: " + JSON.stringify(this.browse_cmd_map), false);
+		this.logSilly('BrowseCmdMap: ' + JSON.stringify(this.browse_cmd_map), false);
 		return entry;
 	}
 
@@ -815,8 +815,8 @@ class Heos extends utils.Adapter {
 	}
 
 	async createSource(folderPath, source){
-		var baseStatePath = folderPath + '.' + source.sid;
-		var statePath = baseStatePath + '.';
+		const baseStatePath = folderPath + '.' + source.sid;
+		const statePath = baseStatePath + '.';
 		//Folder
 		await this.setObjectAsync(baseStatePath, {
 			type: 'folder',
@@ -917,9 +917,9 @@ class Heos extends utils.Adapter {
 	}
 
 	async createPlaylist(folderPath, payload){
-		var itemId = payload.cid;
-		var baseStatePath = folderPath + '.' + itemId;
-		var statePath = baseStatePath + '.';
+		const itemId = payload.cid;
+		const baseStatePath = folderPath + '.' + itemId;
+		const statePath = baseStatePath + '.';
 		//Folder
 		await this.setObjectAsync(baseStatePath, {
 			type: 'folder',
@@ -1070,8 +1070,8 @@ class Heos extends utils.Adapter {
 	}
 
 	async createPreset(folderPath, itemId, payload){
-		var baseStatePath = folderPath + '.' + itemId;
-		var statePath = baseStatePath + '.';
+		const baseStatePath = folderPath + '.' + itemId;
+		const statePath = baseStatePath + '.';
 
 		//Folder
 		await this.setObjectAsync(baseStatePath, {
@@ -1232,37 +1232,37 @@ class Heos extends utils.Adapter {
 				this.logDebug('parseResponse: ' + response, false);
 			}
 
-			if (response.indexOf("command under process") > 0)
-				return
+			if (response.indexOf('command under process') > 0)
+				return;
 
-			var i;
-			var jdata = JSON.parse(response);
+			let i;
+			const jdata = JSON.parse(response);
 			if (!jdata.hasOwnProperty('heos') || !jdata.heos.hasOwnProperty('command'))
 				return;
 
-			var command = jdata.heos.command;
+			let command = jdata.heos.command;
 			if(jdata.heos.message != null && jdata.heos.message.trim().length > 0){
-				command += "?" + jdata.heos.message;
+				command += '?' + jdata.heos.message;
 			}
 			// msg auswerten
-			var jmsg = this.parseMessage(jdata.heos.message);
+			const jmsg = this.parseMessage(jdata.heos.message);
 
 			// result ?
-			var result = 'success';
+			let result = 'success';
 			if (jdata.heos.hasOwnProperty('result')) result = jdata.heos.result;
 			if (result != 'success') {
 				switch(jmsg.text){
 					case 'User not logged in':
 						this.signed_in = false;
 						await this.setStateAsync('signed_in', false, true);
-						await this.setStateAsync('signed_in_user', "", true);
+						await this.setStateAsync('signed_in_user', '', true);
 						this.signIn();
 						break;
 					case 'Processing previous command':
 						//this.reboot();
 						break;
 				}
-				this.setLastError('result=' + result + ',text=' + jmsg.text + ",command=" + jdata.heos.command);
+				this.setLastError('result=' + result + ',text=' + jmsg.text + ',command=' + jdata.heos.command);
 				return; //Stop Parsing, because of error
 			} else {
 				this.getState('error',  async (err, state) => {
@@ -1273,8 +1273,8 @@ class Heos extends utils.Adapter {
 			}
 
 			// cmd auswerten
-			var cmd = jdata.heos.command.split('/');
-			var cmd_group = cmd[0];
+			let cmd = jdata.heos.command.split('/');
+			const cmd_group = cmd[0];
 			cmd = cmd[1];
 			switch (cmd_group) {
 				case 'system':
@@ -1295,7 +1295,7 @@ class Heos extends utils.Adapter {
 							this.getMusicSources();
 							break;
 						case 'user_changed':
-							this.logDebug("sign: " + JSON.stringify(jmsg), false);
+							this.logDebug('sign: ' + JSON.stringify(jmsg), false);
 							if('signed_in' in jmsg){
 								this.signed_in = true;
 								await this.setStateAsync('signed_in', true, true);
@@ -1303,7 +1303,7 @@ class Heos extends utils.Adapter {
 							} else {
 								this.signed_in = false;
 								await this.setStateAsync('signed_in', false, true);
-								await this.setStateAsync('signed_in_user', "", true);
+								await this.setStateAsync('signed_in_user', '', true);
 								this.signIn();
 							}
 							this.getMusicSources();
@@ -1318,12 +1318,12 @@ class Heos extends utils.Adapter {
 							// "heos": {"command": "event/group_volume_changed ","message": "gid='group_id'&level='vol_level'&mute='on_or_off'"}
 							if (jmsg.hasOwnProperty('gid')) {
 								if (jmsg.hasOwnProperty('level')) {
-									let leadHeosPlayer = this.players[jmsg.gid];
+									const leadHeosPlayer = this.players[jmsg.gid];
 									if (leadHeosPlayer) {
 										var memberPids = leadHeosPlayer.group_pid.split(',');
 										for (let i = 0; i < memberPids.length; i++) {
-											let pid = memberPids[i];
-											let heosPlayer = this.players[pid];
+											const pid = memberPids[i];
+											const heosPlayer = this.players[pid];
 											if (heosPlayer) {
 												heosPlayer.setGroupVolume(jmsg.level);
 											}
@@ -1331,14 +1331,14 @@ class Heos extends utils.Adapter {
 									}
 								}
 								if (jmsg.hasOwnProperty('mute')) {
-									let leadHeosPlayer = this.players[jmsg.gid];
+									const leadHeosPlayer = this.players[jmsg.gid];
 									if (leadHeosPlayer) {
 										var memberPids = leadHeosPlayer.group_pid.split(',');
 										for (let i = 0; i < memberPids.length; i++) {
-											let pid = memberPids[i];
-											let heosPlayer = this.players[pid];
+											const pid = memberPids[i];
+											const heosPlayer = this.players[pid];
 											if (heosPlayer) {
-												heosPlayer.setGroupMuted(jmsg.mute == 'on' ? true : false)
+												heosPlayer.setGroupMuted(jmsg.mute == 'on' ? true : false);
 											}
 										}
 									}
@@ -1349,9 +1349,9 @@ class Heos extends utils.Adapter {
 					break;
 				case 'player':
 					switch (cmd) {
-						// {"heos": {"command": "player/get_players", "result": "success", "message": ""}, 
-						//  "payload": [{"name": "HEOS Bar", "pid": 1262037998, "model": "HEOS Bar", "version": "1.430.160", "ip": "192.168.2.225", "network": "wifi", "lineout": 0, "serial": "ADAG9170202780"}, 
-						//              {"name": "HEOS 1 rechts", "pid": -1746612370, "model": "HEOS 1", "version": "1.430.160", "ip": "192.168.2.201", "network": "wifi", "lineout": 0, "serial": "AMWG9170934429"}, 
+						// {"heos": {"command": "player/get_players", "result": "success", "message": ""},
+						//  "payload": [{"name": "HEOS Bar", "pid": 1262037998, "model": "HEOS Bar", "version": "1.430.160", "ip": "192.168.2.225", "network": "wifi", "lineout": 0, "serial": "ADAG9170202780"},
+						//              {"name": "HEOS 1 rechts", "pid": -1746612370, "model": "HEOS 1", "version": "1.430.160", "ip": "192.168.2.201", "network": "wifi", "lineout": 0, "serial": "AMWG9170934429"},
 						//              {"name": "HEOS 1 links", "pid": 68572158, "model": "HEOS 1", "version": "1.430.160", "ip": "192.168.2.219", "network": "wifi", "lineout": 0, "serial": "AMWG9170934433"}
 						//             ]}
 						case 'get_players':
@@ -1362,19 +1362,19 @@ class Heos extends utils.Adapter {
 					}
 					break;
 
-				// {"heos": {"command": "browse/get_music_sources", "result": "success", "message": ""}, 
-				//  "payload": [{"name": "Amazon", "image_url": "https://production...png", "type": "music_service", "sid": 13}, 
-				//              {"name": "TuneIn", "image_url": "https://production...png", "type": "music_service", "sid": 3}, 
-				//              {"name": "Local Music", "image_url": "https://production...png", "type": "heos_server", "sid": 1024}, 
-				//              {"name": "Playlists", "image_url": "https://production...png", "type": "heos_service", "sid": 1025}, 
-				//              {"name": "History", "image_url": "https://production...png", "type": "heos_service", "sid": 1026}, 
-				//              {"name": "AUX Input", "image_url": "https://production...png", "type": "heos_service", "sid": 1027}, 
+				// {"heos": {"command": "browse/get_music_sources", "result": "success", "message": ""},
+				//  "payload": [{"name": "Amazon", "image_url": "https://production...png", "type": "music_service", "sid": 13},
+				//              {"name": "TuneIn", "image_url": "https://production...png", "type": "music_service", "sid": 3},
+				//              {"name": "Local Music", "image_url": "https://production...png", "type": "heos_server", "sid": 1024},
+				//              {"name": "Playlists", "image_url": "https://production...png", "type": "heos_service", "sid": 1025},
+				//              {"name": "History", "image_url": "https://production...png", "type": "heos_service", "sid": 1026},
+				//              {"name": "AUX Input", "image_url": "https://production...png", "type": "heos_service", "sid": 1027},
 				//              {"name": "Favorites", "image_url": "https://production...png", "type": "heos_service", "sid": 1028}]}
 				case 'browse':
 					switch (cmd) {
 						case 'get_music_sources':
 							if ((jdata.hasOwnProperty('payload'))) {
-								var folderPath = 'sources'
+								var folderPath = 'sources';
 								//Folder
 								await this.setObjectAsync(folderPath, {
 									type: 'folder',
@@ -1400,63 +1400,63 @@ class Heos extends utils.Adapter {
 								//Clear browse Map to reduce memory;
 								this.browse_cmd_map = {};
 
-								let sources = this.mapBrowseCmd(command, "sources", "", "");
-								let browseResult = {
-									"name": sources.name,
-									"image_url": sources.image_url,
-									"parameter": jmsg,
-									"payload": []
+								const sources = this.mapBrowseCmd(command, 'sources', '', '');
+								const browseResult = {
+									'name': sources.name,
+									'image_url': sources.image_url,
+									'parameter': jmsg,
+									'payload': []
 								};
 								//jdata.payload.sort(function(a, b) {
 								//	return a.name.localeCompare(b.name);
 								//});
 								for (i = 0; i < jdata.payload.length; i++) {
-									let payload = jdata.payload[i];
-									let browse = "browse/browse?sid=" + payload.sid;
-									let source = this.mapBrowseCmd(browse, decodeURIComponent(payload.name), payload.image_url, "browse/get_music_sources");
+									const payload = jdata.payload[i];
+									const browse = 'browse/browse?sid=' + payload.sid;
+									const source = this.mapBrowseCmd(browse, decodeURIComponent(payload.name), payload.image_url, 'browse/get_music_sources');
 									this.createSource(folderPath, payload);
-									browseResult["payload"].push(
+									browseResult['payload'].push(
 										{
-											"name": source.name,
-											"image_url": source.image_url,
-											"type": "media",
-											"available": (payload.available == 'true' ? true : false),
-											"commands": {
-												"browse": browse
+											'name': source.name,
+											'image_url': source.image_url,
+											'type': 'media',
+											'available': (payload.available == 'true' ? true : false),
+											'commands': {
+												'browse': browse
 											}
 										}
 									);
 								}
-								this.setState("sources.browse_result", JSON.stringify(browseResult));
+								this.setState('sources.browse_result', JSON.stringify(browseResult));
 							}
 							break;
 
-						// {"heos": {"command": "browse/browse", "result": "success", "message": "pid=1262037998&sid=1028&returned=5&count=5"}, 
-						//  "payload": [{"container": "no", "mid": "s17492", "type": "station", "playable": "yes", "name": "NDR 2 (Adult Contemporary Music)", "image_url": "http://cdn-radiotime-logos.tunein.com/s17492q.png"}, 
-						//              {"container": "no", "mid": "s158432", "type": "station", "playable": "yes", "name": "Absolut relax (Easy Listening Music)", "image_url": "http://cdn-radiotime-logos.tunein.com/s158432q.png"}, 
-						//              {"container": "no", "mid": "catalog/stations/A1W7U8U71CGE50/#chunk", "type": "station", "playable": "yes", "name": "Ed Sheeran", "image_url": "https://images-na.ssl-images-amazon.com/images/G/01/Gotham/DE_artist/EdSheeran._SX200_SY200_.jpg"}, 
-						//              {"container": "no", "mid": "catalog/stations/A1O1J39JGVQ9U1/#chunk", "type": "station", "playable": "yes", "name": "Passenger", "image_url": "https://images-na.ssl-images-amazon.com/images/I/71DsYkU4QaL._SY500_CR150,0,488,488_SX200_SY200_.jpg"}, 
-						//              {"container": "no", "mid": "catalog/stations/A316JYMKQTS45I/#chunk", "type": "station", "playable": "yes", "name": "Johannes Oerding", "image_url": "https://images-na.ssl-images-amazon.com/images/G/01/Gotham/DE_artist/JohannesOerding._SX200_SY200_.jpg"}], 
-						//  "options": [{"browse": [{"id": 20, "name": "Remove from HEOS Favorites"}]}]}                    
+						// {"heos": {"command": "browse/browse", "result": "success", "message": "pid=1262037998&sid=1028&returned=5&count=5"},
+						//  "payload": [{"container": "no", "mid": "s17492", "type": "station", "playable": "yes", "name": "NDR 2 (Adult Contemporary Music)", "image_url": "http://cdn-radiotime-logos.tunein.com/s17492q.png"},
+						//              {"container": "no", "mid": "s158432", "type": "station", "playable": "yes", "name": "Absolut relax (Easy Listening Music)", "image_url": "http://cdn-radiotime-logos.tunein.com/s158432q.png"},
+						//              {"container": "no", "mid": "catalog/stations/A1W7U8U71CGE50/#chunk", "type": "station", "playable": "yes", "name": "Ed Sheeran", "image_url": "https://images-na.ssl-images-amazon.com/images/G/01/Gotham/DE_artist/EdSheeran._SX200_SY200_.jpg"},
+						//              {"container": "no", "mid": "catalog/stations/A1O1J39JGVQ9U1/#chunk", "type": "station", "playable": "yes", "name": "Passenger", "image_url": "https://images-na.ssl-images-amazon.com/images/I/71DsYkU4QaL._SY500_CR150,0,488,488_SX200_SY200_.jpg"},
+						//              {"container": "no", "mid": "catalog/stations/A316JYMKQTS45I/#chunk", "type": "station", "playable": "yes", "name": "Johannes Oerding", "image_url": "https://images-na.ssl-images-amazon.com/images/G/01/Gotham/DE_artist/JohannesOerding._SX200_SY200_.jpg"}],
+						//  "options": [{"browse": [{"id": 20, "name": "Remove from HEOS Favorites"}]}]}
 						case 'browse':
 							if ((jdata.hasOwnProperty('payload'))) {
-								let sid = parseInt(jmsg.sid, 10);
-								let source = this.mapBrowseCmd(command, "", "", "");
-								if(jmsg.hasOwnProperty("count")){
+								const sid = parseInt(jmsg.sid, 10);
+								const source = this.mapBrowseCmd(command, '', '', '');
+								if(jmsg.hasOwnProperty('count')){
 									jmsg.count = parseInt(jmsg.count);
 								}
-								if(jmsg.hasOwnProperty("returned")){
+								if(jmsg.hasOwnProperty('returned')){
 									jmsg.returned = parseInt(jmsg.returned);
 								}
-								let browseResult = {
-									"name": source.name,
-									"image_url": source.image_url,
-									"parameter": jmsg,
-									"payload": []
+								const browseResult = {
+									'name': source.name,
+									'image_url': source.image_url,
+									'parameter': jmsg,
+									'payload': []
 								};
 								//Save index before sorting
 								for (i = 0; i < jdata.payload.length; i++) {
-									let payload = jdata.payload[i];
+									const payload = jdata.payload[i];
 									payload.index = i;
 								}
 								//Sort by name
@@ -1465,47 +1465,47 @@ class Heos extends utils.Adapter {
 								//});
 
 								//Add top
-								let sources = this.mapBrowseCmd("browse/get_music_sources", "", "", "");
-								browseResult["payload"].push(
+								const sources = this.mapBrowseCmd('browse/get_music_sources', '', '', '');
+								browseResult['payload'].push(
 									{
-										"name": sources.name,
-										"image_url": sources.image_url,
-										"type": "control",
-										"available": true,
-										"commands" : {
-											"browse": "browse/get_music_sources"
+										'name': sources.name,
+										'image_url': sources.image_url,
+										'type': 'control',
+										'available': true,
+										'commands' : {
+											'browse': 'browse/get_music_sources'
 										}
 									}
 								);
 
 								//Back button
 								if(source.parent.length > 0){
-									browseResult["payload"].push(
+									browseResult['payload'].push(
 										{
-											"name": "back",
-											"image_url": "",
-											"type": "control",
-											"available": true,
-											"commands" : {
-												"browse": source.parent
+											'name': 'back',
+											'image_url': '',
+											'type': 'control',
+											'available': true,
+											'commands' : {
+												'browse': source.parent
 											}
 										}
 									);
 								}
-								
+
 								//Add play all
 								if (jdata.hasOwnProperty('options')) {
-									let options = jdata.options[0].browse;
+									const options = jdata.options[0].browse;
 									for(i = 0; i < options.length; i++){
 										if(options[i].id == 21){
-											browseResult["payload"].push(
+											browseResult['payload'].push(
 												{
-													"name": "play_all",
-													"image_url": "",
-													"type": "control",
-													"available": true,
-													"commands": {
-														"play": "scope/add_to_queue&sid=" + sid + "&cid=" + jmsg.cid + "&aid=" + this.config.queueMode
+													'name': 'play_all',
+													'image_url': '',
+													'type': 'control',
+													'available': true,
+													'commands': {
+														'play': 'scope/add_to_queue&sid=' + sid + '&cid=' + jmsg.cid + '&aid=' + this.config.queueMode
 													}
 												}
 											);
@@ -1517,9 +1517,9 @@ class Heos extends utils.Adapter {
 								if (jmsg.returned < jmsg.count) {
 									var start = 1;
 									var end = 50;
-									var pageCmd = "";
+									var pageCmd = '';
 									if(jmsg.hasOwnProperty('range')){
-										let range = jmsg.range.split(',');
+										const range = jmsg.range.split(',');
 										start = parseInt(range[0]) + 1;
 										end = parseInt(range[1]) + 1;
 									}
@@ -1529,21 +1529,21 @@ class Heos extends utils.Adapter {
 										if(start < 1) {
 											start = 1;
 										}
-										for(let key in jmsg){
-											if(!["range", "returned", "count"].includes(key)){
-												pageCmd += (pageCmd.length > 0 ? "&" : "") + key + "=" + jmsg[key];
+										for(const key in jmsg){
+											if(!['range', 'returned', 'count'].includes(key)){
+												pageCmd += (pageCmd.length > 0 ? '&' : '') + key + '=' + jmsg[key];
 											}
 										}
 										if(pageCmd.length > 0){
-											pageCmd = "browse/browse?" + pageCmd + "&range=" + (start - 1) + "," + (end - 1);
-											browseResult["payload"].push(
+											pageCmd = 'browse/browse?' + pageCmd + '&range=' + (start - 1) + ',' + (end - 1);
+											browseResult['payload'].push(
 												{
-													"name": "load_prev",
-													"image_url": "",
-													"type": "control",
-													"available": true,
-													"commands": {
-														"browse": pageCmd
+													'name': 'load_prev',
+													'image_url': '',
+													'type': 'control',
+													'available': true,
+													'commands': {
+														'browse': pageCmd
 													}
 												}
 											);
@@ -1553,102 +1553,102 @@ class Heos extends utils.Adapter {
 
 								switch(sid){
 									case 1025:
-										var folderPath = 'sources.1025'
+										var folderPath = 'sources.1025';
 										//Folder
-										let playlists = [];
+										const playlists = [];
 										for (i = 0; i < jdata.payload.length; i++) {
-											let payload = jdata.payload[i];
-											playlists.push(payload.cid)
+											const payload = jdata.payload[i];
+											playlists.push(payload.cid);
 											if (payload.name.length == 0){
-												payload.name = "Unknown"
+												payload.name = 'Unknown';
 											}
 											this.createPlaylist(folderPath, payload);
-											browseResult["payload"].push(
+											browseResult['payload'].push(
 												{
-													"name": unescape(decodeURIComponent(payload.name)),
-													"image_url": payload.image_url,
-													"type": "media",
-													"available": true,
-													"commands": {
-														"play": "scope/add_to_queue&sid=1025&aid=" + this.config.queueMode + "&cid=" + payload.cid
+													'name': unescape(decodeURIComponent(payload.name)),
+													'image_url': payload.image_url,
+													'type': 'media',
+													'available': true,
+													'commands': {
+														'play': 'scope/add_to_queue&sid=1025&aid=' + this.config.queueMode + '&cid=' + payload.cid
 													}
 												}
 											);
 										}
 										if(jdata.payload.length){
-											this.getStates(folderPath + ".*", async (err, states) => {
-												for (var id in states) {
+											this.getStates(folderPath + '.*', async (err, states) => {
+												for (const id in states) {
 													if(states[id] && states[id].val){
-														var idSplit = id.split('.');
-														var state = idSplit[idSplit.length - 1];
+														const idSplit = id.split('.');
+														const state = idSplit[idSplit.length - 1];
 														if(state == 'cid'){
 															if(!playlists.includes(states[id].val)){
-																this.logWarn("deleting playlist: " + states[id].val, false)
-																this.delObject(folderPath + "." + states[id].val, {recursive: true})
+																this.logWarn('deleting playlist: ' + states[id].val, false);
+																this.delObject(folderPath + '.' + states[id].val, {recursive: true});
 															}
 														}
 													}
 												}
-											})
+											});
 										}
 										break;
 									case 1028:
-										var folderPath = 'sources.1028'
+										var folderPath = 'sources.1028';
 										//Folder
-										let presets = [];
+										const presets = [];
 										for (i = 0; i < jdata.payload.length; i++) {
-											let payload = jdata.payload[i];
+											const payload = jdata.payload[i];
 											if (payload.name.length == 0){
-												payload.name = "Unknown"
+												payload.name = 'Unknown';
 											}
-											let presetId = payload.index + 1
-											presets.push(presetId)
+											const presetId = payload.index + 1;
+											presets.push(presetId);
 											this.createPreset(folderPath, presetId, payload);
-											browseResult["payload"].push(
+											browseResult['payload'].push(
 												{
-													"name": unescape(decodeURIComponent(payload.name)),
-													"image_url": payload.image_url,
-													"type": "media",
-													"available": true,
-													"commands": {
-														"play": "scope/play_preset&preset=" + presetId
+													'name': unescape(decodeURIComponent(payload.name)),
+													'image_url': payload.image_url,
+													'type': 'media',
+													'available': true,
+													'commands': {
+														'play': 'scope/play_preset&preset=' + presetId
 													}
 												}
 											);
 										}
 										if(jdata.payload.length){
-											this.getStates(folderPath + ".*", async (err, states) => {
-												for (var id in states) {
+											this.getStates(folderPath + '.*', async (err, states) => {
+												for (const id in states) {
 													if(states[id] && states[id].val){
-														var idSplit = id.split('.');
-														var state = idSplit[idSplit.length - 1];
+														const idSplit = id.split('.');
+														const state = idSplit[idSplit.length - 1];
 														if(state == 'id'){
 															if(!presets.includes(states[id].val)){
-																this.logWarn("deleting preset: " + states[id].val, false)
-																this.delObject(folderPath + "." + states[id].val, {recursive: true})
+																this.logWarn('deleting preset: ' + states[id].val, false);
+																this.delObject(folderPath + '.' + states[id].val, {recursive: true});
 															}
 														}
 													}
 												}
-											})
+											});
 										}
 										break;
 									default:
 										//Add payload items
 										for (i = 0; i < jdata.payload.length; i++) {
-											let payload = jdata.payload[i];
+											const payload = jdata.payload[i];
 											if (payload.name.length == 0){
-												payload.name = "Unknown"
+												payload.name = 'Unknown';
 											}
-											browseResult["payload"].push(
+											browseResult['payload'].push(
 												{
-													"name": unescape(decodeURIComponent(payload.name)),
-													"image_url": payload.image_url,
-													"type": "media",
-													"available": true,
-													"commands": this.browse2Commands(jmsg, payload)
+													'name': unescape(decodeURIComponent(payload.name)),
+													'image_url': payload.image_url,
+													'type': 'media',
+													'available': true,
+													'commands': this.browse2Commands(jmsg, payload)
 												}
-											)
+											);
 										}
 								}
 
@@ -1656,9 +1656,9 @@ class Heos extends utils.Adapter {
 								if (jmsg.returned < jmsg.count) {
 									var start = 1;
 									var end = 50;
-									var pageCmd = "";
+									var pageCmd = '';
 									if(jmsg.hasOwnProperty('range')){
-										let range = jmsg.range.split(',');
+										const range = jmsg.range.split(',');
 										start = parseInt(range[0]) + 1;
 										end = parseInt(range[1]) + 1;
 									}
@@ -1668,28 +1668,28 @@ class Heos extends utils.Adapter {
 										if(end > jmsg.count) {
 											end = jmsg.count;
 										}
-										for(let key in jmsg){
-											if(!["range", "returned", "count"].includes(key)){
-												pageCmd += (pageCmd.length > 0 ? "&" : "") + key + "=" + jmsg[key];
+										for(const key in jmsg){
+											if(!['range', 'returned', 'count'].includes(key)){
+												pageCmd += (pageCmd.length > 0 ? '&' : '') + key + '=' + jmsg[key];
 											}
 										}
 										if(pageCmd.length > 0){
-											pageCmd = "browse/browse?" + pageCmd + "&range=" + (start - 1) + "," + (end - 1);
-											browseResult["payload"].push(
+											pageCmd = 'browse/browse?' + pageCmd + '&range=' + (start - 1) + ',' + (end - 1);
+											browseResult['payload'].push(
 												{
-													"name": "load_next",
-													"image_url": "",
-													"type": "control",
-													"available": true,
-													"commands": {
-														"browse": pageCmd
+													'name': 'load_next',
+													'image_url': '',
+													'type': 'control',
+													'available': true,
+													'commands': {
+														'browse': pageCmd
 													}
 												}
 											);
 										}
 									}
 								}
-								this.setState("sources.browse_result", JSON.stringify(browseResult));
+								this.setState('sources.browse_result', JSON.stringify(browseResult));
 							}
 							break;
 					}
@@ -1699,7 +1699,7 @@ class Heos extends utils.Adapter {
 					switch (cmd) {
 						// { "heos":{"command":"player/set_group","result":"success",
 						//           "message": "gid='new group_id'&name='group_name'&pid='player_id_1, player_id_2,…,player_id_n'
-						//          } 
+						//          }
 						// }
 						case 'set_group':
 							//Ignorieren, da jmsg falsche Daten enthält. Get-groups enthält die korrekten Daten.
@@ -1710,12 +1710,12 @@ class Heos extends utils.Adapter {
 						case 'get_volume':
 							if (jmsg.hasOwnProperty('gid')) {
 								if (jmsg.hasOwnProperty('level')) {
-									let leadHeosPlayer = this.players[jmsg.gid];
+									const leadHeosPlayer = this.players[jmsg.gid];
 									if (leadHeosPlayer) {
 										var memberPids = leadHeosPlayer.group_pid.split(',');
 										for (let i = 0; i < memberPids.length; i++) {
-											let pid = memberPids[i];
-											let heosPlayer = this.players[pid];
+											const pid = memberPids[i];
+											const heosPlayer = this.players[pid];
 											if (heosPlayer) {
 												heosPlayer.setGroupVolume(jmsg.level);
 											}
@@ -1729,12 +1729,12 @@ class Heos extends utils.Adapter {
 						case 'get_mute':
 							if (jmsg.hasOwnProperty('gid')) {
 								if (jmsg.hasOwnProperty('state')) {
-									let leadHeosPlayer = this.players[jmsg.gid];
+									const leadHeosPlayer = this.players[jmsg.gid];
 									if (leadHeosPlayer) {
 										var memberPids = leadHeosPlayer.group_pid.split(',');
 										for (let i = 0; i < memberPids.length; i++) {
-											let pid = memberPids[i];
-											let heosPlayer = this.players[pid];
+											const pid = memberPids[i];
+											const heosPlayer = this.players[pid];
 											if (heosPlayer) {
 												heosPlayer.setGroupMuted(jmsg.state == 'on' ? true : false);
 											}
@@ -1747,15 +1747,15 @@ class Heos extends utils.Adapter {
 						// { "heos": { "command": "player/get_groups", "result": "success", "message": "" },
 						//   "payload": [{"name":"'group name 1'", "gid": "group id 1'",
 						//                "players":[{"name":"player name 1","pid":"'player id1'","role":"player role 1 (leader or member)'"},
-						//                           {"name":"player name 2","pid":"'player id2'","role":"player role 2 (leader or member)'"} 
+						//                           {"name":"player name 2","pid":"'player id2'","role":"player role 2 (leader or member)'"}
 						//                          ]
 						//               },
 						//               {"name":"'group name 2'","gid":"group id 2'",
-						//                "players":[{"name":"player name ... 
+						//                "players":[{"name":"player name ...
 						case 'get_groups':
 							// bisherige groups leeren
-							for(var pid in this.players) {
-								let player = this.players[pid];
+							for(const pid in this.players) {
+								const player = this.players[pid];
 								if(player) {
 									await player.setGroupName('');
 									await player.setGroupPid('');
@@ -1768,15 +1768,15 @@ class Heos extends utils.Adapter {
 							// payload mit den groups auswerten
 							if ((jdata.hasOwnProperty('payload'))) {
 								for (i = 0; i < jdata.payload.length; i++) {
-									var group = jdata.payload[i];
-									var players = group.players;
+									const group = jdata.payload[i];
+									const players = group.players;
 									// Player IDs addieren. Hinweis: "leader" ist nicht immer der 1.Playereintrag
-									group.pid = "";
-									for (var p = 0; p < players.length; p++) {
+									group.pid = '';
+									for (let p = 0; p < players.length; p++) {
 										if (players[p].role == 'leader')
-											group.pid = players[p].pid + (group.pid.length > 0 ? "," : "") + group.pid;
+											group.pid = players[p].pid + (group.pid.length > 0 ? ',' : '') + group.pid;
 										else
-											group.pid = group.pid + (group.pid.length > 0 ? "," : "") + players[p].pid;
+											group.pid = group.pid + (group.pid.length > 0 ? ',' : '') + players[p].pid;
 									}
 									this.setGroup(group);
 								}
@@ -1798,9 +1798,9 @@ class Heos extends utils.Adapter {
 
 			// an die zugehörigen Player weiterleiten
 			if (jmsg.hasOwnProperty('pid')) {
-				let heosPlayer = this.players[jmsg.pid];
+				const heosPlayer = this.players[jmsg.pid];
 				if (heosPlayer) {
-					heosPlayer.parseResponse(jdata, jmsg, cmd_group, cmd)
+					heosPlayer.parseResponse(jdata, jmsg, cmd_group, cmd);
 				}
 			}
 
@@ -1808,7 +1808,7 @@ class Heos extends utils.Adapter {
 	}
 
 	browse2Commands(message, payload){
-		let cmd = {};
+		const cmd = {};
 		let msid;
 		let psid;
 		let mcid;
@@ -1837,66 +1837,66 @@ class Heos extends utils.Adapter {
 			type = payload.type;
 		}
 		if (payload.hasOwnProperty('playable')) {
-			playable = payload.playable == "yes" ? true : false;
+			playable = payload.playable == 'yes' ? true : false;
 		}
 		if (payload.hasOwnProperty('container')) {
-			container = payload.container == "yes" ? true : false;
+			container = payload.container == 'yes' ? true : false;
 		}
 
 		//browse
 		if(psid){
-			cmd.browse = "browse/browse?sid=" + psid;
+			cmd.browse = 'browse/browse?sid=' + psid;
 		} else if (container){
-			let cmdTmp = [];
+			const cmdTmp = [];
 			if(msid){
-				cmdTmp.push("sid=" + msid);
+				cmdTmp.push('sid=' + msid);
 			}
 			if(pcid){
-				cmdTmp.push("cid=" + pcid);
+				cmdTmp.push('cid=' + pcid);
 			} else if(mcid){
-				cmdTmp.push("cid=" + mcid);
+				cmdTmp.push('cid=' + mcid);
 			}
 			if(pcid || mcid){
-				cmdTmp.push("range=0,49");
+				cmdTmp.push('range=0,49');
 			}
-			
+
 			if(cmdTmp.length > 0){
-				cmd.browse = "browse/browse?" + cmdTmp.join("&");
+				cmd.browse = 'browse/browse?' + cmdTmp.join('&');
 			}
 
 		}
 
 		//Parent
-		let parentCmd = "";
-		let parentCmdTmp = [];
+		let parentCmd = '';
+		const parentCmdTmp = [];
 		if(msid){
-			parentCmdTmp.push("sid=" + msid);
+			parentCmdTmp.push('sid=' + msid);
 		}
 		if(mcid){
-			parentCmdTmp.push("cid=" + mcid);
+			parentCmdTmp.push('cid=' + mcid);
 		}
 		if(parentCmdTmp.length > 0){
-			parentCmd = "browse/browse?" + parentCmdTmp.join("&");
+			parentCmd = 'browse/browse?' + parentCmdTmp.join('&');
 		}
 
-		if("browse" in cmd){
+		if('browse' in cmd){
 			this.mapBrowseCmd(cmd.browse, unescape(decodeURIComponent(payload.name)), payload.image_url, parentCmd);
 		}
 
 		//playable
 		if(playable && type){
-			if (type == 'station' && mid){      
-				if(mid.includes("inputs/")){
-					cmd.play = "scope/play_input&input=" + mid;
+			if (type == 'station' && mid){
+				if(mid.includes('inputs/')){
+					cmd.play = 'scope/play_input&input=' + mid;
 				} else if(mcid){
-					cmd.play = "scope/play_stream&sid=" + msid + "&cid=" + mcid + "&mid=" + mid;
+					cmd.play = 'scope/play_stream&sid=' + msid + '&cid=' + mcid + '&mid=' + mid;
 				} else {
-					cmd.play = "scope/play_stream&sid=" + msid + "&mid=" + mid;
+					cmd.play = 'scope/play_stream&sid=' + msid + '&mid=' + mid;
 				}
 			} else if(container && pcid){
-				cmd.play = "scope/add_to_queue&sid=" + msid + "&cid=" + pcid + "&aid=" + this.config.queueMode;
+				cmd.play = 'scope/add_to_queue&sid=' + msid + '&cid=' + pcid + '&aid=' + this.config.queueMode;
 			} else if(mcid && mid){
-				cmd.play = "scope/add_to_queue&sid=" + msid + "&cid=" + mcid + "&mid=" + mid + "&aid=" + this.config.queueMode;
+				cmd.play = 'scope/add_to_queue&sid=' + msid + '&cid=' + mcid + '&mid=' + mid + '&aid=' + this.config.queueMode;
 			}
 		}
 
@@ -1905,8 +1905,8 @@ class Heos extends utils.Adapter {
 
 	sendCommandToAllPlayers(cmd, leaderOnly){
 		if (this.state == States.Connected) {
-			for (var pid in this.players){
-				let player = this.players[pid];
+			for (const pid in this.players){
+				const player = this.players[pid];
 				if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerLeader()))){
 					player.sendCommand(cmd);
 				}
@@ -1916,8 +1916,8 @@ class Heos extends utils.Adapter {
 
 	ttsToAllPlayers(fileName, volume, leaderOnly){
 		if (this.state == States.Connected) {
-			for (var pid in this.players){
-				let player = this.players[pid];
+			for (const pid in this.players){
+				const player = this.players[pid];
 				if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerLeader()))){
 					player.tts(fileName, volume);
 				}
@@ -1927,11 +1927,11 @@ class Heos extends utils.Adapter {
 
 	/**
 	 * Adapted from https://github.com/ioBroker/ioBroker.sonos
-	 * @param {*} fileName 
-	 * @param {*} callback 
+	 * @param {*} fileName
+	 * @param {*} callback
 	 */
 	text2speech(fileName, pid, callback) {
-		this.logInfo("TTS: " + fileName + " | PID: " + pid, false);
+		this.logInfo('TTS: ' + fileName + ' | PID: ' + pid, false);
 		// Extract volume
 		let volume = null;
 
@@ -1940,13 +1940,13 @@ class Heos extends utils.Adapter {
 			volume   = fileName.substring(0, pos);
 			fileName = fileName.substring(pos + 1);
 		}
-	
+
 		fileName = fileName.trim();
 
 		// play http/https urls directly on heos device
 		if (fileName && fileName.match(/^https?:\/\//)) {
 			if(pid in this.players){
-				let player = this.players[pid];
+				const player = this.players[pid];
 				if(player) {
 					player.tts(fileName, volume);
 				} else {
@@ -1955,7 +1955,7 @@ class Heos extends utils.Adapter {
 			} else {
 				this.ttsToAllPlayers(fileName, volume, true);
 			}
-			
+
 			callback && callback();
 		} else {
 			this.logError('invalid filename specified');
@@ -1964,11 +1964,11 @@ class Heos extends utils.Adapter {
 	}
 
 	/**
-	 * 
-	 * @param {String} pid 
+	 *
+	 * @param {String} pid
 	 */
 	async stopPlayer(pid){
-		let player = this.players[pid];
+		const player = this.players[pid];
 		if(player){
 			await player.disconnect();
 		}
@@ -1979,37 +1979,37 @@ class Heos extends utils.Adapter {
 	// Für die gefundenen HEOS Player entsprechende class HeosPlayer Instanzen bilden und nicht mehr verbundene Player stoppen
 	async startPlayers(payload) {
 		try {
-			var connectedPlayers = [];
-			var foundPlayerIps = [];
-			for (var i = 0; i < payload.length; i++) {
-				var playerConnected = true;
-				var player = payload[i];
+			const connectedPlayers = [];
+			const foundPlayerIps = [];
+			for (let i = 0; i < payload.length; i++) {
+				let playerConnected = true;
+				const player = payload[i];
 				var pid = player.pid + ''; //Convert to String
-				if(player.hasOwnProperty("ip") && player.ip != '127.0.0.1'){
+				if(player.hasOwnProperty('ip') && player.ip != '127.0.0.1'){
 					foundPlayerIps.push(player.ip);
 				}
-				if(!player.name || !player.hasOwnProperty("ip") || player.ip == '127.0.0.1'){
+				if(!player.name || !player.hasOwnProperty('ip') || player.ip == '127.0.0.1'){
 					this.start_players_errors += 1;
-					this.logDebug("Start players payload error: " + JSON.stringify(payload), false);
+					this.logDebug('Start players payload error: ' + JSON.stringify(payload), false);
 					if(this.start_players_errors > 4){
 						this.start_players_errors = 0;
 						if(this.config.rebootOnFailure === true){
-							this.logWarn("HEOS is not responding as expected. Reboot.", false)
+							this.logWarn('HEOS is not responding as expected. Reboot.', false);
 							this.rebootAll();
 						} else {
 							this.logWarn('Device failure detected. Activate "reboot on failure" in the configuration or reboot manually.', true);
 						}
 					}
-					throw new Error("HEOS responded with invalid data.");
+					throw new Error('HEOS responded with invalid data.');
 				} else {
 					if(!(pid in this.players)){
-						let heosPlayer = new HeosPlayer(this, player);
+						const heosPlayer = new HeosPlayer(this, player);
 						this.players[pid] = heosPlayer;
 						try {
 							await heosPlayer.connect();
 						} catch (err){
 							this.logDebug("can't connect error: " + err, false);
-							this.logWarn("can't connect player " + player.name + " (" + player.ip + "). Skip.", false);
+							this.logWarn("can't connect player " + player.name + ' (' + player.ip + '). Skip.', false);
 							playerConnected = false;
 						}
 					} else {
@@ -2027,8 +2027,8 @@ class Heos extends utils.Adapter {
 				}
 			}
 			//Check for players in fail state
-			for(var id in this.ssdp_player_ips){
-				let ip = this.ssdp_player_ips[id];
+			for(const id in this.ssdp_player_ips){
+				const ip = this.ssdp_player_ips[id];
 				if(!foundPlayerIps.includes(ip)){
 					this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps) + ' | Announced Players: ' + JSON.stringify(this.ssdp_player_ips));
 					this.logWarn('Announced player not found by HEOS. Try to reboot device ' + ip, true);
@@ -2046,7 +2046,7 @@ class Heos extends utils.Adapter {
 			}
 			this.getGroups();
 			this.updatePlayerIPs();
-		} catch (err) { 
+		} catch (err) {
 			this.logError('[startPlayers] ' + err.message);
 			this.addLeaderFailure();
 			this.reconnect();
@@ -2056,24 +2056,24 @@ class Heos extends utils.Adapter {
 	updatePlayerIPs(){
 		this.getStates('players.*', async (err, states) => {
 			this.player_ips = [];
-			for (var id in states) {
+			for (const id in states) {
 				if(states[id] && states[id].val){
-					var idSplit = id.split('.');
-					var state = idSplit[idSplit.length - 1];
+					const idSplit = id.split('.');
+					const state = idSplit[idSplit.length - 1];
 					if(state == 'ip'){
 						this.player_ips.push(states[id].val);
 					}
 				}
 			}
-		})
+		});
 	}
 
 	//Alle Player stoppen
 	stopPlayers() {
 		if(Object.keys(this.players).length){
-			this.logDebug("try to stop players:" + Object.keys(this.players).join(','));
+			this.logDebug('try to stop players:' + Object.keys(this.players).join(','));
 		}
-		for (var pid in this.players){
+		for (const pid in this.players){
 			this.stopPlayer(pid);
 		}
 	}
@@ -2089,11 +2089,11 @@ class Heos extends utils.Adapter {
 	async setGroup(group) {
 		if (group.hasOwnProperty('pid')) {
 			// in den Playern den Groupstatus setzen
-			var pids = group.pid.split(',');
+			const pids = group.pid.split(',');
 
-			for (var i = 0; i < pids.length; i++) {
-				let pid = pids[i];
-				let player = this.players[pid];
+			for (let i = 0; i < pids.length; i++) {
+				const pid = pids[i];
+				const player = this.players[pid];
 				if (player) {
 					await player.setGroupName((group.hasOwnProperty('name') ? group.name : ''));
 					await player.setGroupPid(group.pid);
@@ -2105,8 +2105,8 @@ class Heos extends utils.Adapter {
 
 			if (group.hasOwnProperty('gid')) {
 				// volume und mute dazu holen
-				this.executeCommand("group/get_volume?gid=" + group.gid);
-				this.executeCommand("group/get_mute?gid=" + group.gid);
+				this.executeCommand('group/get_volume?gid=' + group.gid);
+				this.executeCommand('group/get_mute?gid=' + group.gid);
 			}
 		}
 	}
@@ -2121,8 +2121,8 @@ class Heos extends utils.Adapter {
 
 	ungroupAll() {
 		if (this.state == States.Connected) {
-			for(var pid in this.players){
-				let player = this.players[pid];
+			for(const pid in this.players){
+				const player = this.players[pid];
 				if(player.group_leader === true){
 					this.msgs.push('heos://group/set_group?pid=' + pid);
 					this.sendNextMsg();
@@ -2133,7 +2133,7 @@ class Heos extends utils.Adapter {
 
 	groupAll() {
 		if (this.state == States.Connected) {
-			let pids = Object.keys(this.players).join(',');
+			const pids = Object.keys(this.players).join(',');
 			this.msgs.push('heos://group/set_group?pid=' + pids);
 			this.sendNextMsg();
 		}
@@ -2146,10 +2146,10 @@ class Heos extends utils.Adapter {
 			this.sendNextMsg();
 		}
 	}
-	
+
 	signIn() {
 		if(this.offline_mode){
-			this.logInfo('Skip sign in, because offline mode is activated.', false)
+			this.logInfo('Skip sign in, because offline mode is activated.', false);
 		} else if (this.state == States.Connected) {
 			// heos://system/sign_in?un=heos_username&pw=heos_password
 			this.msgs.push('heos://system/sign_in?un=' + this.config.username + '&pw=' + this.config.password);
@@ -2167,7 +2167,7 @@ class Heos extends utils.Adapter {
 
 	removeRebootIp(ip){
 		if(this.ip == ip && this.reboot_ips.includes(ip)){
-			var index = this.reboot_ips.indexOf(ip);
+			const index = this.reboot_ips.indexOf(ip);
 			if (index > -1) {
 				this.reboot_ips.splice(index, 1);
 			}
@@ -2183,7 +2183,7 @@ class Heos extends utils.Adapter {
 
 	reboot() {
 		if (this.state == States.Connected || this.state == States.Reconnecting || this.state == States.Disconnecting) {
-			this.logWarn("rebooting player " + this.ip);
+			this.logWarn('rebooting player ' + this.ip);
 			// heos://system/reboot
 			this.msgs.push('heos://system/reboot');
 			this.sendNextMsg();
@@ -2194,14 +2194,14 @@ class Heos extends utils.Adapter {
 			}
 			this.reboot_timeout = setTimeout(() => {
 				this.reconnect();
-			}, 1000)
+			}, 1000);
 		}
 	}
 
 	rebootAll() {
-		this.logWarn("rebooting all players", false);
+		this.logWarn('rebooting all players', false);
 		this.reboot_ips = [];
-		for (var i = 0; i < this.player_ips.length; i++) {
+		for (let i = 0; i < this.player_ips.length; i++) {
 			this.addRebootIp(this.player_ips[i]);
 		}
 		this.reboot();
@@ -2222,17 +2222,17 @@ class Heos extends utils.Adapter {
 			this.sendNextMsg();
 		}
 	}
-	
+
 	startHeartbeat() {
 		if (this.state == States.Connected) {
-			this.logDebug("[HEARTBEAT] start interval", false);
+			this.logDebug('[HEARTBEAT] start interval', false);
 			this.heartbeat_interval = setInterval(() => {
-				this.logDebug("[HEARTBEAT] ping", false)
+				this.logDebug('[HEARTBEAT] ping', false);
 				this.msgs.push('heos://system/heart_beat');
 				this.sendNextMsg();
 				this.heartbeat_retries += 1;
 				if(this.heartbeat_retries >= this.config.heartbeatRetries){
-					this.logWarn("[HEARTBEAT] retries exceeded", false);
+					this.logWarn('[HEARTBEAT] retries exceeded', false);
 					this.resetHeartbeatRetries(false);
 					this.reboot();
 				}
@@ -2242,25 +2242,25 @@ class Heos extends utils.Adapter {
 
 	resetHeartbeatRetries(pong) {
 		if(pong){
-			this.logDebug("[HEARTBEAT] pong", false);
+			this.logDebug('[HEARTBEAT] pong', false);
 		} else {
-			this.logDebug("[HEARTBEAT] reset retries", false);
+			this.logDebug('[HEARTBEAT] reset retries', false);
 		}
 		this.heartbeat_retries = 0;
 	}
 
 	stopHeartbeat() {
-		this.logDebug("[HEARTBEAT] stop interval", false);
+		this.logDebug('[HEARTBEAT] stop interval', false);
 		if (this.heartbeat_interval) {
 			clearInterval(this.heartbeat_interval);
 			this.heartbeat_interval = undefined;
 		}
 		this.resetHeartbeatRetries(false);
 	}
-	
+
 	sendNextMsg() {
 		if (this.msgs.length > 0) {
-			var msg = this.msgs.shift();
+			const msg = this.msgs.shift();
 			this.sendMsg(msg);
 		}
 	}
@@ -2269,17 +2269,17 @@ class Heos extends utils.Adapter {
 	sendMsg(msg) {
 		if(this.net_client){
 			try {
-				this.net_client.write(msg + "\n");
-			} catch (err) { 
+				this.net_client.write(msg + '\n');
+			} catch (err) {
 				this.logError('[sendMsg] ' + err.message, false);
 				this.addLeaderFailure();
 				this.reconnect();
 			}
 			if(msg.includes('sign_in')){
-				this.logSilly("data sent: " + msg, false);
-				this.logDebug("data sent: sign_in - sensitive data hidden", false);
+				this.logSilly('data sent: ' + msg, false);
+				this.logDebug('data sent: sign_in - sensitive data hidden', false);
 			} else {
-				this.logDebug("data sent: " + msg, false);
+				this.logDebug('data sent: ' + msg, false);
 			}
 		}
 	}
@@ -2298,7 +2298,7 @@ class Heos extends utils.Adapter {
 			this.logError('[connect] ' + error, false);
 			this.removeRebootIp(ip);
 			if(this.next_connect_ip == ip){
-				this.next_connect_ip = "";
+				this.next_connect_ip = '';
 			}
 			this.addLeaderFailure();
 			this.reconnect();
@@ -2310,7 +2310,7 @@ class Heos extends utils.Adapter {
 
 			this.state = States.Connected;
 			if(this.next_connect_ip == ip){
-				this.next_connect_ip = "";
+				this.next_connect_ip = '';
 			}
 			if(this.reboot_ips.includes(this.ip)){
 				this.reboot();
@@ -2324,7 +2324,7 @@ class Heos extends utils.Adapter {
 			}
 		});
 
-		// Gegenseite hat die Verbindung geschlossen 
+		// Gegenseite hat die Verbindung geschlossen
 		this.net_client.on('end', () => {
 			this.logWarn('HEOS closed the connection to ' + this.ip, false);
 			this.reconnect();
@@ -2346,11 +2346,11 @@ class Heos extends utils.Adapter {
 			//Reset connect states
 			this.setStateChanged('info.connection', false, true);
 			this.setStateChanged('connected_ip', '', true);
-			this.getChannels("players", (err, list) => {
+			this.getChannels('players', (err, list) => {
 				if(list){
 					list.forEach((item) => {
-						this.setState(item._id + ".connected", false, true);
-					})
+						this.setState(item._id + '.connected', false, true);
+					});
 				}
 			});
 			this.state = States.Searching;
@@ -2359,8 +2359,8 @@ class Heos extends utils.Adapter {
 			this.updatePlayerIPs();
 
 			if(this.reboot_ips.length > 0){
-				this.logDebug('following ips need to be rebooted: ' + this.reboot_ips.join(','), false)
-				let ip = this.reboot_ips[0];
+				this.logDebug('following ips need to be rebooted: ' + this.reboot_ips.join(','), false);
+				const ip = this.reboot_ips[0];
 				if(this.reboot_ip_counter[ip]){
 					this.reboot_ip_counter[ip] += 1;
 				} else {
@@ -2370,17 +2370,17 @@ class Heos extends utils.Adapter {
 				this.logDebug('try to connect to ' + ip + ' to reboot device', false);
 				this.connect(ip);
 			} else if(this.next_connect_ip.length > 0) {
-				this.logDebug('try to connect to ' + this.next_connect_ip, false)
+				this.logDebug('try to connect to ' + this.next_connect_ip, false);
 				this.connect(this.next_connect_ip);
 			} else {
 				this.ssdp_player_ips = [];
 				this.manual_search_mode = false;
-				this.logInfo("searching for HEOS devices ...", true)
+				this.logInfo('searching for HEOS devices ...', true);
 				this.ssdp_retry_counter = 0;
 				this.nodessdp_client = new NodeSSDP();
 				this.nodessdp_client.explicitSocketBind = true;
 				this.nodessdp_client.on('response', (headers, statusCode, rinfo) => this.onNodeSSDPResponse(headers, statusCode, rinfo));
-				this.nodessdp_client.on('error', error => { this.nodessdp_client.close(); this.logError("[nodessdp] " + error, false); });
+				this.nodessdp_client.on('error', error => { this.nodessdp_client.close(); this.logError('[nodessdp] ' + error, false); });
 				this.nodessdp_client.search(this.ssdp_search_target_name);
 				if (this.ssdp_search_interval) {
 					clearInterval(this.ssdp_search_interval);
@@ -2392,13 +2392,13 @@ class Heos extends utils.Adapter {
 					}
 					if(this.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
 						this.manual_search_mode = true;
-						this.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false)
-						for (var i = 0; i < this.player_ips.length; i++) {
+						this.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false);
+						for (let i = 0; i < this.player_ips.length; i++) {
 							this.addRebootIp(this.player_ips[i]);
 						}
 						this.reconnect();
 					} else {
-						this.logDebug("searching for HEOS devices ...", true);
+						this.logDebug('searching for HEOS devices ...', true);
 						this.ssdp_player_ips = [];
 						this.nodessdp_client.search(this.ssdp_search_target_name);
 					}
@@ -2417,14 +2417,14 @@ class Heos extends utils.Adapter {
 		}
 		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_ip_failures));
 	}
-	
+
 	getRarestFailureLeaderIp(){
-		var ip = "";
-		var failures = 0
+		let ip = '';
+		let failures = 0;
 
 		for (let i = 0; i < this.player_ips.length; i++) {
-			let player_ip = this.player_ips[i];
-			
+			const player_ip = this.player_ips[i];
+
 			if(this.leader_ip_failures[player_ip]){
 				if(ip.length > 0){
 					if(this.leader_ip_failures[player_ip] < failures){
@@ -2443,10 +2443,10 @@ class Heos extends utils.Adapter {
 	}
 
 	getMostOfenFailureLeaderIp(){
-		var ip = "";
-		var failures = 0
+		let ip = '';
+		let failures = 0;
 
-		for (let key in this.leader_ip_failures) {
+		for (const key in this.leader_ip_failures) {
 			if(this.leader_ip_failures[key] > failures){
 				ip = key;
 				failures = this.leader_ip_failures[key];
@@ -2511,11 +2511,11 @@ class Heos extends utils.Adapter {
 			this.nodessdp_client.stop();
 			this.nodessdp_client = undefined;
 		}
-		this.setState("error", false);
-		this.setState("last_error", "");
+		this.setState('error', false);
+		this.setState('last_error', '');
 		this.setState('signed_in', false);
 		this.signed_in = false;
-		this.setState('signed_in_user', "");
+		this.setState('signed_in_user', '');
 
 		this.state = States.Disconnected;
 		//this.ip = '';
@@ -2523,18 +2523,18 @@ class Heos extends utils.Adapter {
 		this.unfinished_responses = '';
 		this.players = {};
 
-		this.getChannels("players", (err, list) => {
+		this.getChannels('players', (err, list) => {
 			if(list){
 				list.forEach((item) => {
-					this.setState(item._id + ".connected", false, true);
-				})
+					this.setState(item._id + '.connected', false, true);
+				});
 			}
 		});
 		this.setStateChanged('info.connection', false, true);
 		this.setStateChanged('connected_ip', '', true);
 		this.logInfo('disconnected from HEOS', false);
 	}
-	
+
 	reconnect() {
 		if(this.state == States.Reconnecting || this.state == States.Disconnecting) return;
 
