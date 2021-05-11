@@ -2007,6 +2007,8 @@ class Heos extends utils.Adapter {
 				} else {
 					if(!(pid in this.players)){
 						const heosPlayer = new HeosPlayer(this, player);
+						// wait until objects are created before connecting, because states shouldn't be set before objects exist
+						await heosPlayer.initMetaData(player);
 						this.players[pid] = heosPlayer;
 						try {
 							await heosPlayer.connect();
