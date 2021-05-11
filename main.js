@@ -313,9 +313,12 @@ class Heos extends utils.Adapter {
 		//Root
 		this.subscribeStates('command');
 		this.subscribeStates('offline_mode');
-		this.getStateAsync('offline_mode', (err, state) => {
+		try {
+			const state = await this.getStateAsync('offline_mode');
 			this.offline_mode = state.val;
-		});
+		} catch {
+			// ignore
+		}
 
 		//Presets|Playlists
 		this.subscribeStates('sources.*.play');
@@ -678,7 +681,7 @@ class Heos extends utils.Adapter {
 	setLastError(error) {
 		this.getState('error',  async (err, state) => {
 			if(state && state.val !== true){
-				await this.setStateAsync('error', true);
+				await this.setStateAsync('error', true, true);
 			}
 		});
 		this.getState('last_error',  async (err, state) => {
@@ -1427,7 +1430,7 @@ class Heos extends utils.Adapter {
 										}
 									);
 								}
-								this.setState('sources.browse_result', JSON.stringify(browseResult));
+								this.setState('sources.browse_result', JSON.stringify(browseResult), true);
 							}
 							break;
 
@@ -2511,11 +2514,11 @@ class Heos extends utils.Adapter {
 			this.nodessdp_client.stop();
 			this.nodessdp_client = undefined;
 		}
-		this.setState('error', false);
-		this.setState('last_error', '');
-		this.setState('signed_in', false);
+		this.setState('error', false, true);
+		this.setState('last_error', '', true);
+		this.setState('signed_in', false, true);
 		this.signed_in = false;
-		this.setState('signed_in_user', '');
+		this.setState('signed_in_user', '', true);
 
 		this.state = States.Disconnected;
 		//this.ip = '';
