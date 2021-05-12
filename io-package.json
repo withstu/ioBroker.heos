@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.8.1",
+		"version": "1.8.2",
 		"news": {
+			"1.8.2": {
+				"en": "Fix type issues and some more minor changes",
+				"de": "Beheben Sie Typprobleme und kleinere Änderungen",
+				"ru": "Исправить проблемы с типом и еще несколько мелких изменений",
+				"pt": "Corrija problemas de tipo e mais algumas pequenas alterações",
+				"nl": "Los typeproblemen en wat meer kleine wijzigingen op",
+				"fr": "Résoudre les problèmes de type et quelques modifications plus mineures",
+				"it": "Risolvi i problemi di tipo e alcune modifiche minori",
+				"es": "Solucionar problemas de tipo y algunos cambios menores",
+				"pl": "Napraw problemy z typem i kilka mniejszych zmian",
+				"zh-cn": "修复类型问题和一些更小的更改"
+			},
 			"1.8.1": {
 				"en": "fix reboot loop",
 				"de": "Reboot-Schleife korrigieren",
@@ -230,18 +242,6 @@
 				"es": "pequeñas mejoras relacionadas con la función de reproducción automática",
 				"pl": "drobne ulepszenia związane z funkcją automatycznego odtwarzania",
 				"zh-cn": "与自动播放功能相关的小改进"
-			},
-			"1.5.2": {
-				"en": "improve tts stop method",
-				"de": "Verbesserung der Stoppmethode",
-				"ru": "улучшить метод остановки tts",
-				"pt": "melhorar o método tts stop",
-				"nl": "tts stop methode verbeteren",
-				"fr": "améliorer la méthode d'arrêt tts",
-				"it": "migliorare il metodo di arresto tts",
-				"es": "mejorar el método de parada tts",
-				"pl": "poprawić metodę zatrzymania tts",
-				"zh-cn": "改进tts停止方法"
 			}
 		},
 		"title": "HEOS",

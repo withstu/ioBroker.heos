@@ -561,7 +561,7 @@ class Heos extends utils.Adapter {
 			if (typeof this.net_client == 'undefined') {
 				if (headers.ST !== this.ssdp_search_target_name) { // korrektes SSDP
 					this.logDebug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...', false);
-				} else if(this.getMostOfenFailureLeaderIp() == ip){
+				} else if(this.getMostOftenFailureLeaderIp() == ip){
 					this.reduceLeaderIPFailures(ip);
 					this.logDebug('[onNodeSSDPResponse] Skip IP ' + ip + ' with most failures. Keep trying...', false);
 				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(ip)){
@@ -2447,7 +2447,7 @@ class Heos extends utils.Adapter {
 		return ip;
 	}
 
-	getMostOfenFailureLeaderIp(){
+	getMostOftenFailureLeaderIp(){
 		let ip = '';
 		let failures = 0;
 
