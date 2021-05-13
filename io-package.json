@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.8.2",
+		"version": "1.8.3",
 		"news": {
+			"1.8.3": {
+				"en": "fix upnp values on failure",
+				"de": "Korrigieren Sie die Upnp-Werte bei einem Fehler",
+				"ru": "исправить значения upnp при сбое",
+				"pt": "corrigir valores upnp em caso de falha",
+				"nl": "repareer upnp-waarden bij mislukking",
+				"fr": "corriger les valeurs upnp en cas d'échec",
+				"it": "correggere i valori upnp in caso di errore",
+				"es": "corregir los valores upnp en caso de falla",
+				"pl": "napraw wartości upnp w przypadku awarii",
+				"zh-cn": "修复失败时的upnp值"
+			},
 			"1.8.2": {
 				"en": "Fix type issues and some more minor changes",
 				"de": "Beheben Sie Typprobleme und kleinere Änderungen",
@@ -230,18 +242,6 @@
 				"es": "ignorar respuestas inválidas en reproducción",
 				"pl": "ignoruj nieprawidłowe teraz odtwarzane odpowiedzi",
 				"zh-cn": "忽略无效的正在播放的响应"
-			},
-			"1.5.3": {
-				"en": "minor improvements related to auto play feature",
-				"de": "kleinere Verbesserungen im Zusammenhang mit der Auto-Play-Funktion",
-				"ru": "незначительные улучшения, связанные с функцией автоматического воспроизведения",
-				"pt": "pequenas melhorias relacionadas ao recurso de reprodução automática",
-				"nl": "kleine verbeteringen met betrekking tot de automatische afspeelfunctie",
-				"fr": "améliorations mineures liées à la fonction de lecture automatique",
-				"it": "piccoli miglioramenti relativi alla funzione di riproduzione automatica",
-				"es": "pequeñas mejoras relacionadas con la función de reproducción automática",
-				"pl": "drobne ulepszenia związane z funkcją automatycznego odtwarzania",
-				"zh-cn": "与自动播放功能相关的小改进"
 			}
 		},
 		"title": "HEOS",
