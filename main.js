@@ -551,6 +551,9 @@ class Heos extends utils.Adapter {
 	}
 
 	async onNodeSSDPResponse(headers, statusCode, rinfo) {
+		this.logSilly('Header: ' + JSON.stringify(headers), false);
+		this.logSilly('Status Code: ' + JSON.stringify(statusCode), false);
+		this.logSilly('rinfo: ' + JSON.stringify(rinfo), false);
 		try {
 			// rinfo {"address":"192.168.2.225","family":"IPv4","port":53871,"size":430}
 			const ip = rinfo.address;
