@@ -565,7 +565,6 @@ class Heos extends utils.Adapter {
 				if (headers.ST !== this.ssdp_search_target_name) { // korrektes SSDP
 					this.logDebug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...', false);
 				} else if(this.getMostOftenFailureLeaderIp() == ip){
-					this.reduceLeaderIPFailures(ip);
 					this.logDebug('[onNodeSSDPResponse] Skip IP ' + ip + ' with most failures. Keep trying...', false);
 				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(ip)){
 					this.logDebug('[onNodeSSDPResponse] Reboot IP activated. Getting wrong SSDP entry. Keep trying...', false);
@@ -2038,19 +2037,33 @@ class Heos extends utils.Adapter {
 			for(const id in this.ssdp_player_ips){
 				const ip = this.ssdp_player_ips[id];
 				if(!foundPlayerIps.includes(ip)){
-					this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps) + ' | Announced Players: ' + JSON.stringify(this.ssdp_player_ips));
-					this.logWarn('Announced player not found by HEOS. Try to reboot device ' + ip, true);
-					this.addRebootIp(ip);
-					this.next_connect_ip = this.getRarestFailureLeaderIp();
+					this.addLeaderFailure();
+					if(this.config.rebootOnFailure === true){
+						this.next_connect_ip = this.getRarestFailureLeaderIp();
+						this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps) + ' | Announced Players: ' + JSON.stringify(this.ssdp_player_ips), true);
+						if(this.next_connect_ip != ip){
+							this.logWarn('Announced player not found by HEOS. Try to reboot device ' + ip, true);
+							this.addRebootIp(ip);
+						} else {
+							this.logDebug('Announced player not found by HEOS. Choosen as next connected device. Skip reboot of device ' + ip, true);
+						}
+					} else {
+						this.logWarn('Announced player not found by HEOS. Activate "reboot on failure" in the configuration or reboot manually the device: ' + ip, true);
+					}
 				}
 			}
 			if(this.reboot_ips.length > 0 || this.next_connect_ip.length > 0){
-				this.addLeaderFailure();
 				this.reconnect();
+			} else if(this.getMostOftenFailureLeaderIp() == this.ip){
+				this.reduceLeaderIPFailures(this.ip);
 			}
 			if(connectedPlayers.length == 0){
-				this.logWarn('Can\'t connect any players. Reboot.', true);
-				this.rebootAll();
+				if(this.config.rebootOnFailure === true){
+					this.logWarn('Can\'t connect any players. Reboot.', true);
+					this.rebootAll();
+				} else {
+					this.logWarn('Can\'t connect any players. Activate "reboot on failure" in the configuration or reboot manually.', true);
+				}
 			}
 			this.getGroups();
 			this.updatePlayerIPs();
@@ -2374,6 +2387,7 @@ class Heos extends utils.Adapter {
 				} else {
 					this.reboot_ip_counter[ip] = 1;
 				}
+				this.reduceLeaderIPFailures(ip);
 				this.logDebug('reboot statistics: ' + JSON.stringify(this.reboot_ip_counter));
 				this.logDebug('try to connect to ' + ip + ' to reboot device', false);
 				this.connect(ip);
