@@ -23,7 +23,7 @@
     "url": "https://github.com/withstu/ioBroker.heos"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^2.4.0",
+    "@iobroker/adapter-core": "^2.5.0",
     "fast-xml-parser": "^3.19.0",
     "got": "^11.8.2",
     "html-entities": "^2.3.2",
