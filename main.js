@@ -2219,14 +2219,14 @@ class Heos extends utils.Adapter {
 			this.msgs.push('heos://system/reboot');
 			this.sendNextMsg();
 			this.removeRebootIp(this.ip);
-			if (this.reboot_timeout) {
-				clearTimeout(this.reboot_timeout);
-				this.reboot_timeout = undefined;
-			}
-			this.reboot_timeout = setTimeout(() => {
-				this.reconnect();
-			}, 1000);
 		}
+		if (this.reboot_timeout) {
+			clearTimeout(this.reboot_timeout);
+			this.reboot_timeout = undefined;
+		}
+		this.reboot_timeout = setTimeout(() => {
+			this.reconnect();
+		}, 1000);
 	}
 
 	rebootAll() {
