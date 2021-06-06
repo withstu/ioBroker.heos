@@ -522,7 +522,7 @@ class Heos extends utils.Adapter {
 						if(state) {
 							const val = state.val + '';
 							this.addRebootIp(val);
-							this.logWarn('rebooting player ' + this.ip + ' requested. Needs to reconnect HEOS to the correct player first.', false);
+							this.logWarn('rebooting player ' + this.ip + ' requested. Needs to reconnect HEOS to the correct player first.', true);
 							this.reconnect();
 						} else {
 							this.logWarn('Player ' + id.channel + ' not connected. Can not update ' + id.state, true + '.');
@@ -2001,7 +2001,6 @@ class Heos extends utils.Adapter {
 				}
 				if(!player.name || !player.hasOwnProperty('ip') || player.ip == '127.0.0.1'){
 					this.start_players_errors += 1;
-					this.raiseLeaderFailures(this.ip);
 					this.logDebug('Start players payload error: ' + JSON.stringify(payload), false);
 					if(this.start_players_errors > 4){
 						this.start_players_errors = 0;
@@ -2209,7 +2208,7 @@ class Heos extends utils.Adapter {
 
 	reboot() {
 		if (this.state == States.Connected || this.state == States.Reconnecting || this.state == States.Disconnecting) {
-			this.logWarn('rebooting player ' + this.ip);
+			this.logWarn('rebooting player ' + this.ip, true);
 
 			this.raiseReboots(this.ip);
 			this.reduceLeaderFailures(this.ip);
@@ -2397,35 +2396,34 @@ class Heos extends utils.Adapter {
 			} else if(this.next_connect_ip.length > 0) {
 				this.logDebug('try to connect to ' + this.next_connect_ip, false);
 				this.connect(this.next_connect_ip);
-			} else {
-				this.ssdp_player_ips = [];
-				this.manual_search_mode = false;
-				this.logInfo('searching for HEOS devices ...', true);
-				this.ssdp_retry_counter = 0;
-				this.nodessdp_client = new NodeSSDP();
-				this.nodessdp_client.explicitSocketBind = true;
-				this.nodessdp_client.on('response', (headers, statusCode, rinfo) => this.onNodeSSDPResponse(headers, statusCode, rinfo));
-				this.nodessdp_client.on('error', error => { this.nodessdp_client.close(); this.logError('[nodessdp] ' + error, false); });
-				this.nodessdp_client.search(this.ssdp_search_target_name);
-				if (this.ssdp_search_interval) {
-					clearInterval(this.ssdp_search_interval);
-					this.ssdp_search_interval = undefined;
-				}
-				this.ssdp_search_interval = setInterval(() => {
-					if (typeof this.net_client == 'undefined') {
-						this.ssdp_retry_counter += 1;
-					}
-					if(this.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
-						this.manual_search_mode = true;
-						this.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false);
-						this.rebootAll();
-					} else {
-						this.logDebug('searching for HEOS devices ...', true);
-						this.ssdp_player_ips = [];
-						this.nodessdp_client.search(this.ssdp_search_target_name);
-					}
-				}, this.config.searchInterval);
 			}
+			this.ssdp_player_ips = [];
+			this.manual_search_mode = false;
+			this.logInfo('searching for HEOS devices ...', true);
+			this.ssdp_retry_counter = 0;
+			this.nodessdp_client = new NodeSSDP();
+			this.nodessdp_client.explicitSocketBind = true;
+			this.nodessdp_client.on('response', (headers, statusCode, rinfo) => this.onNodeSSDPResponse(headers, statusCode, rinfo));
+			this.nodessdp_client.on('error', error => { this.nodessdp_client.close(); this.logError('[nodessdp] ' + error, false); });
+			this.nodessdp_client.search(this.ssdp_search_target_name);
+			if (this.ssdp_search_interval) {
+				clearInterval(this.ssdp_search_interval);
+				this.ssdp_search_interval = undefined;
+			}
+			this.ssdp_search_interval = setInterval(() => {
+				if (typeof this.net_client == 'undefined') {
+					this.ssdp_retry_counter += 1;
+				}
+				if(this.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
+					this.manual_search_mode = true;
+					this.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false);
+					this.rebootAll();
+				} else {
+					this.logDebug('searching for HEOS devices ...', true);
+					this.ssdp_player_ips = [];
+					this.nodessdp_client.search(this.ssdp_search_target_name);
+				}
+			}, this.config.searchInterval);
 		} catch (err) { this.logError('[search] ' + err.message, false); }
 	}
 
@@ -2716,7 +2714,6 @@ class Heos extends utils.Adapter {
 		this.state = States.Disconnecting;
 
 		this.stopHeartbeat();
-		this.resetIntervals();
 		this.stopPlayers();
 
 		this.resetTimeouts();
