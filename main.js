@@ -565,13 +565,15 @@ class Heos extends utils.Adapter {
 			if (typeof this.net_client == 'undefined') {
 				if (headers.ST !== this.ssdp_search_target_name) { // korrektes SSDP
 					this.logDebug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...', false);
-				} else if(this.getMaxLeaderFailures() == ip && this.ssdp_retry_counter < 5){
+				} else if(this.getBestNextLeader().length > 0 && this.getBestNextLeader() != ip && this.ssdp_retry_counter < 2){
+					this.logDebug('[onNodeSSDPResponse] IP ' + ip + ' is not next best leader IP (' + this.getBestNextLeader() + '). Keep trying...', false);
+				/*} else if(this.getMaxLeaderFailures() == ip && this.ssdp_retry_counter < 2){
 					this.logDebug('[onNodeSSDPResponse] Skip IP ' + ip + ' with most leader failures. Keep trying...', false);
-				} else if(this.getMaxFailures() == ip && this.ssdp_retry_counter < 5){
+				} else if(this.getMaxFailures() == ip && this.ssdp_retry_counter < 2){
 					this.logDebug('[onNodeSSDPResponse] Skip IP ' + ip + ' with most failures. Keep trying...', false);
-				} else if(this.getMaxReboots() == ip && this.ssdp_retry_counter < 5){
-					this.logDebug('[onNodeSSDPResponse] Skip IP ' + ip + ' with most reboots. Keep trying...', false);
-				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(ip) && this.ssdp_retry_counter < 5){
+				} else if(this.getMaxReboots() == ip && this.ssdp_retry_counter < 2){
+					this.logDebug('[onNodeSSDPResponse] Skip IP ' + ip + ' with most reboots. Keep trying...', false);*/
+				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(ip) && this.ssdp_retry_counter < 2){
 					this.logDebug('[onNodeSSDPResponse] Reboot IP activated. Getting wrong SSDP entry. Keep trying...', false);
 				} else {
 					this.connect(ip);
@@ -2758,9 +2760,6 @@ class Heos extends utils.Adapter {
 
 		this.logInfo('reconnecting to HEOS ...', false);
 
-		if(this.next_connect_ip.length == 0){
-			this.next_connect_ip = this.getBestNextLeader();
-		}
 		this.disconnect();
 		this.state = States.Reconnecting;
 		if (this.reconnect_timeout) {
