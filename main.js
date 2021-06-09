@@ -2398,11 +2398,12 @@ class Heos extends utils.Adapter {
 			} else if(this.next_connect_ip.length > 0) {
 				this.logDebug('try to connect to ' + this.next_connect_ip, false);
 				this.connect(this.next_connect_ip);
+			} else {
+				this.manual_search_mode = false;
+				this.ssdp_retry_counter = 0;
 			}
 			this.ssdp_player_ips = [];
-			this.manual_search_mode = false;
 			this.logInfo('searching for HEOS devices ...', true);
-			this.ssdp_retry_counter = 0;
 			this.nodessdp_client = new NodeSSDP();
 			this.nodessdp_client.explicitSocketBind = true;
 			this.nodessdp_client.on('response', (headers, statusCode, rinfo) => this.onNodeSSDPResponse(headers, statusCode, rinfo));
