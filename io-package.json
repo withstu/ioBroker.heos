@@ -1,346 +1,346 @@
 {
-	"common": {
-		"name": "heos",
-		"version": "1.8.4",
-		"news": {
-			"1.8.4": {
-				"en": "improve stability",
-				"de": "Stabilität verbessern",
-				"ru": "улучшить стабильность",
-				"pt": "melhorar a estabilidade",
-				"nl": "stabiliteit verbeteren",
-				"fr": "améliorer la stabilité",
-				"it": "migliorare la stabilità",
-				"es": "mejorar la estabilidad",
-				"pl": "poprawić stabilność",
-				"zh-cn": "提高稳定性"
-			},
-			"1.8.3": {
-				"en": "fix upnp values on failure",
-				"de": "Korrigieren Sie die Upnp-Werte bei einem Fehler",
-				"ru": "исправить значения upnp при сбое",
-				"pt": "corrigir valores upnp em caso de falha",
-				"nl": "repareer upnp-waarden bij mislukking",
-				"fr": "corriger les valeurs upnp en cas d'échec",
-				"it": "correggere i valori upnp in caso di errore",
-				"es": "corregir los valores upnp en caso de falla",
-				"pl": "napraw wartości upnp w przypadku awarii",
-				"zh-cn": "修复失败时的upnp值"
-			},
-			"1.8.2": {
-				"en": "Fix type issues and some more minor changes",
-				"de": "Beheben Sie Typprobleme und kleinere Änderungen",
-				"ru": "Исправить проблемы с типом и еще несколько мелких изменений",
-				"pt": "Corrija problemas de tipo e mais algumas pequenas alterações",
-				"nl": "Los typeproblemen en wat meer kleine wijzigingen op",
-				"fr": "Résoudre les problèmes de type et quelques modifications plus mineures",
-				"it": "Risolvi i problemi di tipo e alcune modifiche minori",
-				"es": "Solucionar problemas de tipo y algunos cambios menores",
-				"pl": "Napraw problemy z typem i kilka mniejszych zmian",
-				"zh-cn": "修复类型问题和一些更小的更改"
-			},
-			"1.8.1": {
-				"en": "fix reboot loop",
-				"de": "Reboot-Schleife korrigieren",
-				"ru": "исправить цикл перезагрузки",
-				"pt": "consertar loop de reinicialização",
-				"nl": "herstart lus repareren",
-				"fr": "réparer la boucle de redémarrage",
-				"it": "risolto il ciclo di riavvio",
-				"es": "arreglar el bucle de reinicio",
-				"pl": "naprawić pętlę restartu",
-				"zh-cn": "修复重启循环"
-			},
-			"1.8.0": {
-				"en": "add reboot on failure configuration",
-				"de": "Fügen Sie bei einer Fehlerkonfiguration einen Neustart hinzu",
-				"ru": "добавить перезагрузку при сбое конфигурации",
-				"pt": "adicionar reinicialização em caso de falha na configuração",
-				"nl": "voeg opnieuw opstarten toe bij foutconfiguratie",
-				"fr": "ajouter un redémarrage en cas d'échec de la configuration",
-				"it": "aggiungere il riavvio in caso di errore di configurazione",
-				"es": "agregar reinicio en la configuración de falla",
-				"pl": "dodaj ponowne uruchomienie po awarii konfiguracji",
-				"zh-cn": "添加失败配置重启"
-			},
-			"1.7.9": {
-				"en": "add power state",
-				"de": "Power-Status hinzufügen",
-				"ru": "добавить состояние питания",
-				"pt": "adicionar estado de energia",
-				"nl": "voeg machtsstaat toe",
-				"fr": "ajouter un état d'alimentation",
-				"it": "aggiungere lo stato di alimentazione",
-				"es": "agregar estado de energía",
-				"pl": "dodaj stan zasilania",
-				"zh-cn": "加电状态"
-			},
-			"1.7.8": {
-				"en": "add reboot",
-				"de": "Neustart hinzufügen",
-				"ru": "добавить перезагрузку",
-				"pt": "adicionar reinicialização",
-				"nl": "voeg reboot toe",
-				"fr": "ajouter un redémarrage",
-				"it": "aggiungi riavvio",
-				"es": "agregar reinicio",
-				"pl": "dodaj restart",
-				"zh-cn": "添加重启"
-			},
-			"1.7.7": {
-				"en": "add creation of missing version state",
-				"de": "Erstellung eines fehlenden Versionsstatus hinzufügen",
-				"ru": "добавить создание состояния отсутствующей версии",
-				"pt": "adicionar criação de estado de versão ausente",
-				"nl": "voeg de ontbrekende versiestatus toe",
-				"fr": "ajouter la création de l'état de version manquant",
-				"it": "aggiungere la creazione dello stato della versione mancante",
-				"es": "agregar la creación del estado de la versión faltante",
-				"pl": "dodaj tworzenie brakującego stanu wersji",
-				"zh-cn": "添加缺少版本状态的创建"
-			},
-			"1.7.6": {
-				"en": "add image color extraction",
-				"de": "Bildfarbenextraktion hinzufügen",
-				"ru": "добавить извлечение цвета изображения",
-				"pt": "adicionar extração de cor de imagem",
-				"nl": "voeg kleurextractie toe",
-				"fr": "ajouter une extraction de couleur d'image",
-				"it": "aggiungi l'estrazione del colore dell'immagine",
-				"es": "agregar extracción de color de imagen",
-				"pl": "dodać ekstrakcję kolorów obrazu",
-				"zh-cn": "添加图像颜色提取"
-			},
-			"1.7.5": {
-				"en": "add bit depth",
-				"de": "Bittiefe hinzufügen",
-				"ru": "добавить битовую глубину",
-				"pt": "adicionar profundidade de bits",
-				"nl": "beetje diepte toevoegen",
-				"fr": "ajouter une profondeur de bits",
-				"it": "aggiungere la profondità di bit",
-				"es": "agregar profundidad de bits",
-				"pl": "dodać głębię bitową",
-				"zh-cn": "增加位深度"
-			},
-			"1.7.4": {
-				"en": "fix upnp init bug",
-				"de": "Behebung des Upnp-Init-Fehlers",
-				"ru": "исправить ошибку инициализации upnp",
-				"pt": "corrigir bug upnp init",
-				"nl": "repareer upnp init-bug",
-				"fr": "correction du bogue d'initialisation upnp",
-				"it": "correggere il bug di inizializzazione di upnp",
-				"es": "corregir el error de inicio de upnp",
-				"pl": "napraw błąd init upnp",
-				"zh-cn": "修复upnp初始化错误"
-			},
-			"1.7.3": {
-				"en": "add upnp module and support bitrate, audio format and sample rate",
-				"de": "Fügen Sie das Upnp-Modul hinzu und unterstützen Sie Bitrate, Audioformat und Samplerate",
-				"ru": "добавить модуль upnp и поддерживать битрейт, аудиоформат и частоту дискретизации",
-				"pt": "adicionar módulo upnp e suportar taxa de bits, formato de áudio e taxa de amostragem",
-				"nl": "voeg upnp-module toe en ondersteun bitrate, audioformaat en samplefrequentie",
-				"fr": "ajouter le module upnp et prendre en charge le débit binaire, le format audio et la fréquence d'échantillonnage",
-				"it": "aggiungere il modulo upnp e supportare bitrate, formato audio e frequenza di campionamento",
-				"es": "agregue el módulo upnp y admita bitrate, formato de audio y frecuencia de muestreo",
-				"pl": "dodaj moduł upnp i obsługuj bitrate, format audio i częstotliwość próbkowania",
-				"zh-cn": "添加upnp模块并支持比特率，音频格式和采样率"
-			},
-			"1.7.2": {
-				"en": "fix seek in groups",
-				"de": "Fix Suche in Gruppen",
-				"ru": "исправить поиск в группах",
-				"pt": "consertar buscar em grupos",
-				"nl": "zoeken in groepen repareren",
-				"fr": "corriger la recherche dans les groupes",
-				"it": "correzione della ricerca in gruppi",
-				"es": "arreglar buscar en grupos",
-				"pl": "napraw wyszukiwanie w grupach",
-				"zh-cn": "分组修复"
-			},
-			"1.7.1": {
-				"en": "add seek",
-				"de": "Suche hinzufügen",
-				"ru": "добавить поиск",
-				"pt": "adicionar procurar",
-				"nl": "voeg zoeken toe",
-				"fr": "ajouter chercher",
-				"it": "aggiungi seek",
-				"es": "agregar buscar",
-				"pl": "dodaj szukaj",
-				"zh-cn": "增加寻道"
-			},
-			"1.7.0": {
-				"en": "reboot not responding players & delete old presets and playlists",
-				"de": "Starten Sie nicht reagierende Player neu und löschen Sie alte Voreinstellungen und Wiedergabelisten",
-				"ru": "перезагрузить не отвечающих игроков и удалить старые пресеты и плейлисты",
-				"pt": "reinicie os jogadores que não respondem e exclua predefinições e listas de reprodução antigas",
-				"nl": "herstart niet-reagerende spelers en verwijder oude presets en afspeellijsten",
-				"fr": "redémarrer les joueurs qui ne répondent pas et supprimer les anciens préréglages et listes de lecture",
-				"it": "riavviare i giocatori che non rispondono ed eliminare i vecchi preset e playlist",
-				"es": "reiniciar los reproductores que no responden y eliminar los ajustes preestablecidos y las listas de reproducción antiguas",
-				"pl": "zrestartuj nie odpowiadających graczy i usuń stare ustawienia i listy odtwarzania",
-				"zh-cn": "重新启动没有响应的播放器并删除旧的预设和播放列表"
-			},
-			"1.6.2": {
-				"en": "fix \"user not logged in\" handling",
-				"de": "Korrektur der Behandlung \"Benutzer nicht angemeldet\"",
-				"ru": "исправлена обработка \"пользователь не вошел в систему\"",
-				"pt": "corrigir o tratamento de \"usuário não conectado\"",
-				"nl": "fix \"gebruiker niet ingelogd\" afhandeling",
-				"fr": "correction de la gestion des \"utilisateurs non connectés\"",
-				"it": "correzione della gestione \"utente non connesso\"",
-				"es": "corregir el manejo de \"usuario no conectado\"",
-				"pl": "naprawa obsługi „użytkownik niezalogowany”",
-				"zh-cn": "修复“用户未登录”处理"
-			},
-			"1.6.1": {
-				"en": "clear timeout and interval on unload; fix roles; remove sleep in tts module",
-				"de": "Zeitüberschreitung und Intervall beim Entladen löschen; Rollen fixieren; Schlaf im tts-Modul entfernen",
-				"ru": "очистить таймаут и интервал при разгрузке; исправить роли; удалить сон в модуле tts",
-				"pt": "limpar o tempo limite e o intervalo ao descarregar; fixar papéis; remover o sono no módulo tts",
-				"nl": "time-out en interval wissen bij uitladen; rollen vastleggen; verwijder sleep in tts module",
-				"fr": "effacer le délai d'attente et l'intervalle de déchargement; fixer les rôles; supprimer le sommeil dans le module tts",
-				"it": "cancellare il timeout e l'intervallo di scaricamento; ruoli fissi; rimuovere il sonno nel modulo tts",
-				"es": "despejar el tiempo de espera y el intervalo de descarga; arreglar roles; quitar el sueño en el módulo tts",
-				"pl": "wyczyść limit czasu i interwał podczas rozładunku; naprawić role; usuń uśpienie w module tts",
-				"zh-cn": "清除超时和卸载间隔；固定角色；删除tts模块中的睡眠"
-			},
-			"1.6.0": {
-				"en": "add regex mute",
-				"de": "Regex Mute hinzufügen",
-				"ru": "добавить отключение регулярного выражения",
-				"pt": "adicionar regex mudo",
-				"nl": "regex mute toevoegen",
-				"fr": "ajouter regex mute",
-				"it": "aggiungi regex mute",
-				"es": "agregar regex mute",
-				"pl": "dodaj wyciszenie wyrażenia regularnego",
-				"zh-cn": "添加正则表达式静音"
-			},
-			"1.5.6": {
-				"en": "add source images & optimize auto play",
-				"de": "Quellbilder hinzufügen und automatische Wiedergabe optimieren",
-				"ru": "добавить исходные изображения и оптимизировать автоматическое воспроизведение",
-				"pt": "adicione imagens de origem e otimize a reprodução automática",
-				"nl": "bronafbeeldingen toevoegen en automatisch afspelen optimaliseren",
-				"fr": "ajouter des images sources et optimiser la lecture automatique",
-				"it": "aggiungi immagini sorgente e ottimizza la riproduzione automatica",
-				"es": "agregar imágenes de origen y optimizar la reproducción automática",
-				"pl": "dodaj obrazy źródłowe i zoptymalizuj automatyczne odtwarzanie",
-				"zh-cn": "添加源图像并优化自动播放"
-			},
-			"1.5.5": {
-				"en": "update some packages and add sources event",
-				"de": "Aktualisieren Sie einige Pakete und fügen Sie ein Quellereignis hinzu",
-				"ru": "обновить некоторые пакеты и добавить событие источника",
-				"pt": "atualizar alguns pacotes e adicionar eventos de fontes",
-				"nl": "update een aantal pakketten en voeg een source-evenement toe",
-				"fr": "mettre à jour certains packages et ajouter un événement sources",
-				"it": "aggiorna alcuni pacchetti e aggiungi eventi sorgenti",
-				"es": "actualizar algunos paquetes y agregar eventos de fuentes",
-				"pl": "zaktualizuj niektóre pakiety i dodaj zdarzenie źródeł",
-				"zh-cn": "更新一些软件包并添加源事件"
-			}
-		},
-		"title": "HEOS",
-		"titleLang": {
-			"en": "HEOS",
-			"de": "HEOS",
-			"ru": "HEOS",
-			"pt": "HEOS",
-			"nl": "HEOS",
-			"fr": "HEOS",
-			"it": "HEOS",
-			"es": "HEOS",
-			"pl": "HEOS",
-			"zh-cn": "HEOS"
-		},
-		"desc": {
-			"en": "The adapter lets control HEOS from ioBroker",
-			"de": "Mit dem Adapter können Sie HEOS von ioBroker aus steuern",
-			"ru": "Адаптер позволяет управлять HEOS от ioBroker",
-			"pt": "O adaptador permite controlar o HEOS do ioBroker",
-			"nl": "Met de adapter kan HEOS worden bediend vanaf ioBroker",
-			"fr": "L'adaptateur permet de contrôler HEOS depuis ioBroker",
-			"it": "L'adattatore consente di controllare HEOS da ioBroker",
-			"es": "El adaptador permite controlar HEOS desde ioBroker",
-			"pl": "Adapter umożliwia sterowanie HEOS z ioBroker",
-			"zh-cn": "该适配器可以从ioBroker控制HEOS"
-		},
-		"authors": [
-			"withstu <withstu@gmx.de>"
-		],
-		"keywords": [
-			"ioBroker",
-			"HEOS"
-		],
-		"license": "MIT",
-		"platform": "Javascript/Node.js",
-		"main": "main.js",
-		"icon": "heos.png",
-		"enabled": true,
-		"extIcon": "https://raw.githubusercontent.com/withstu/ioBroker.heos/master/admin/heos.png",
-		"readme": "https://github.com/withstu/ioBroker.heos/blob/master/README.md",
-		"loglevel": "info",
-		"messagebox": true,
-		"mode": "daemon",
-		"type": "multimedia",
-		"compact": true,
-		"connectionType": "local",
-		"dataSource": "poll",
-		"materialize": true,
-		"dependencies": [
-			{
-				"js-controller": ">=3.0.0"
-			}
-		]
-	},
-	"protectedNative": [
-		"password"
-	],
-	"encryptedNative": [
-		"password"
-	],
-	"native": {
-		"username": "",
-		"password": "",
-		"reconnectTimeout": 5000,
-		"searchInterval": 30000,
-		"heartbeatInterval": 15000,
-		"heartbeatRetries": 4,
-		"rebootOnFailure": false,
-		"muteOnRegex": false,
-		"muteRegex": "spotify:ad:|Advertisement",
-		"autoPlay": false,
-		"autoPlayCmd": "set_group_volume&level=15|play_preset&preset=1",
-		"volumeStepLevel": 2,
-		"queueMode": 4,
-		"cmdScope": "leader"
-	},
-	"objects": [],
-	"instanceObjects": [
-		{
-			"_id": "info",
-			"type": "channel",
-			"common": {
-				"name": "Information"
-			},
-			"native": {}
-		},
-		{
-			"_id": "info.connection",
-			"type": "state",
-			"common": {
-				"role": "indicator.connected",
-				"name": "Device or service connected",
-				"type": "boolean",
-				"read": true,
-				"write": false,
-				"def": false
-			},
-			"native": {}
-		}
-	]
+    "common": {
+        "name": "heos",
+        "version": "1.8.5",
+        "news": {
+            "1.8.5": {
+                "en": "test fixed pipeline",
+                "de": "feste Pipeline testen",
+                "ru": "испытать фиксированный трубопровод",
+                "pt": "teste de pipeline fixo",
+                "nl": "test vaste pijplijn",
+                "fr": "tester le pipeline fixe",
+                "it": "prova la conduttura fissa",
+                "es": "prueba de tubería fija",
+                "pl": "przetestować stały rurociąg",
+                "zh-cn": "测试固定管道"
+            },
+            "1.8.4": {
+                "en": "improve stability",
+                "de": "Stabilität verbessern",
+                "ru": "улучшить стабильность",
+                "pt": "melhorar a estabilidade",
+                "nl": "stabiliteit verbeteren",
+                "fr": "améliorer la stabilité",
+                "it": "migliorare la stabilità",
+                "es": "mejorar la estabilidad",
+                "pl": "poprawić stabilność",
+                "zh-cn": "提高稳定性"
+            },
+            "1.8.3": {
+                "en": "fix upnp values on failure",
+                "de": "Korrigieren Sie die Upnp-Werte bei einem Fehler",
+                "ru": "исправить значения upnp при сбое",
+                "pt": "corrigir valores upnp em caso de falha",
+                "nl": "repareer upnp-waarden bij mislukking",
+                "fr": "corriger les valeurs upnp en cas d'échec",
+                "it": "correggere i valori upnp in caso di errore",
+                "es": "corregir los valores upnp en caso de falla",
+                "pl": "napraw wartości upnp w przypadku awarii",
+                "zh-cn": "修复失败时的upnp值"
+            },
+            "1.8.2": {
+                "en": "Fix type issues and some more minor changes",
+                "de": "Beheben Sie Typprobleme und kleinere Änderungen",
+                "ru": "Исправить проблемы с типом и еще несколько мелких изменений",
+                "pt": "Corrija problemas de tipo e mais algumas pequenas alterações",
+                "nl": "Los typeproblemen en wat meer kleine wijzigingen op",
+                "fr": "Résoudre les problèmes de type et quelques modifications plus mineures",
+                "it": "Risolvi i problemi di tipo e alcune modifiche minori",
+                "es": "Solucionar problemas de tipo y algunos cambios menores",
+                "pl": "Napraw problemy z typem i kilka mniejszych zmian",
+                "zh-cn": "修复类型问题和一些更小的更改"
+            },
+            "1.8.1": {
+                "en": "fix reboot loop",
+                "de": "Reboot-Schleife korrigieren",
+                "ru": "исправить цикл перезагрузки",
+                "pt": "consertar loop de reinicialização",
+                "nl": "herstart lus repareren",
+                "fr": "réparer la boucle de redémarrage",
+                "it": "risolto il ciclo di riavvio",
+                "es": "arreglar el bucle de reinicio",
+                "pl": "naprawić pętlę restartu",
+                "zh-cn": "修复重启循环"
+            },
+            "1.8.0": {
+                "en": "add reboot on failure configuration",
+                "de": "Fügen Sie bei einer Fehlerkonfiguration einen Neustart hinzu",
+                "ru": "добавить перезагрузку при сбое конфигурации",
+                "pt": "adicionar reinicialização em caso de falha na configuração",
+                "nl": "voeg opnieuw opstarten toe bij foutconfiguratie",
+                "fr": "ajouter un redémarrage en cas d'échec de la configuration",
+                "it": "aggiungere il riavvio in caso di errore di configurazione",
+                "es": "agregar reinicio en la configuración de falla",
+                "pl": "dodaj ponowne uruchomienie po awarii konfiguracji",
+                "zh-cn": "添加失败配置重启"
+            },
+            "1.7.9": {
+                "en": "add power state",
+                "de": "Power-Status hinzufügen",
+                "ru": "добавить состояние питания",
+                "pt": "adicionar estado de energia",
+                "nl": "voeg machtsstaat toe",
+                "fr": "ajouter un état d'alimentation",
+                "it": "aggiungere lo stato di alimentazione",
+                "es": "agregar estado de energía",
+                "pl": "dodaj stan zasilania",
+                "zh-cn": "加电状态"
+            },
+            "1.7.8": {
+                "en": "add reboot",
+                "de": "Neustart hinzufügen",
+                "ru": "добавить перезагрузку",
+                "pt": "adicionar reinicialização",
+                "nl": "voeg reboot toe",
+                "fr": "ajouter un redémarrage",
+                "it": "aggiungi riavvio",
+                "es": "agregar reinicio",
+                "pl": "dodaj restart",
+                "zh-cn": "添加重启"
+            },
+            "1.7.7": {
+                "en": "add creation of missing version state",
+                "de": "Erstellung eines fehlenden Versionsstatus hinzufügen",
+                "ru": "добавить создание состояния отсутствующей версии",
+                "pt": "adicionar criação de estado de versão ausente",
+                "nl": "voeg de ontbrekende versiestatus toe",
+                "fr": "ajouter la création de l'état de version manquant",
+                "it": "aggiungere la creazione dello stato della versione mancante",
+                "es": "agregar la creación del estado de la versión faltante",
+                "pl": "dodaj tworzenie brakującego stanu wersji",
+                "zh-cn": "添加缺少版本状态的创建"
+            },
+            "1.7.6": {
+                "en": "add image color extraction",
+                "de": "Bildfarbenextraktion hinzufügen",
+                "ru": "добавить извлечение цвета изображения",
+                "pt": "adicionar extração de cor de imagem",
+                "nl": "voeg kleurextractie toe",
+                "fr": "ajouter une extraction de couleur d'image",
+                "it": "aggiungi l'estrazione del colore dell'immagine",
+                "es": "agregar extracción de color de imagen",
+                "pl": "dodać ekstrakcję kolorów obrazu",
+                "zh-cn": "添加图像颜色提取"
+            },
+            "1.7.5": {
+                "en": "add bit depth",
+                "de": "Bittiefe hinzufügen",
+                "ru": "добавить битовую глубину",
+                "pt": "adicionar profundidade de bits",
+                "nl": "beetje diepte toevoegen",
+                "fr": "ajouter une profondeur de bits",
+                "it": "aggiungere la profondità di bit",
+                "es": "agregar profundidad de bits",
+                "pl": "dodać głębię bitową",
+                "zh-cn": "增加位深度"
+            },
+            "1.7.4": {
+                "en": "fix upnp init bug",
+                "de": "Behebung des Upnp-Init-Fehlers",
+                "ru": "исправить ошибку инициализации upnp",
+                "pt": "corrigir bug upnp init",
+                "nl": "repareer upnp init-bug",
+                "fr": "correction du bogue d'initialisation upnp",
+                "it": "correggere il bug di inizializzazione di upnp",
+                "es": "corregir el error de inicio de upnp",
+                "pl": "napraw błąd init upnp",
+                "zh-cn": "修复upnp初始化错误"
+            },
+            "1.7.3": {
+                "en": "add upnp module and support bitrate, audio format and sample rate",
+                "de": "Fügen Sie das Upnp-Modul hinzu und unterstützen Sie Bitrate, Audioformat und Samplerate",
+                "ru": "добавить модуль upnp и поддерживать битрейт, аудиоформат и частоту дискретизации",
+                "pt": "adicionar módulo upnp e suportar taxa de bits, formato de áudio e taxa de amostragem",
+                "nl": "voeg upnp-module toe en ondersteun bitrate, audioformaat en samplefrequentie",
+                "fr": "ajouter le module upnp et prendre en charge le débit binaire, le format audio et la fréquence d'échantillonnage",
+                "it": "aggiungere il modulo upnp e supportare bitrate, formato audio e frequenza di campionamento",
+                "es": "agregue el módulo upnp y admita bitrate, formato de audio y frecuencia de muestreo",
+                "pl": "dodaj moduł upnp i obsługuj bitrate, format audio i częstotliwość próbkowania",
+                "zh-cn": "添加upnp模块并支持比特率，音频格式和采样率"
+            },
+            "1.7.2": {
+                "en": "fix seek in groups",
+                "de": "Fix Suche in Gruppen",
+                "ru": "исправить поиск в группах",
+                "pt": "consertar buscar em grupos",
+                "nl": "zoeken in groepen repareren",
+                "fr": "corriger la recherche dans les groupes",
+                "it": "correzione della ricerca in gruppi",
+                "es": "arreglar buscar en grupos",
+                "pl": "napraw wyszukiwanie w grupach",
+                "zh-cn": "分组修复"
+            },
+            "1.7.1": {
+                "en": "add seek",
+                "de": "Suche hinzufügen",
+                "ru": "добавить поиск",
+                "pt": "adicionar procurar",
+                "nl": "voeg zoeken toe",
+                "fr": "ajouter chercher",
+                "it": "aggiungi seek",
+                "es": "agregar buscar",
+                "pl": "dodaj szukaj",
+                "zh-cn": "增加寻道"
+            },
+            "1.7.0": {
+                "en": "reboot not responding players & delete old presets and playlists",
+                "de": "Starten Sie nicht reagierende Player neu und löschen Sie alte Voreinstellungen und Wiedergabelisten",
+                "ru": "перезагрузить не отвечающих игроков и удалить старые пресеты и плейлисты",
+                "pt": "reinicie os jogadores que não respondem e exclua predefinições e listas de reprodução antigas",
+                "nl": "herstart niet-reagerende spelers en verwijder oude presets en afspeellijsten",
+                "fr": "redémarrer les joueurs qui ne répondent pas et supprimer les anciens préréglages et listes de lecture",
+                "it": "riavviare i giocatori che non rispondono ed eliminare i vecchi preset e playlist",
+                "es": "reiniciar los reproductores que no responden y eliminar los ajustes preestablecidos y las listas de reproducción antiguas",
+                "pl": "zrestartuj nie odpowiadających graczy i usuń stare ustawienia i listy odtwarzania",
+                "zh-cn": "重新启动没有响应的播放器并删除旧的预设和播放列表"
+            },
+            "1.6.2": {
+                "en": "fix \"user not logged in\" handling",
+                "de": "Korrektur der Behandlung \"Benutzer nicht angemeldet\"",
+                "ru": "исправлена обработка \"пользователь не вошел в систему\"",
+                "pt": "corrigir o tratamento de \"usuário não conectado\"",
+                "nl": "fix \"gebruiker niet ingelogd\" afhandeling",
+                "fr": "correction de la gestion des \"utilisateurs non connectés\"",
+                "it": "correzione della gestione \"utente non connesso\"",
+                "es": "corregir el manejo de \"usuario no conectado\"",
+                "pl": "naprawa obsługi „użytkownik niezalogowany”",
+                "zh-cn": "修复“用户未登录”处理"
+            },
+            "1.6.1": {
+                "en": "clear timeout and interval on unload; fix roles; remove sleep in tts module",
+                "de": "Zeitüberschreitung und Intervall beim Entladen löschen; Rollen fixieren; Schlaf im tts-Modul entfernen",
+                "ru": "очистить таймаут и интервал при разгрузке; исправить роли; удалить сон в модуле tts",
+                "pt": "limpar o tempo limite e o intervalo ao descarregar; fixar papéis; remover o sono no módulo tts",
+                "nl": "time-out en interval wissen bij uitladen; rollen vastleggen; verwijder sleep in tts module",
+                "fr": "effacer le délai d'attente et l'intervalle de déchargement; fixer les rôles; supprimer le sommeil dans le module tts",
+                "it": "cancellare il timeout e l'intervallo di scaricamento; ruoli fissi; rimuovere il sonno nel modulo tts",
+                "es": "despejar el tiempo de espera y el intervalo de descarga; arreglar roles; quitar el sueño en el módulo tts",
+                "pl": "wyczyść limit czasu i interwał podczas rozładunku; naprawić role; usuń uśpienie w module tts",
+                "zh-cn": "清除超时和卸载间隔；固定角色；删除tts模块中的睡眠"
+            },
+            "1.6.0": {
+                "en": "add regex mute",
+                "de": "Regex Mute hinzufügen",
+                "ru": "добавить отключение регулярного выражения",
+                "pt": "adicionar regex mudo",
+                "nl": "regex mute toevoegen",
+                "fr": "ajouter regex mute",
+                "it": "aggiungi regex mute",
+                "es": "agregar regex mute",
+                "pl": "dodaj wyciszenie wyrażenia regularnego",
+                "zh-cn": "添加正则表达式静音"
+            },
+            "1.5.6": {
+                "en": "add source images & optimize auto play",
+                "de": "Quellbilder hinzufügen und automatische Wiedergabe optimieren",
+                "ru": "добавить исходные изображения и оптимизировать автоматическое воспроизведение",
+                "pt": "adicione imagens de origem e otimize a reprodução automática",
+                "nl": "bronafbeeldingen toevoegen en automatisch afspelen optimaliseren",
+                "fr": "ajouter des images sources et optimiser la lecture automatique",
+                "it": "aggiungi immagini sorgente e ottimizza la riproduzione automatica",
+                "es": "agregar imágenes de origen y optimizar la reproducción automática",
+                "pl": "dodaj obrazy źródłowe i zoptymalizuj automatyczne odtwarzanie",
+                "zh-cn": "添加源图像并优化自动播放"
+            }
+        },
+        "title": "HEOS",
+        "titleLang": {
+            "en": "HEOS",
+            "de": "HEOS",
+            "ru": "HEOS",
+            "pt": "HEOS",
+            "nl": "HEOS",
+            "fr": "HEOS",
+            "it": "HEOS",
+            "es": "HEOS",
+            "pl": "HEOS",
+            "zh-cn": "HEOS"
+        },
+        "desc": {
+            "en": "The adapter lets control HEOS from ioBroker",
+            "de": "Mit dem Adapter können Sie HEOS von ioBroker aus steuern",
+            "ru": "Адаптер позволяет управлять HEOS от ioBroker",
+            "pt": "O adaptador permite controlar o HEOS do ioBroker",
+            "nl": "Met de adapter kan HEOS worden bediend vanaf ioBroker",
+            "fr": "L'adaptateur permet de contrôler HEOS depuis ioBroker",
+            "it": "L'adattatore consente di controllare HEOS da ioBroker",
+            "es": "El adaptador permite controlar HEOS desde ioBroker",
+            "pl": "Adapter umożliwia sterowanie HEOS z ioBroker",
+            "zh-cn": "该适配器可以从ioBroker控制HEOS"
+        },
+        "authors": [
+            "withstu <withstu@gmx.de>"
+        ],
+        "keywords": [
+            "ioBroker",
+            "HEOS"
+        ],
+        "license": "MIT",
+        "platform": "Javascript/Node.js",
+        "main": "main.js",
+        "icon": "heos.png",
+        "enabled": true,
+        "extIcon": "https://raw.githubusercontent.com/withstu/ioBroker.heos/master/admin/heos.png",
+        "readme": "https://github.com/withstu/ioBroker.heos/blob/master/README.md",
+        "loglevel": "info",
+        "messagebox": true,
+        "mode": "daemon",
+        "type": "multimedia",
+        "compact": true,
+        "connectionType": "local",
+        "dataSource": "poll",
+        "materialize": true,
+        "dependencies": [
+            {
+                "js-controller": ">=3.0.0"
+            }
+        ]
+    },
+    "protectedNative": [
+        "password"
+    ],
+    "encryptedNative": [
+        "password"
+    ],
+    "native": {
+        "username": "",
+        "password": "",
+        "reconnectTimeout": 5000,
+        "searchInterval": 30000,
+        "heartbeatInterval": 15000,
+        "heartbeatRetries": 4,
+        "rebootOnFailure": false,
+        "muteOnRegex": false,
+        "muteRegex": "spotify:ad:|Advertisement",
+        "autoPlay": false,
+        "autoPlayCmd": "set_group_volume&level=15|play_preset&preset=1",
+        "volumeStepLevel": 2,
+        "queueMode": 4,
+        "cmdScope": "leader"
+    },
+    "objects": [],
+    "instanceObjects": [
+        {
+            "_id": "info",
+            "type": "channel",
+            "common": {
+                "name": "Information"
+            },
+            "native": {}
+        },
+        {
+            "_id": "info.connection",
+            "type": "state",
+            "common": {
+                "role": "indicator.connected",
+                "name": "Device or service connected",
+                "type": "boolean",
+                "read": true,
+                "write": false,
+                "def": false
+            },
+            "native": {}
+        }
+    ]
 }
