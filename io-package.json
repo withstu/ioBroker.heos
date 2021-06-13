@@ -1,9 +1,9 @@
 {
     "common": {
         "name": "heos",
-        "version": "1.8.5",
+        "version": "1.8.6",
         "news": {
-            "1.8.5": {
+            "1.8.6": {
                 "en": "test fixed pipeline",
                 "de": "feste Pipeline testen",
                 "ru": "испытать фиксированный трубопровод",
