@@ -1,8 +1,20 @@
 {
 	"common": {
 		"name": "heos",
-		"version": "1.8.3",
+		"version": "1.8.4",
 		"news": {
+			"1.8.4": {
+				"en": "improve stability",
+				"de": "Stabilität verbessern",
+				"ru": "улучшить стабильность",
+				"pt": "melhorar a estabilidade",
+				"nl": "stabiliteit verbeteren",
+				"fr": "améliorer la stabilité",
+				"it": "migliorare la stabilità",
+				"es": "mejorar la estabilidad",
+				"pl": "poprawić stabilność",
+				"zh-cn": "提高稳定性"
+			},
 			"1.8.3": {
 				"en": "fix upnp values on failure",
 				"de": "Korrigieren Sie die Upnp-Werte bei einem Fehler",
@@ -230,18 +242,6 @@
 				"es": "actualizar algunos paquetes y agregar eventos de fuentes",
 				"pl": "zaktualizuj niektóre pakiety i dodaj zdarzenie źródeł",
 				"zh-cn": "更新一些软件包并添加源事件"
-			},
-			"1.5.4": {
-				"en": "ignore invalid now playing responses",
-				"de": "Ignorieren Sie ungültige Antworten, die gerade abgespielt werden",
-				"ru": "игнорировать недопустимые ответы сейчас воспроизводятся",
-				"pt": "ignorar respostas inválidas agora em reprodução",
-				"nl": "negeer ongeldige reacties die nu worden afgespeeld",
-				"fr": "ignorer les réponses en cours de lecture invalides",
-				"it": "ignora le risposte non valide in riproduzione",
-				"es": "ignorar respuestas inválidas en reproducción",
-				"pl": "ignoruj nieprawidłowe teraz odtwarzane odpowiedzi",
-				"zh-cn": "忽略无效的正在播放的响应"
 			}
 		},
 		"title": "HEOS",
