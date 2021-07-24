@@ -317,7 +317,8 @@
         "autoPlayCmd": "set_group_volume&level=15|play_preset&preset=1",
         "volumeStepLevel": 2,
         "queueMode": 4,
-        "cmdScope": "leader"
+        "cmdScope": "leader",
+        "sourcePort": 0
     },
     "objects": [],
     "instanceObjects": [

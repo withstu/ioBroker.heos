@@ -2404,7 +2404,7 @@ class Heos extends utils.Adapter {
 			}
 			this.ssdp_player_ips = [];
 			this.logInfo('searching for HEOS devices ...', true);
-			this.nodessdp_client = new NodeSSDP();
+			this.nodessdp_client = new NodeSSDP({'sourcePort': this.config.sourcePort});
 			this.nodessdp_client.explicitSocketBind = true;
 			this.nodessdp_client.on('response', (headers, statusCode, rinfo) => this.onNodeSSDPResponse(headers, statusCode, rinfo));
 			this.nodessdp_client.on('error', error => { this.nodessdp_client.close(); this.logError('[nodessdp] ' + error, false); });
