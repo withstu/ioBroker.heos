@@ -242,18 +242,6 @@
                 "es": "agregar regex mute",
                 "pl": "dodaj wyciszenie wyrażenia regularnego",
                 "zh-cn": "添加正则表达式静音"
-            },
-            "1.5.6": {
-                "en": "add source images & optimize auto play",
-                "de": "Quellbilder hinzufügen und automatische Wiedergabe optimieren",
-                "ru": "добавить исходные изображения и оптимизировать автоматическое воспроизведение",
-                "pt": "adicione imagens de origem e otimize a reprodução automática",
-                "nl": "bronafbeeldingen toevoegen en automatisch afspelen optimaliseren",
-                "fr": "ajouter des images sources et optimiser la lecture automatique",
-                "it": "aggiungi immagini sorgente e ottimizza la riproduzione automatica",
-                "es": "agregar imágenes de origen y optimizar la reproducción automática",
-                "pl": "dodaj obrazy źródłowe i zoptymalizuj automatyczne odtwarzanie",
-                "zh-cn": "添加源图像并优化自动播放"
             }
         },
         "title": "HEOS",
