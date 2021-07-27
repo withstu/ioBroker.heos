@@ -182,6 +182,18 @@ systemDictionary = {
 		"pl": "Interwał wyszukiwania",
 		"zh-cn": "搜索间隔"
 	},
+	"Source port [UDP] for SSDP client (0 = automatic)": {
+		"en": "Source port [UDP] for SSDP client (0 = automatic)",
+		"de": "Quellport [UDP] für SSDP-Client (0 = automatisch)",
+		"ru": "Исходный порт [UDP] для SSDP-клиента (0 = автоматически)",
+		"pt": "Porta de origem [UDP] para cliente SSDP (0 = automático)",
+		"nl": "Bronpoort [UDP] voor SSDP-client (0 = automatisch)",
+		"fr": "Port source [UDP] pour le client SSDP (0 = automatique)",
+		"it": "Porta di origine [UDP] per client SSDP (0 = automatico)",
+		"es": "Puerto de origen [UDP] para el cliente SSDP (0 = automático)",
+		"pl": "Port źródłowy [UDP] dla klienta SSDP (0 = automatycznie)",
+		"zh-cn": "SSDP 客户端的源端口 [UDP]（0 = 自动）"
+	},
 	"Play settings": {
 		"en": "Play settings",
 		"de": "Abspieleinstellungen",

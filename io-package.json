@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "heos",
-        "version": "1.8.6",
+        "version": "1.9.0",
         "news": {
+            "1.9.0": {
+                "en": "Add option to configure udp source port",
+                "de": "Option zum Konfigurieren des UDP-Quellports hinzufügen",
+                "ru": "Добавить параметр для настройки порта источника udp",
+                "pt": "Adicionar opção para configurar a porta de origem udp",
+                "nl": "Optie toevoegen om udp-bronpoort te configureren",
+                "fr": "Ajouter une option pour configurer le port source udp",
+                "it": "Aggiungi l'opzione per configurare la porta sorgente udp",
+                "es": "Agregar opción para configurar el puerto de origen udp",
+                "pl": "Dodaj opcję konfiguracji portu źródłowego UDP",
+                "zh-cn": "添加配置udp源端口的选项"
+            },
             "1.8.6": {
                 "en": "test fixed pipeline",
                 "de": "feste Pipeline testen",
