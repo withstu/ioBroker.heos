@@ -1338,7 +1338,7 @@ class Heos extends utils.Adapter {
 											const pid = memberPids[i];
 											const heosPlayer = this.players[pid];
 											if (heosPlayer) {
-												heosPlayer.setGroupVolume(jmsg.level);
+												heosPlayer.setGroupVolume(parseFloat(jmsg.level));
 											}
 										}
 									}
@@ -1730,7 +1730,7 @@ class Heos extends utils.Adapter {
 											const pid = memberPids[i];
 											const heosPlayer = this.players[pid];
 											if (heosPlayer) {
-												heosPlayer.setGroupVolume(jmsg.level);
+												heosPlayer.setGroupVolume(parseFloat(jmsg.level));
 											}
 										}
 									}
