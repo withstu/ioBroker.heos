@@ -414,7 +414,7 @@ class Heos extends utils.Adapter {
 					if(id.state === 'muted'){
 						player.sendCommand('set_mute&state=' + (state.val === true ? 'on' : 'off'));
 					} else if(id.state === 'repeat'){
-						player.sendCommand('set_play_mode&repeat=' + state.val);
+						player.sendCommand('set_play_mode&repeat=' + player.getRepeatStateName(state.val));
 					} else if(id.state === 'shuffle'){
 						player.sendCommand('set_play_mode&shuffle=' + (state.val === true ? 'on' : 'off'));
 					} else if(id.state === 'state'){
@@ -1702,7 +1702,7 @@ class Heos extends utils.Adapter {
 										}
 									}
 								}
-								this.setState('sources.browse_result', JSON.stringify(browseResult));
+								this.setState('sources.browse_result', JSON.stringify(browseResult), true);
 							}
 							break;
 					}
