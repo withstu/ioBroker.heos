@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "heos",
-        "version": "1.9.0",
+        "version": "1.9.1",
         "news": {
+            "1.9.1": {
+                "en": "fix type issues & repeat state",
+                "de": "Typprobleme beheben und Status wiederholen",
+                "ru": "исправить проблемы с типом и повторить состояние",
+                "pt": "corrigir problemas de tipo e repetir estado",
+                "nl": "typeproblemen oplossen en status herhalen",
+                "fr": "résoudre les problèmes de type et répéter l'état",
+                "it": "risolvi i problemi di tipo e ripeti lo stato",
+                "es": "corregir problemas de tipo y repetir estado",
+                "pl": "napraw problemy z typami i powtórz stan",
+                "zh-cn": "修复类型问题并重复状态"
+            },
             "1.9.0": {
                 "en": "Add option to configure udp source port",
                 "de": "Option zum Konfigurieren des UDP-Quellports hinzufügen",
@@ -230,18 +242,6 @@
                 "es": "despejar el tiempo de espera y el intervalo de descarga; arreglar roles; quitar el sueño en el módulo tts",
                 "pl": "wyczyść limit czasu i interwał podczas rozładunku; naprawić role; usuń uśpienie w module tts",
                 "zh-cn": "清除超时和卸载间隔；固定角色；删除tts模块中的睡眠"
-            },
-            "1.6.0": {
-                "en": "add regex mute",
-                "de": "Regex Mute hinzufügen",
-                "ru": "добавить отключение регулярного выражения",
-                "pt": "adicionar regex mudo",
-                "nl": "regex mute toevoegen",
-                "fr": "ajouter regex mute",
-                "it": "aggiungi regex mute",
-                "es": "agregar regex mute",
-                "pl": "dodaj wyciszenie wyrażenia regularnego",
-                "zh-cn": "添加正则表达式静音"
             }
         },
         "title": "HEOS",
