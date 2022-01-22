@@ -335,6 +335,7 @@ class Heos extends utils.Adapter {
 		this.subscribeStates('players.*.state_simple');
 		this.subscribeStates('players.*.volume');
 		this.subscribeStates('players.*.volume_limit');
+		this.subscribeStates('players.*.volume_lock');
 		this.subscribeStates('players.*.volume_up');
 		this.subscribeStates('players.*.volume_down');
 		this.subscribeStates('players.*.seek');
@@ -431,9 +432,15 @@ class Heos extends utils.Adapter {
 							this.logWarn('Volume limit reached. Reset to: ' + player.volume_limit, false);
 							volume = player.volume_limit;
 						}
+						if(player.volume_lock && player.volume != volume){
+							this.logInfo(player.name + ': Volume lock enabled. Reset to: ' + player.volume, false);
+							volume = player.volume;
+						}
 						player.sendCommand('set_volume&level=' + volume);
 					} else if(id.state === 'volume_limit'){
 						player.volume_limit = state.val;
+					} else if(id.state === 'volume_lock'){
+						player.volume_lock = state.val;
 					} else if(id.state === 'group_volume'){
 						player.sendCommand('set_group_volume&level=' + state.val);
 					} else if(id.state === 'group_muted'){
