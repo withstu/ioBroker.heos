@@ -1,8 +1,20 @@
 {
     "common": {
         "name": "heos",
-        "version": "1.9.1",
+        "version": "1.9.2",
         "news": {
+            "1.9.2": {
+                "en": "add volume lock",
+                "de": "Lautstärkesperre hinzufügen",
+                "ru": "добавить блокировку громкости",
+                "pt": "adicionar bloqueio de volume",
+                "nl": "volumevergrendeling toevoegen",
+                "fr": "ajouter un verrou de volume",
+                "it": "aggiungi il blocco del volume",
+                "es": "añadir bloqueo de volumen",
+                "pl": "dodaj blokadę głośności",
+                "zh-cn": "添加音量锁"
+            },
             "1.9.1": {
                 "en": "fix type issues & repeat state",
                 "de": "Typprobleme beheben und Status wiederholen",
@@ -230,18 +242,6 @@
                 "es": "corregir el manejo de \"usuario no conectado\"",
                 "pl": "naprawa obsługi „użytkownik niezalogowany”",
                 "zh-cn": "修复“用户未登录”处理"
-            },
-            "1.6.1": {
-                "en": "clear timeout and interval on unload; fix roles; remove sleep in tts module",
-                "de": "Zeitüberschreitung und Intervall beim Entladen löschen; Rollen fixieren; Schlaf im tts-Modul entfernen",
-                "ru": "очистить таймаут и интервал при разгрузке; исправить роли; удалить сон в модуле tts",
-                "pt": "limpar o tempo limite e o intervalo ao descarregar; fixar papéis; remover o sono no módulo tts",
-                "nl": "time-out en interval wissen bij uitladen; rollen vastleggen; verwijder sleep in tts module",
-                "fr": "effacer le délai d'attente et l'intervalle de déchargement; fixer les rôles; supprimer le sommeil dans le module tts",
-                "it": "cancellare il timeout e l'intervallo di scaricamento; ruoli fissi; rimuovere il sonno nel modulo tts",
-                "es": "despejar el tiempo de espera y el intervalo de descarga; arreglar roles; quitar el sueño en el módulo tts",
-                "pl": "wyczyść limit czasu i interwał podczas rozładunku; naprawić role; usuń uśpienie w module tts",
-                "zh-cn": "清除超时和卸载间隔；固定角色；删除tts模块中的睡眠"
             }
         },
         "title": "HEOS",
