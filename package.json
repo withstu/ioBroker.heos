@@ -23,7 +23,7 @@
     "url": "https://github.com/withstu/ioBroker.heos"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^2.5.1",
+    "@iobroker/adapter-core": "^2.6.0",
     "fast-xml-parser": "^3.21.1",
     "got": "^11.8.5",
     "html-entities": "^2.3.3",
@@ -33,7 +33,7 @@
   "devDependencies": {
     "@alcalzone/release-script": "^3.5.9",
     "@alcalzone/release-script-plugin-iobroker": "^3.5.9",
-    "@iobroker/testing": "^2.5.2",
+    "@iobroker/testing": "^3.0.2",
     "@types/chai": "^4.3.0",
     "@types/chai-as-promised": "^7.1.4",
     "@types/gulp": "^4.0.9",
