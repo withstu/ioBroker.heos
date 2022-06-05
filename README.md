@@ -127,6 +127,13 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 
 
 ## Changelog
+<!--
+	Placeholder for the next version (at the beginning of the line):
+	### **WORK IN PROGRESS**
+-->
+### **WORK IN PROGRESS**
+* (foxriver76) fix default value of `sid` (closes #174)
+
 ### 1.9.2 (2022-01-22)
 * (withstu) add volume lock
 

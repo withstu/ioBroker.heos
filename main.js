@@ -856,8 +856,7 @@ class Heos extends utils.Adapter {
 				type: 'number',
 				role: 'media.sid',
 				read: true,
-				write: false,
-				def: ''
+				write: false
 			},
 			native: {},
 		});
