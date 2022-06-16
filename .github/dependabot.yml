@@ -10,3 +10,6 @@ updates:
   assignees:
   - withstu
   versioning-strategy: increase
+  ignore:
+    - dependency-name: "got"
+      update-types: ["version-update: semver-major"]
