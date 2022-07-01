@@ -25,7 +25,7 @@
   "dependencies": {
     "@iobroker/adapter-core": "^2.6.0",
     "fast-xml-parser": "^4.0.8",
-    "got": "^11.8.5",
+    "got": "^12.1.0",
     "html-entities": "^2.3.3",
     "node-ssdp": "^4.0.1",
     "node-vibrant": "^3.1.6"
