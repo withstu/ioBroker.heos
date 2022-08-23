@@ -131,6 +131,10 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (withstu) improve player failure detection
+
 ### 1.10.0 (2022-06-16)
 * (foxriver76) fix default value of `sid` (closes #174)
 
