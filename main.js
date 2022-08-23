@@ -457,7 +457,7 @@ class Heos extends utils.Adapter {
 						if (state.val > 100) {
 							percent = 100;
 						}
-						if(player.isPlayerLeader()){
+						if(player.isPlayerGroupLeader()){
 							player.timeSeek(Math.round((player.current_duration * percent) / 100));
 						} else {
 							const leader = this.players[player.group_leader_pid];
@@ -466,7 +466,7 @@ class Heos extends utils.Adapter {
 							}
 						}
 					} else if(id.state === 'current_elapsed'){
-						if(player.isPlayerLeader()){
+						if(player.isPlayerGroupLeader()){
 							player.timeSeek(state.val);
 						} else {
 							const leader = this.players[player.group_leader_pid];
@@ -491,7 +491,7 @@ class Heos extends utils.Adapter {
 								return this.logError('invalid elapsed time: ' + state.val, false);
 							}
 						}
-						if(player.isPlayerLeader()){
+						if(player.isPlayerGroupLeader()){
 							player.timeSeek(seconds);
 						} else {
 							const leader = this.players[player.group_leader_pid];
@@ -1926,7 +1926,7 @@ class Heos extends utils.Adapter {
 		if (this.state == States.Connected) {
 			for (const pid in this.players){
 				const player = this.players[pid];
-				if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerLeader()))){
+				if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerGroupLeader()))){
 					player.sendCommand(cmd);
 				}
 			}
@@ -1937,7 +1937,7 @@ class Heos extends utils.Adapter {
 		if (this.state == States.Connected) {
 			for (const pid in this.players){
 				const player = this.players[pid];
-				if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerLeader()))){
+				if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerGroupLeader()))){
 					player.tts(fileName, volume);
 				}
 			}
@@ -2503,6 +2503,11 @@ class Heos extends utils.Adapter {
 		return ip;
 	}
 
+	logPlayerStatistics(){
+		this.logDebug('failure statistics: ' + JSON.stringify(this.failure_counter));
+		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_failure_counter));
+	}
+
 	getFailures(ip){
 		if(ip.length > 0){
 			if(this.failure_counter[ip]){
@@ -2523,7 +2528,7 @@ class Heos extends utils.Adapter {
 				this.failure_counter[ip] = 1;
 			}
 		}
-		this.logDebug('failure statistics: ' + JSON.stringify(this.failure_counter));
+		this.logPlayerStatistics();
 	}
 
 	reduceFailures(ip){
@@ -2537,14 +2542,14 @@ class Heos extends utils.Adapter {
 				this.failure_counter[ip] = 0;
 			}
 		}
-		this.logDebug('failure statistics: ' + JSON.stringify(this.failure_counter));
+		this.logPlayerStatistics();
 	}
 
 	clearFailures(ip){
 		if(ip.length > 0){
 			this.failure_counter[ip] = 0;
 		}
-		this.logDebug('failure statistics: ' + JSON.stringify(this.leader_failure_counter));
+		this.logPlayerStatistics();
 	}
 
 	getMinFailures(){
@@ -2604,7 +2609,7 @@ class Heos extends utils.Adapter {
 				this.leader_failure_counter[ip] = 1;
 			}
 		}
-		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_failure_counter));
+		this.logPlayerStatistics();
 	}
 
 	reduceLeaderFailures(ip){
@@ -2618,14 +2623,14 @@ class Heos extends utils.Adapter {
 				this.leader_failure_counter[ip] = 0;
 			}
 		}
-		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_failure_counter));
+		this.logPlayerStatistics();
 	}
 
 	clearLeaderFailures(ip){
 		if(ip.length > 0){
 			this.leader_failure_counter[ip] = 0;
 		}
-		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_failure_counter));
+		this.logPlayerStatistics();
 	}
 
 	getMinLeaderFailures(){
