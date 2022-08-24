@@ -12,18 +12,10 @@ const utils = require('@iobroker/adapter-core');
 const net = require('net');
 const NodeSSDP = require('node-ssdp').Client;
 const HeosPlayer = require('./lib/heos-player');
+const { STATES, ERROR_CODES } = require('./lib/constants');
 
-const States = {
-	Disconnecting: 0,
-	Disconnected: 1,
-	Searching: 2,
-	Reconnecting: 3,
-	Connecting: 4,
-	Connected: 5
-};
 
 class Heos extends utils.Adapter {
-
 	/**
 	 * @param {Partial<utils.AdapterOptions>} [options={}]
 	 */
@@ -40,7 +32,7 @@ class Heos extends utils.Adapter {
 		this.players = {};
 		this.browse_cmd_map = {};
 		this.ip = '';
-		this.state = States.Disconnected;
+		this.state = STATES.Disconnected;
 		this.manual_search_mode = false;
 		this.signed_in = false;
 		this.offline_mode = false;
@@ -684,7 +676,7 @@ class Heos extends utils.Adapter {
 				break;
 		}
 
-		if (commandFallback && this.state == States.Connected) {
+		if (commandFallback && this.state == STATES.Connected) {
 			if(cmd_group == null){
 				this.msgs.push('heos://' + cmd + '\n');
 			} else {
@@ -764,7 +756,7 @@ class Heos extends utils.Adapter {
 					try {
 						JSON.parse(response); // check ob korrektes JSON Array
 						if(lastResponse !== response){
-							if(this.state == States.Connected){
+							if(this.state == STATES.Connected){
 								this.parseResponse(response);
 								lastResponse = response;
 							} else {
@@ -1923,7 +1915,7 @@ class Heos extends utils.Adapter {
 	}
 
 	sendCommandToAllPlayers(cmd, leaderOnly){
-		if (this.state == States.Connected) {
+		if (this.state == STATES.Connected) {
 			for (const pid in this.players){
 				const player = this.players[pid];
 				if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerGroupLeader()))){
@@ -1934,7 +1926,7 @@ class Heos extends utils.Adapter {
 	}
 
 	ttsToAllPlayers(fileName, volume, leaderOnly){
-		if (this.state == States.Connected) {
+		if (this.state == STATES.Connected) {
 			for (const pid in this.players){
 				const player = this.players[pid];
 				if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerGroupLeader()))){
@@ -2052,7 +2044,7 @@ class Heos extends utils.Adapter {
 				const ip = this.ssdp_player_ips[id];
 				if(!foundPlayerIps.includes(ip)){
 					this.raiseLeaderFailures(this.ip);
-					this.raiseFailures(ip);
+					this.raiseFailures(ip, ERROR_CODES.General);
 					this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps) + ' | Announced Players: ' + JSON.stringify(this.ssdp_player_ips), true);
 
 					if(this.config.rebootOnFailure === true) {
@@ -2112,7 +2104,7 @@ class Heos extends utils.Adapter {
 	}
 
 	getPlayers() {
-		if (this.state == States.Connected) {
+		if (this.state == STATES.Connected) {
 			this.msgs.push('heos://player/get_players\n');
 			this.sendNextMsg();
 		}
@@ -2145,7 +2137,7 @@ class Heos extends utils.Adapter {
 	}
 
 	getGroups() {
-		if (this.state == States.Connected) {
+		if (this.state == STATES.Connected) {
 			// heos://group/get_groups
 			this.msgs.push('heos://group/get_groups');
 			this.sendNextMsg();
@@ -2153,7 +2145,7 @@ class Heos extends utils.Adapter {
 	}
 
 	ungroupAll() {
-		if (this.state == States.Connected) {
+		if (this.state == STATES.Connected) {
 			for(const pid in this.players){
 				const player = this.players[pid];
 				if(player.group_leader === true){
@@ -2165,7 +2157,7 @@ class Heos extends utils.Adapter {
 	}
 
 	groupAll() {
-		if (this.state == States.Connected) {
+		if (this.state == STATES.Connected) {
 			const pids = Object.keys(this.players).join(',');
 			this.msgs.push('heos://group/set_group?pid=' + pids);
 			this.sendNextMsg();
@@ -2173,7 +2165,7 @@ class Heos extends utils.Adapter {
 	}
 
 	getMusicSources() {
-		if (this.state == States.Connected) {
+		if (this.state == STATES.Connected) {
 			// heos://browse/get_music_sources
 			this.msgs.push('heos://browse/get_music_sources');
 			this.sendNextMsg();
@@ -2183,7 +2175,7 @@ class Heos extends utils.Adapter {
 	signIn() {
 		if(this.offline_mode || !this.config.username || !this.config.password){
 			this.logInfo('Skip sign in, because offline mode is activated or credentials missing.', false);
-		} else if (this.state == States.Connected) {
+		} else if (this.state == STATES.Connected) {
 			// heos://system/sign_in?un=heos_username&pw=heos_password
 			this.msgs.push('heos://system/sign_in?un=' + this.config.username + '&pw=' + this.config.password);
 			this.sendNextMsg();
@@ -2191,7 +2183,7 @@ class Heos extends utils.Adapter {
 	}
 
 	signOut() {
-		if (this.state == States.Connected) {
+		if (this.state == STATES.Connected) {
 			// heos://system/sign_out
 			this.msgs.push('heos://system/sign_out');
 			this.sendNextMsg();
@@ -2215,7 +2207,7 @@ class Heos extends utils.Adapter {
 	}
 
 	reboot() {
-		if (this.state == States.Connected || this.state == States.Reconnecting || this.state == States.Disconnecting) {
+		if (this.state == STATES.Connected || this.state == STATES.Reconnecting || this.state == STATES.Disconnecting) {
 			this.logWarn('rebooting player ' + this.ip, true);
 
 			this.raiseReboots(this.ip);
@@ -2246,7 +2238,7 @@ class Heos extends utils.Adapter {
 	}
 
 	browseSource(sid) {
-		if (this.state == States.Connected) {
+		if (this.state == STATES.Connected) {
 			// heos://browse/browse?sid=source_id
 			this.msgs.push('heos://browse/browse?sid=' + sid);
 			this.sendNextMsg();
@@ -2254,7 +2246,7 @@ class Heos extends utils.Adapter {
 	}
 
 	registerChangeEvents(b) {
-		if (this.state == States.Connected || this.state == States.Reconnecting || this.state == States.Disconnecting) {
+		if (this.state == STATES.Connected || this.state == STATES.Reconnecting || this.state == STATES.Disconnecting) {
 			if (b) this.msgs.push('heos://system/register_for_change_events?enable=on');
 			else this.msgs.push('heos://system/register_for_change_events?enable=off');
 			this.sendNextMsg();
@@ -2262,7 +2254,7 @@ class Heos extends utils.Adapter {
 	}
 
 	startHeartbeat() {
-		if (this.state == States.Connected) {
+		if (this.state == STATES.Connected) {
 			this.logDebug('[HEARTBEAT] start interval', false);
 			this.heartbeat_interval = setInterval(() => {
 				this.logDebug('[HEARTBEAT] ping', false);
@@ -2330,7 +2322,7 @@ class Heos extends utils.Adapter {
 		//this.net_client.setNoDelay(true);
 		this.net_client.setTimeout(60000);
 
-		this.state = States.Connecting;
+		this.state = STATES.Connecting;
 
 		this.net_client.on('error', (error) => {
 			this.logError('[connect] ' + error, false);
@@ -2346,7 +2338,7 @@ class Heos extends utils.Adapter {
 			this.setStateChanged('info.connection', true, true);
 			this.setStateChanged('connected_ip', this.ip, true);
 
-			this.state = States.Connected;
+			this.state = STATES.Connected;
 			if(this.next_connect_ip == ip){
 				this.next_connect_ip = '';
 			}
@@ -2391,7 +2383,7 @@ class Heos extends utils.Adapter {
 					});
 				}
 			});
-			this.state = States.Searching;
+			this.state = STATES.Searching;
 
 			//Update Player IPs
 			this.updatePlayerIPs();
@@ -2509,9 +2501,25 @@ class Heos extends utils.Adapter {
 	}
 
 	getFailures(ip){
+		let failures = 0;
 		if(ip.length > 0){
 			if(this.failure_counter[ip]){
-				return this.failure_counter[ip];
+				for (const code in ERROR_CODES) {
+					failures += this.failure_counter[ip][ERROR_CODES[code]];
+				}
+				return failures;
+			} else {
+				return failures;
+			}
+		} else {
+			return failures;
+		}
+	}
+
+	getFailuresByCode(ip, code){
+		if(ip.length > 0){
+			if(this.failure_counter[ip] && this.failure_counter[ip][code]){
+				return this.failure_counter[ip][code];
 			} else {
 				return 0;
 			}
@@ -2520,26 +2528,28 @@ class Heos extends utils.Adapter {
 		}
 	}
 
-	raiseFailures(ip){
+	raiseFailures(ip, code){
 		if(ip.length > 0){
-			if(this.failure_counter[ip]){
-				this.failure_counter[ip] += 1;
+			if(this.failure_counter[ip] && this.failure_counter[ip][code]){
+				this.failure_counter[ip][code] += 1;
 			} else {
-				this.failure_counter[ip] = 1;
+				this.failure_counter[ip] = {};
+				this.failure_counter[ip][code] = 1;
 			}
 		}
 		this.logPlayerStatistics();
 	}
 
-	reduceFailures(ip){
+	reduceFailures(ip, code){
 		if(ip.length > 0){
-			if(this.failure_counter[ip]){
-				this.failure_counter[ip] -= 1;
+			if(this.failure_counter[ip] && this.failure_counter[ip][code]){
+				this.failure_counter[ip][code] -= 1;
 			} else {
-				this.failure_counter[ip] = 0;
+				this.failure_counter[ip] = {};
+				this.failure_counter[ip][code] = 0;
 			}
-			if(this.failure_counter[ip] && this.failure_counter[ip] < 0){
-				this.failure_counter[ip] = 0;
+			if(this.failure_counter[ip] && this.failure_counter[ip][code] && this.failure_counter[ip] < 0){
+				this.failure_counter[ip][code] = 0;
 			}
 		}
 		this.logPlayerStatistics();
@@ -2547,30 +2557,22 @@ class Heos extends utils.Adapter {
 
 	clearFailures(ip){
 		if(ip.length > 0){
-			this.failure_counter[ip] = 0;
+			this.failure_counter[ip] = {};
+			for (const code in ERROR_CODES) {
+				this.failure_counter[ip][ERROR_CODES[code]] = 0;
+			}
 		}
 		this.logPlayerStatistics();
 	}
 
 	getMinFailures(){
 		let ip = '';
-		let failures = 0;
+		let failures = 999;
 
-		for (let i = 0; i < this.player_ips.length; i++) {
-			const player_ip = this.player_ips[i];
-
-			if(this.failure_counter[player_ip]){
-				if(ip.length > 0){
-					if(this.failure_counter[player_ip] < failures){
-						ip = player_ip;
-						failures = this.failure_counter[player_ip];
-					}
-				} else {
-					ip = player_ip;
-					failures = this.failure_counter[player_ip];
-				}
-			} else {
-				return player_ip;
+		for (const key in this.failure_counter) {
+			if(this.getFailures(key) < failures){
+				ip = key;
+				failures = this.getFailures(key);
 			}
 		}
 		return ip;
@@ -2581,9 +2583,9 @@ class Heos extends utils.Adapter {
 		let failures = 0;
 
 		for (const key in this.failure_counter) {
-			if(this.failure_counter[key] > failures){
+			if(this.getFailures(key) > failures){
 				ip = key;
-				failures = this.failure_counter[key];
+				failures = this.getFailures(key);
 			}
 		}
 		return ip;
@@ -2635,23 +2637,12 @@ class Heos extends utils.Adapter {
 
 	getMinLeaderFailures(){
 		let ip = '';
-		let failures = 0;
+		let failures = 999;
 
-		for (let i = 0; i < this.player_ips.length; i++) {
-			const player_ip = this.player_ips[i];
-
-			if(this.leader_failure_counter[player_ip]){
-				if(ip.length > 0){
-					if(this.leader_failure_counter[player_ip] < failures){
-						ip = player_ip;
-						failures = this.leader_failure_counter[player_ip];
-					}
-				} else {
-					ip = player_ip;
-					failures = this.leader_failure_counter[player_ip];
-				}
-			} else {
-				return player_ip;
+		for (const key in this.leader_failure_counter) {
+			if(this.leader_failure_counter[key] < failures){
+				ip = key;
+				failures = this.leader_failure_counter[key];
 			}
 		}
 		return ip;
@@ -2725,7 +2716,7 @@ class Heos extends utils.Adapter {
 	/** Alle Player stoppen und die TelNet Verbindung schließen **/
 	disconnect() {
 		this.logInfo('disconnecting from HEOS ...', false);
-		this.state = States.Disconnecting;
+		this.state = STATES.Disconnecting;
 
 		this.stopHeartbeat();
 		this.stopPlayers();
@@ -2749,7 +2740,7 @@ class Heos extends utils.Adapter {
 		this.signed_in = false;
 		this.setState('signed_in_user', '', true);
 
-		this.state = States.Disconnected;
+		this.state = STATES.Disconnected;
 		//this.ip = '';
 		this.msgs = [];
 		this.unfinished_responses = '';
@@ -2768,12 +2759,12 @@ class Heos extends utils.Adapter {
 	}
 
 	reconnect() {
-		if(this.state == States.Reconnecting || this.state == States.Disconnecting) return;
+		if(this.state == STATES.Reconnecting || this.state == STATES.Disconnecting) return;
 
 		this.logInfo('reconnecting to HEOS ...', false);
 
 		this.disconnect();
-		this.state = States.Reconnecting;
+		this.state = STATES.Reconnecting;
 		if (this.reconnect_timeout) {
 			clearTimeout(this.reconnect_timeout);
 			this.reconnect_timeout = undefined;
