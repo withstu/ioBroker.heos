@@ -2210,6 +2210,8 @@ class Heos extends utils.Adapter {
 		if (this.state == STATES.Connected || this.state == STATES.Reconnecting || this.state == STATES.Disconnecting) {
 			this.logWarn('rebooting player ' + this.ip, true);
 
+			this.logPlayerStatistics();
+
 			this.raiseReboots(this.ip);
 			this.reduceLeaderFailures(this.ip);
 			this.clearFailures(this.ip);
@@ -2265,6 +2267,11 @@ class Heos extends utils.Adapter {
 					this.logWarn('[HEARTBEAT] retries exceeded', false);
 					this.resetHeartbeatRetries(false);
 					this.reboot();
+				}
+				//Check Player Health
+				for (const pid in this.players){
+					const player = this.players[pid];
+					player.checkHealth();
 				}
 			}, this.config.heartbeatInterval);
 		}
@@ -2428,22 +2435,10 @@ class Heos extends utils.Adapter {
 		} catch (err) { this.logError('[search] ' + err.message, false); }
 	}
 
-	raiseReboots(ip){
-		if(ip.length > 0){
-			if(this.reboot_counter[ip]){
-				this.reboot_counter[ip] += 1;
-			} else {
-				this.reboot_counter[ip] = 1;
-			}
-		}
+	logPlayerStatistics(){
 		this.logDebug('reboot statistics: ' + JSON.stringify(this.reboot_counter));
-	}
-
-	clearReboots(ip){
-		if(ip.length > 0){
-			this.reboot_counter[ip] = 0;
-		}
-		this.logDebug('reboot statistics: ' + JSON.stringify(this.reboot_counter));
+		this.logDebug('failure statistics: ' + JSON.stringify(this.failure_counter));
+		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_failure_counter));
 	}
 
 	getReboots(ip){
@@ -2458,25 +2453,46 @@ class Heos extends utils.Adapter {
 		}
 	}
 
+	raiseReboots(ip){
+		if(ip.length > 0){
+			if(this.reboot_counter[ip]){
+				this.reboot_counter[ip] += 1;
+			} else {
+				this.reboot_counter[ip] = 1;
+			}
+		}
+		this.logPlayerStatistics();
+	}
+
+	reduceReboots(ip){
+		if(ip.length > 0){
+			if(this.reboot_counter[ip]){
+				this.reboot_counter[ip] -= 1;
+			} else {
+				this.reboot_counter[ip] = 0;
+			}
+			if(this.reboot_counter[ip] && this.reboot_counter[ip] < 0){
+				this.reboot_counter[ip] = 0;
+			}
+		}
+		this.logPlayerStatistics();
+	}
+
+	clearReboots(ip){
+		if(ip.length > 0){
+			this.reboot_counter[ip] = 0;
+		}
+		this.logPlayerStatistics();
+	}
+
 	getMinReboots(){
 		let ip = '';
-		let reboots = 0;
+		let reboots = 999;
 
-		for (let i = 0; i < this.player_ips.length; i++) {
-			const player_ip = this.player_ips[i];
-
-			if(this.reboot_counter[player_ip]){
-				if(ip.length > 0){
-					if(this.reboot_counter[player_ip] < reboots){
-						ip = player_ip;
-						reboots = this.reboot_counter[player_ip];
-					}
-				} else {
-					ip = player_ip;
-					reboots = this.reboot_counter[player_ip];
-				}
-			} else {
-				return player_ip;
+		for (const key in this.reboot_counter) {
+			if(this.getReboots(key) < reboots){
+				ip = key;
+				reboots = this.getReboots(key);
 			}
 		}
 		return ip;
@@ -2487,17 +2503,12 @@ class Heos extends utils.Adapter {
 		let reboots = 0;
 
 		for (const key in this.reboot_counter) {
-			if(this.reboot_counter[key] > reboots){
+			if(this.getReboots(key) > reboots){
 				ip = key;
-				reboots = this.reboot_counter[key];
+				reboots = this.getReboots(key);
 			}
 		}
 		return ip;
-	}
-
-	logPlayerStatistics(){
-		this.logDebug('failure statistics: ' + JSON.stringify(this.failure_counter));
-		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_failure_counter));
 	}
 
 	getFailures(ip){
