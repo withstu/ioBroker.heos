@@ -1918,7 +1918,7 @@ class Heos extends utils.Adapter {
 		if (this.state == STATES.Connected) {
 			for (const pid in this.players){
 				const player = this.players[pid];
-				if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerGroupLeader()))){
+				if(player && player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerGroupLeader()))){
 					player.sendCommand(cmd);
 				}
 			}
@@ -1929,7 +1929,7 @@ class Heos extends utils.Adapter {
 		if (this.state == STATES.Connected) {
 			for (const pid in this.players){
 				const player = this.players[pid];
-				if(player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerGroupLeader()))){
+				if(player && player.ignore_broadcast_cmd === false && (!leaderOnly || (leaderOnly && player.isPlayerGroupLeader()))){
 					player.tts(fileName, volume);
 				}
 			}
@@ -2148,7 +2148,7 @@ class Heos extends utils.Adapter {
 		if (this.state == STATES.Connected) {
 			for(const pid in this.players){
 				const player = this.players[pid];
-				if(player.group_leader === true){
+				if(player && player.group_leader === true){
 					this.msgs.push('heos://group/set_group?pid=' + pid);
 					this.sendNextMsg();
 				}
@@ -2271,7 +2271,9 @@ class Heos extends utils.Adapter {
 				//Check Player Health
 				for (const pid in this.players){
 					const player = this.players[pid];
-					player.checkHealth();
+					if(player){
+						player.checkHealth();
+					}
 				}
 			}, this.config.heartbeatInterval);
 		}
@@ -2730,10 +2732,10 @@ class Heos extends utils.Adapter {
 		this.state = STATES.Disconnecting;
 
 		this.stopHeartbeat();
-		this.stopPlayers();
-
 		this.resetTimeouts();
 		this.resetIntervals();
+
+		this.stopPlayers();
 
 		if (typeof this.net_client !== 'undefined') {
 			this.registerChangeEvents(false);
