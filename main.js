@@ -566,6 +566,7 @@ class Heos extends utils.Adapter {
 					this.logDebug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...', false);
 				} else if(this.getBestNextLeader().length > 0 && this.getBestNextLeader() != ip && this.ssdp_retry_counter < 2){
 					this.logDebug('[onNodeSSDPResponse] IP ' + ip + ' is not next best leader IP (' + this.getBestNextLeader() + '). Keep trying...', false);
+					this.logPlayerStatistics();
 				/*} else if(this.getMaxLeaderFailures() == ip && this.ssdp_retry_counter < 2){
 					this.logDebug('[onNodeSSDPResponse] Skip IP ' + ip + ' with most leader failures. Keep trying...', false);
 				} else if(this.getMaxFailures() == ip && this.ssdp_retry_counter < 2){
@@ -580,7 +581,7 @@ class Heos extends utils.Adapter {
 			} else {
 				//Connected
 			}
-		} catch (err) { this.logError('[onNodeSSDPResponse] ' + err.message, false); }
+		} catch (err) { this.logError('[onNodeSSDPResponse] ' + err, false); }
 	}
 
 	executeCommand(cmd) {
@@ -705,7 +706,7 @@ class Heos extends utils.Adapter {
 						lines.pop();
 					lines.unshift(error);
 					await this.setStateAsync('last_error', lines.join('\n'), true);
-				} catch (e) { this.logError('[setLastError] ' + e.message, false); }
+				} catch (e) { this.logError('[setLastError] ' + e, false); }
 			}
 		});
 	}
@@ -774,7 +775,7 @@ class Heos extends utils.Adapter {
 			// wenn weitere Msg zum Senden vorhanden sind, die nächste senden
 			if (this.msgs.length > 0)
 				this.sendNextMsg();
-		} catch (err) { this.logError('[onData] ' + err.message, false); }
+		} catch (err) { this.logError('[onData] ' + err, false); }
 	}
 
 	parseMessage(message) {
@@ -1815,7 +1816,7 @@ class Heos extends utils.Adapter {
 				}
 			}
 
-		} catch (err) { this.logError('[parseResponse] ' + err.message + '\n ' + response); }
+		} catch (err) { this.logError('[parseResponse] ' + err + '\n ' + response); }
 	}
 
 	browse2Commands(message, payload){
@@ -2048,10 +2049,11 @@ class Heos extends utils.Adapter {
 					this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps) + ' | Announced Players: ' + JSON.stringify(this.ssdp_player_ips), true);
 
 					if(this.config.rebootOnFailure === true) {
+						this.logWarn('Announced player not found by HEOS.');
 						if(this.getFailures(ip) > 10){
 							this.addRebootIp(ip);
 						}
-						if(this.getLeaderFailures(ip) > 10){
+						if(this.getLeaderFailures(this.ip) > 10){
 							this.addRebootIp(this.ip);
 						}
 						this.reconnect();
@@ -2072,7 +2074,7 @@ class Heos extends utils.Adapter {
 			this.getGroups();
 			this.updatePlayerIPs();
 		} catch (err) {
-			this.logError('[startPlayers] ' + err.message);
+			this.logError('[startPlayers] ' + err);
 			this.raiseLeaderFailures(this.ip);
 			this.reconnect();
 		}
@@ -2310,7 +2312,7 @@ class Heos extends utils.Adapter {
 			try {
 				this.net_client.write(msg + '\n');
 			} catch (err) {
-				this.logError('[sendMsg] ' + err.message, false);
+				this.logError('[sendMsg] ' + err, false);
 				this.raiseLeaderFailures(this.ip);
 				this.reconnect();
 			}
@@ -2434,13 +2436,26 @@ class Heos extends utils.Adapter {
 					this.nodessdp_client.search(this.ssdp_search_target_name);
 				}
 			}, this.config.searchInterval);
-		} catch (err) { this.logError('[search] ' + err.message, false); }
+		} catch (err) { this.logError('[search] ' + err, false); }
 	}
 
 	logPlayerStatistics(){
 		this.logDebug('reboot statistics: ' + JSON.stringify(this.reboot_counter));
 		this.logDebug('failure statistics: ' + JSON.stringify(this.failure_counter));
 		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_failure_counter));
+	}
+
+	initPlayerStatistics(ip){
+		this.initReboots(ip);
+		this.initFailures(ip);
+		this.initLeaderFailures(ip);
+	}
+
+	initReboots(ip){
+		if(ip.length > 0 && !this.reboot_counter[ip]){
+			this.reboot_counter[ip] = 0;
+		}
+		this.logPlayerStatistics();
 	}
 
 	getReboots(ip){
@@ -2511,6 +2526,20 @@ class Heos extends utils.Adapter {
 			}
 		}
 		return ip;
+	}
+
+	initFailures(ip){
+		if(ip.length > 0){
+			if(!this.failure_counter[ip]){
+				this.failure_counter[ip] = {};
+			}
+			for (const code in ERROR_CODES) {
+				if(!this.failure_counter[ip][ERROR_CODES[code]]){
+					this.failure_counter[ip][ERROR_CODES[code]] = 0;
+				}
+			}
+		}
+		this.logPlayerStatistics();
 	}
 
 	getFailures(ip){
@@ -2604,6 +2633,13 @@ class Heos extends utils.Adapter {
 		return ip;
 	}
 
+	initLeaderFailures(ip){
+		if(ip.length > 0 && !this.leader_failure_counter[ip]){
+			this.leader_failure_counter[ip] = 0;
+		}
+		this.logPlayerStatistics();
+	}
+
 	getLeaderFailures(ip){
 		if(ip.length > 0){
 			if(this.leader_failure_counter[ip]){
@@ -2681,7 +2717,7 @@ class Heos extends utils.Adapter {
 	}
 
 	getBestNextLeader(){
-		const failureIps = [];
+		let failureIps = [];
 		const minFailures = this.getMinFailures();
 		const minReboots = this.getMinReboots();
 		const minLeaderFailures = this.getMinLeaderFailures();
@@ -2695,12 +2731,15 @@ class Heos extends utils.Adapter {
 		if(minLeaderFailures.length){
 			failureIps.push(minLeaderFailures);
 		}
+		failureIps = failureIps.filter(n => n); //Filter empty strings
+
 		if(failureIps.length){
-			nextIp = this.mode(failureIps);
+			nextIp = this.mode(failureIps); //Get most often value
 		}
 		if(nextIp.length == 0 && this.player_ips.length){
 			nextIp = this.player_ips[Math.floor(Math.random() * this.player_ips.length)];
 		}
+
 		return nextIp;
 	}
 
