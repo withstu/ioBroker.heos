@@ -564,15 +564,10 @@ class Heos extends utils.Adapter {
 			if (typeof this.net_client == 'undefined') {
 				if (headers.ST !== this.ssdp_search_target_name) { // korrektes SSDP
 					this.logDebug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...', false);
-				} else if(this.getBestNextLeader().length > 0 && this.getBestNextLeader() != ip && this.ssdp_retry_counter < 2){
+				} else if(this.ssdp_retry_counter < 2 && this.getBestNextLeader().length > 0 && this.getBestNextLeader() != ip) {
 					this.logDebug('[onNodeSSDPResponse] IP ' + ip + ' is not next best leader IP (' + this.getBestNextLeader() + '). Keep trying...', false);
-					this.logPlayerStatistics();
-				/*} else if(this.getMaxLeaderFailures() == ip && this.ssdp_retry_counter < 2){
-					this.logDebug('[onNodeSSDPResponse] Skip IP ' + ip + ' with most leader failures. Keep trying...', false);
-				} else if(this.getMaxFailures() == ip && this.ssdp_retry_counter < 2){
-					this.logDebug('[onNodeSSDPResponse] Skip IP ' + ip + ' with most failures. Keep trying...', false);
-				} else if(this.getMaxReboots() == ip && this.ssdp_retry_counter < 2){
-					this.logDebug('[onNodeSSDPResponse] Skip IP ' + ip + ' with most reboots. Keep trying...', false);*/
+				} else if(this.ssdp_retry_counter < 5 && this.getBestNextLeaderCandidates().length > 0 && !this.getBestNextLeaderCandidates().includes(ip)) {
+					this.logDebug('[onNodeSSDPResponse] IP ' + ip + ' is not one of the next best leader IPs (' + JSON.stringify(this.getBestNextLeaderCandidates()) + '). Keep trying...', false);
 				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(ip) && this.ssdp_retry_counter < 2){
 					this.logDebug('[onNodeSSDPResponse] Reboot IP activated. Getting wrong SSDP entry. Keep trying...', false);
 				} else {
@@ -2037,7 +2032,7 @@ class Heos extends utils.Adapter {
 			//Remove disconnected players
 			for(var pid in this.players){
 				if(!connectedPlayers.includes(pid)){
-					this.stopPlayer(pid);
+					await this.stopPlayer(pid);
 				}
 			}
 			//Check for players in fail state
@@ -2096,12 +2091,12 @@ class Heos extends utils.Adapter {
 	}
 
 	//Alle Player stoppen
-	stopPlayers() {
+	async stopPlayers() {
 		if(Object.keys(this.players).length){
 			this.logDebug('try to stop players:' + Object.keys(this.players).join(','));
 		}
 		for (const pid in this.players){
-			this.stopPlayer(pid);
+			await this.stopPlayer(pid);
 		}
 	}
 
@@ -2237,6 +2232,7 @@ class Heos extends utils.Adapter {
 		this.reboot_ips = [];
 		for (let i = 0; i < this.player_ips.length; i++) {
 			this.addRebootIp(this.player_ips[i]);
+			this.clearReboots(this.player_ips[i]);
 		}
 		this.reboot();
 	}
@@ -2281,7 +2277,7 @@ class Heos extends utils.Adapter {
 		}
 	}
 
-	resetHeartbeatRetries(pong) {
+	async resetHeartbeatRetries(pong) {
 		if(pong){
 			this.logDebug('[HEARTBEAT] pong', false);
 		} else {
@@ -2290,13 +2286,13 @@ class Heos extends utils.Adapter {
 		this.heartbeat_retries = 0;
 	}
 
-	stopHeartbeat() {
+	async stopHeartbeat() {
 		this.logDebug('[HEARTBEAT] stop interval', false);
 		if (this.heartbeat_interval) {
 			clearInterval(this.heartbeat_interval);
 			this.heartbeat_interval = undefined;
 		}
-		this.resetHeartbeatRetries(false);
+		await this.resetHeartbeatRetries(false);
 	}
 
 	sendNextMsg() {
@@ -2452,7 +2448,7 @@ class Heos extends utils.Adapter {
 	}
 
 	initReboots(ip){
-		if(ip.length > 0 && !this.reboot_counter[ip]){
+		if(ip.length > 0 && !(ip in this.reboot_counter)){
 			this.reboot_counter[ip] = 0;
 		}
 		this.logPlayerStatistics();
@@ -2460,7 +2456,7 @@ class Heos extends utils.Adapter {
 
 	getReboots(ip){
 		if(ip.length > 0){
-			if(this.reboot_counter[ip]){
+			if(ip in this.reboot_counter){
 				return this.reboot_counter[ip];
 			} else {
 				return 0;
@@ -2472,7 +2468,7 @@ class Heos extends utils.Adapter {
 
 	raiseReboots(ip){
 		if(ip.length > 0){
-			if(this.reboot_counter[ip]){
+			if(ip in this.reboot_counter){
 				this.reboot_counter[ip] += 1;
 			} else {
 				this.reboot_counter[ip] = 1;
@@ -2483,12 +2479,12 @@ class Heos extends utils.Adapter {
 
 	reduceReboots(ip){
 		if(ip.length > 0){
-			if(this.reboot_counter[ip]){
+			if(ip in this.reboot_counter){
 				this.reboot_counter[ip] -= 1;
 			} else {
 				this.reboot_counter[ip] = 0;
 			}
-			if(this.reboot_counter[ip] && this.reboot_counter[ip] < 0){
+			if(ip in this.reboot_counter && this.reboot_counter[ip] < 0){
 				this.reboot_counter[ip] = 0;
 			}
 		}
@@ -2503,29 +2499,35 @@ class Heos extends utils.Adapter {
 	}
 
 	getMinReboots(){
-		let ip = '';
+		let ips = [];
 		let reboots = 999;
 
 		for (const key in this.reboot_counter) {
 			if(this.getReboots(key) < reboots){
-				ip = key;
+				ips = [];
+				ips.push(key);
 				reboots = this.getReboots(key);
+			} else if(this.getReboots(key) == reboots){
+				ips.push(key);
 			}
 		}
-		return ip;
+		return ips;
 	}
 
 	getMaxReboots(){
-		let ip = '';
+		let ips = [];
 		let reboots = 0;
 
 		for (const key in this.reboot_counter) {
 			if(this.getReboots(key) > reboots){
-				ip = key;
+				ips = [];
+				ips.push(key);
 				reboots = this.getReboots(key);
+			} else if(this.getReboots(key) == reboots){
+				ips.push(key);
 			}
 		}
-		return ip;
+		return ips;
 	}
 
 	initFailures(ip){
@@ -2534,7 +2536,7 @@ class Heos extends utils.Adapter {
 				this.failure_counter[ip] = {};
 			}
 			for (const code in ERROR_CODES) {
-				if(!this.failure_counter[ip][ERROR_CODES[code]]){
+				if(!(ERROR_CODES[code] in this.failure_counter[ip])){
 					this.failure_counter[ip][ERROR_CODES[code]] = 0;
 				}
 			}
@@ -2545,7 +2547,7 @@ class Heos extends utils.Adapter {
 	getFailures(ip){
 		let failures = 0;
 		if(ip.length > 0){
-			if(this.failure_counter[ip]){
+			if(ip in this.failure_counter){
 				for (const code in ERROR_CODES) {
 					failures += this.failure_counter[ip][ERROR_CODES[code]];
 				}
@@ -2560,7 +2562,10 @@ class Heos extends utils.Adapter {
 
 	getFailuresByCode(ip, code){
 		if(ip.length > 0){
-			if(this.failure_counter[ip] && this.failure_counter[ip][code]){
+			if(!(ip in this.failure_counter)) {
+				this.initFailures(ip);
+			}
+			if(ip in this.failure_counter && code in this.failure_counter[ip]){
 				return this.failure_counter[ip][code];
 			} else {
 				return 0;
@@ -2572,11 +2577,11 @@ class Heos extends utils.Adapter {
 
 	raiseFailures(ip, code){
 		if(ip.length > 0){
-			if(this.failure_counter[ip] && this.failure_counter[ip][code]){
+			if(!(ip in this.failure_counter)) {
+				this.initFailures(ip);
+			}
+			if(ip in this.failure_counter && code in this.failure_counter[ip]){
 				this.failure_counter[ip][code] += 1;
-			} else {
-				this.failure_counter[ip] = {};
-				this.failure_counter[ip][code] = 1;
 			}
 		}
 		this.logPlayerStatistics();
@@ -2584,13 +2589,13 @@ class Heos extends utils.Adapter {
 
 	reduceFailures(ip, code){
 		if(ip.length > 0){
-			if(this.failure_counter[ip] && this.failure_counter[ip][code]){
-				this.failure_counter[ip][code] -= 1;
-			} else {
-				this.failure_counter[ip] = {};
-				this.failure_counter[ip][code] = 0;
+			if(!(ip in this.failure_counter)) {
+				this.initFailures(ip);
 			}
-			if(this.failure_counter[ip] && this.failure_counter[ip][code] && this.failure_counter[ip] < 0){
+			if(ip in this.failure_counter && code in this.failure_counter[ip]){
+				this.failure_counter[ip][code] -= 1;
+			}
+			if(ip in this.failure_counter && code in this.failure_counter[ip] && this.failure_counter[ip][code] < 0){
 				this.failure_counter[ip][code] = 0;
 			}
 		}
@@ -2600,41 +2605,45 @@ class Heos extends utils.Adapter {
 	clearFailures(ip){
 		if(ip.length > 0){
 			this.failure_counter[ip] = {};
-			for (const code in ERROR_CODES) {
-				this.failure_counter[ip][ERROR_CODES[code]] = 0;
-			}
+			this.initFailures(ip);
 		}
 		this.logPlayerStatistics();
 	}
 
 	getMinFailures(){
-		let ip = '';
+		let ips = [];
 		let failures = 999;
 
 		for (const key in this.failure_counter) {
 			if(this.getFailures(key) < failures){
-				ip = key;
+				ips = [];
+				ips.push(key);
 				failures = this.getFailures(key);
+			} else if(this.getFailures(key) == failures){
+				ips.push(key);
 			}
 		}
-		return ip;
+		return ips;
 	}
 
 	getMaxFailures(){
-		let ip = '';
+		let ips = [];
 		let failures = 0;
 
 		for (const key in this.failure_counter) {
 			if(this.getFailures(key) > failures){
-				ip = key;
+				ips = [];
+				ips.push(key);
 				failures = this.getFailures(key);
+			} else if(this.getFailures(key) == failures){
+				ips.push(key);
 			}
 		}
-		return ip;
+		return ips;
 	}
 
 	initLeaderFailures(ip){
-		if(ip.length > 0 && !this.leader_failure_counter[ip]){
+		if(ip.length > 0 && !(ip in this.leader_failure_counter)){
 			this.leader_failure_counter[ip] = 0;
 		}
 		this.logPlayerStatistics();
@@ -2642,7 +2651,7 @@ class Heos extends utils.Adapter {
 
 	getLeaderFailures(ip){
 		if(ip.length > 0){
-			if(this.leader_failure_counter[ip]){
+			if(ip in this.leader_failure_counter){
 				return this.leader_failure_counter[ip];
 			} else {
 				return 0;
@@ -2654,7 +2663,7 @@ class Heos extends utils.Adapter {
 
 	raiseLeaderFailures(ip){
 		if(ip.length > 0){
-			if(this.leader_failure_counter[ip]){
+			if(ip in this.leader_failure_counter){
 				this.leader_failure_counter[ip] += 1;
 			} else {
 				this.leader_failure_counter[ip] = 1;
@@ -2665,12 +2674,12 @@ class Heos extends utils.Adapter {
 
 	reduceLeaderFailures(ip){
 		if(ip.length > 0){
-			if(this.leader_failure_counter[ip]){
+			if(ip in this.leader_failure_counter){
 				this.leader_failure_counter[ip] -= 1;
 			} else {
 				this.leader_failure_counter[ip] = 0;
 			}
-			if(this.leader_failure_counter[ip] && this.leader_failure_counter[ip] < 0){
+			if(ip in this.leader_failure_counter && this.leader_failure_counter[ip] < 0){
 				this.leader_failure_counter[ip] = 0;
 			}
 		}
@@ -2685,29 +2694,35 @@ class Heos extends utils.Adapter {
 	}
 
 	getMinLeaderFailures(){
-		let ip = '';
+		let ips = [];
 		let failures = 999;
 
 		for (const key in this.leader_failure_counter) {
 			if(this.leader_failure_counter[key] < failures){
-				ip = key;
+				ips = [];
+				ips.push(key);
 				failures = this.leader_failure_counter[key];
+			} else if(this.leader_failure_counter[key] == failures){
+				ips.push(key);
 			}
 		}
-		return ip;
+		return ips;
 	}
 
 	getMaxLeaderFailures(){
-		let ip = '';
+		let ips = [];
 		let failures = 0;
 
 		for (const key in this.leader_failure_counter) {
 			if(this.leader_failure_counter[key] > failures){
-				ip = key;
+				ips = [];
+				ips.push(key);
 				failures = this.leader_failure_counter[key];
+			} else if(this.leader_failure_counter[key] > failures){
+				ips.push(key);
 			}
 		}
-		return ip;
+		return ips;
 	}
 
 	mode(arr){
@@ -2716,30 +2731,35 @@ class Heos extends utils.Adapter {
 		}).pop();
 	}
 
-	getBestNextLeader(){
-		let failureIps = [];
+	getBestNextLeaderCandidates(){
+		let candidateIps = [];
 		const minFailures = this.getMinFailures();
 		const minReboots = this.getMinReboots();
 		const minLeaderFailures = this.getMinLeaderFailures();
-		let nextIp = '';
+		
 		if(minFailures.length){
-			failureIps.push(minFailures);
+			candidateIps.concat(minFailures);
 		}
 		if(minReboots.length){
-			failureIps.push(minReboots);
+			candidateIps.concat(minReboots);
 		}
 		if(minLeaderFailures.length){
-			failureIps.push(minLeaderFailures);
+			candidateIps.concat(minLeaderFailures);
 		}
-		failureIps = failureIps.filter(n => n); //Filter empty strings
+		candidateIps = candidateIps.filter(n => n); //Filter empty strings
+		return candidateIps;
+	}
 
-		if(failureIps.length){
-			nextIp = this.mode(failureIps); //Get most often value
+	getBestNextLeader(){
+		let nextIp = '';
+		const candidateIps = this.getBestNextLeaderCandidates();
+
+		if(candidateIps.length && this.ssdp_retry_counter < 2){
+			nextIp = this.mode(candidateIps); //Get most often value
 		}
 		if(nextIp.length == 0 && this.player_ips.length){
 			nextIp = this.player_ips[Math.floor(Math.random() * this.player_ips.length)];
 		}
-
 		return nextIp;
 	}
 
@@ -2766,15 +2786,15 @@ class Heos extends utils.Adapter {
 	}
 
 	/** Alle Player stoppen und die TelNet Verbindung schließen **/
-	disconnect() {
+	async disconnect() {
 		this.logInfo('disconnecting from HEOS ...', false);
 		this.state = STATES.Disconnecting;
 
-		this.stopHeartbeat();
-		this.resetTimeouts();
-		this.resetIntervals();
+		await this.stopHeartbeat();
+		await this.resetTimeouts();
+		await this.resetIntervals();
 
-		this.stopPlayers();
+		await this.stopPlayers();
 
 		if (typeof this.net_client !== 'undefined') {
 			this.registerChangeEvents(false);
@@ -2810,12 +2830,13 @@ class Heos extends utils.Adapter {
 		this.logInfo('disconnected from HEOS', false);
 	}
 
-	reconnect() {
+	async reconnect() {
 		if(this.state == STATES.Reconnecting || this.state == STATES.Disconnecting) return;
 
 		this.logInfo('reconnecting to HEOS ...', false);
 
-		this.disconnect();
+		await this.disconnect();
+		
 		this.state = STATES.Reconnecting;
 		if (this.reconnect_timeout) {
 			clearTimeout(this.reconnect_timeout);
