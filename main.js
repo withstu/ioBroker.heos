@@ -47,6 +47,7 @@ class Heos extends utils.Adapter {
 		this.ssdp_player_ips = [];
 		this.reboot_ips = [];
 		this.reboot_counter = {};
+		this.reboot_time = {};
 		this.failure_counter = {};
 		this.leader_failure_counter = {};
 		this.next_connect_ip = '';
@@ -2204,6 +2205,7 @@ class Heos extends utils.Adapter {
 	}
 
 	reboot() {
+		const that = this;
 		if (this.state == STATES.Connected || this.state == STATES.Reconnecting || this.state == STATES.Disconnecting) {
 			this.logWarn('rebooting player ' + this.ip, true);
 
@@ -2223,7 +2225,7 @@ class Heos extends utils.Adapter {
 			this.reboot_timeout = undefined;
 		}
 		this.reboot_timeout = setTimeout(() => {
-			this.reconnect();
+			that.reconnect();
 		}, 1000);
 	}
 
@@ -2233,6 +2235,8 @@ class Heos extends utils.Adapter {
 		for (let i = 0; i < this.player_ips.length; i++) {
 			this.addRebootIp(this.player_ips[i]);
 			this.clearReboots(this.player_ips[i]);
+			this.clearLeaderFailures(this.player_ips[i]);
+			this.clearFailures(this.player_ips[i]);
 		}
 		this.reboot();
 	}
@@ -2437,6 +2441,7 @@ class Heos extends utils.Adapter {
 
 	logPlayerStatistics(){
 		this.logDebug('reboot statistics: ' + JSON.stringify(this.reboot_counter));
+		this.logDebug('reboot time: ' + JSON.stringify(this.reboot_time));
 		this.logDebug('failure statistics: ' + JSON.stringify(this.failure_counter));
 		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_failure_counter));
 	}
@@ -2447,9 +2452,39 @@ class Heos extends utils.Adapter {
 		this.initLeaderFailures(ip);
 	}
 
+	getUptime(ip){
+		let uptime = 0;
+		const now = new Date();
+		if(ip.length > 0 && ip in this.reboot_time){
+			uptime = Math.floor((now - this.reboot_time[ip])/1000/60); //Minutes
+		}
+		return uptime;
+	}
+
+	getMaxUptime(){
+		let ips = [];
+		let uptime = 0;
+
+		for (const key in this.reboot_time) {
+			if(this.getUptime(key) > uptime){
+				ips = [];
+				ips.push(key);
+				uptime = this.getUptime(key);
+			} else if(this.getUptime(key) == uptime){
+				ips.push(key);
+			}
+		}
+		return ips;
+	}
+
 	initReboots(ip){
-		if(ip.length > 0 && !(ip in this.reboot_counter)){
-			this.reboot_counter[ip] = 0;
+		if(ip.length > 0){
+			if(!(ip in this.reboot_counter)){
+				this.reboot_counter[ip] = 0;
+			}
+			if(!(ip in this.reboot_time)){
+				this.reboot_time[ip] = new Date();
+			}
 		}
 		this.logPlayerStatistics();
 	}
@@ -2473,6 +2508,7 @@ class Heos extends utils.Adapter {
 			} else {
 				this.reboot_counter[ip] = 1;
 			}
+			this.reboot_time[ip] = new Date();
 		}
 		this.logPlayerStatistics();
 	}
@@ -2576,7 +2612,7 @@ class Heos extends utils.Adapter {
 	}
 
 	raiseFailures(ip, code){
-		if(ip.length > 0){
+		if(ip.length > 0 && this.getUptime(ip) >= 5){
 			if(!(ip in this.failure_counter)) {
 				this.initFailures(ip);
 			}
@@ -2662,7 +2698,7 @@ class Heos extends utils.Adapter {
 	}
 
 	raiseLeaderFailures(ip){
-		if(ip.length > 0){
+		if(ip.length > 0 && this.getUptime(ip) >= 5){
 			if(ip in this.leader_failure_counter){
 				this.leader_failure_counter[ip] += 1;
 			} else {
@@ -2736,6 +2772,7 @@ class Heos extends utils.Adapter {
 		const minFailures = this.getMinFailures();
 		const minReboots = this.getMinReboots();
 		const minLeaderFailures = this.getMinLeaderFailures();
+		const maxUptime = this.getMaxUptime();
 		
 		if(minFailures.length){
 			candidateIps.concat(minFailures);
@@ -2745,6 +2782,9 @@ class Heos extends utils.Adapter {
 		}
 		if(minLeaderFailures.length){
 			candidateIps.concat(minLeaderFailures);
+		}
+		if(maxUptime.length){
+			candidateIps.concat(maxUptime);
 		}
 		candidateIps = candidateIps.filter(n => n); //Filter empty strings
 		return candidateIps;
@@ -2831,6 +2871,7 @@ class Heos extends utils.Adapter {
 	}
 
 	async reconnect() {
+		const that = this;
 		if(this.state == STATES.Reconnecting || this.state == STATES.Disconnecting) return;
 
 		this.logInfo('reconnecting to HEOS ...', false);
@@ -2843,7 +2884,7 @@ class Heos extends utils.Adapter {
 			this.reconnect_timeout = undefined;
 		}
 		this.reconnect_timeout = setTimeout(() => {
-			this.search();
+			that.search();
 		}, this.config.reconnectTimeout);
 	}
 
