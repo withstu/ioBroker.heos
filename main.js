@@ -567,8 +567,8 @@ class Heos extends utils.Adapter {
 					this.logDebug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...', false);
 				} else if(this.ssdp_retry_counter < 2 && this.getBestNextLeader().length > 0 && this.getBestNextLeader() != ip) {
 					this.logDebug('[onNodeSSDPResponse] IP ' + ip + ' is not next best leader IP (' + this.getBestNextLeader() + '). Keep trying...', false);
-				} else if(this.ssdp_retry_counter < 5 && this.getBestNextLeaderCandidates().length > 0 && !this.getBestNextLeaderCandidates().includes(ip)) {
-					this.logDebug('[onNodeSSDPResponse] IP ' + ip + ' is not one of the next best leader IPs (' + JSON.stringify(this.getBestNextLeaderCandidates()) + '). Keep trying...', false);
+				} else if(this.ssdp_retry_counter < 5 && this.getMinOverallFailures().length > 0 && !this.getMinOverallFailures().includes(ip)) {
+					this.logDebug('[onNodeSSDPResponse] IP ' + ip + ' is not one of the next best leader IPs (' + JSON.stringify(this.getMinOverallFailures) + '). Keep trying...', false);
 				} else if(this.reboot_ips.length > 0 && !this.reboot_ips.includes(ip) && this.ssdp_retry_counter < 2){
 					this.logDebug('[onNodeSSDPResponse] Reboot IP activated. Getting wrong SSDP entry. Keep trying...', false);
 				} else {
@@ -2258,21 +2258,22 @@ class Heos extends utils.Adapter {
 	}
 
 	startHeartbeat() {
+		const that = this;
 		if (this.state == STATES.Connected) {
 			this.logDebug('[HEARTBEAT] start interval', false);
 			this.heartbeat_interval = setInterval(() => {
-				this.logDebug('[HEARTBEAT] ping', false);
-				this.msgs.push('heos://system/heart_beat');
-				this.sendNextMsg();
-				this.heartbeat_retries += 1;
-				if(this.heartbeat_retries >= this.config.heartbeatRetries){
-					this.logWarn('[HEARTBEAT] retries exceeded', false);
-					this.resetHeartbeatRetries(false);
-					this.reboot();
+				that.logDebug('[HEARTBEAT] ping', false);
+				that.msgs.push('heos://system/heart_beat');
+				that.sendNextMsg();
+				that.heartbeat_retries += 1;
+				if(that.heartbeat_retries >= that.config.heartbeatRetries){
+					that.logWarn('[HEARTBEAT] retries exceeded', false);
+					that.resetHeartbeatRetries(false);
+					that.reboot();
 				}
 				//Check Player Health
-				for (const pid in this.players){
-					const player = this.players[pid];
+				for (const pid in that.players){
+					const player = that.players[pid];
 					if(player){
 						player.checkHealth();
 					}
@@ -2383,6 +2384,7 @@ class Heos extends utils.Adapter {
 
 	/** Verbindung zum HEOS System herstellen **/
 	search() {
+		const that = this;
 		try {
 			//Reset connect states
 			this.setStateChanged('info.connection', false, true);
@@ -2423,17 +2425,17 @@ class Heos extends utils.Adapter {
 				this.ssdp_search_interval = undefined;
 			}
 			this.ssdp_search_interval = setInterval(() => {
-				if (typeof this.net_client == 'undefined') {
-					this.ssdp_retry_counter += 1;
+				if (typeof that.net_client == 'undefined') {
+					that.ssdp_retry_counter += 1;
 				}
-				if(this.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
-					this.manual_search_mode = true;
-					this.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false);
-					this.rebootAll();
+				if(that.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
+					that.manual_search_mode = true;
+					that.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false);
+					that.rebootAll();
 				} else {
-					this.logDebug('searching for HEOS devices ...', true);
-					this.ssdp_player_ips = [];
-					this.nodessdp_client.search(this.ssdp_search_target_name);
+					that.logDebug('searching for HEOS devices ...', true);
+					that.ssdp_player_ips = [];
+					that.nodessdp_client.search(this.ssdp_search_target_name);
 				}
 			}, this.config.searchInterval);
 		} catch (err) { this.logError('[search] ' + err, false); }
@@ -2444,12 +2446,41 @@ class Heos extends utils.Adapter {
 		this.logDebug('reboot time: ' + JSON.stringify(this.reboot_time));
 		this.logDebug('failure statistics: ' + JSON.stringify(this.failure_counter));
 		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_failure_counter));
+		this.logDebug('min overall failure statistics: ' + JSON.stringify(this.getMinOverallFailures()));
+		this.logDebug('best next leader: ' + this.getBestNextLeader());
 	}
 
 	initPlayerStatistics(ip){
 		this.initReboots(ip);
 		this.initFailures(ip);
 		this.initLeaderFailures(ip);
+	}
+
+	getOverallFailures(ip){
+		let failures = 0;
+		if(ip.length > 0){
+			failures += this.getReboots(ip);
+			failures += this.getFailures(ip);
+			failures += this.getLeaderFailures(ip);
+		}
+		return failures;
+	}
+
+	getMinOverallFailures(){
+		let ips = [];
+		let minFailures = 999;
+
+		for (let i = 0; i < this.player_ips.length; i++) {
+			const failures = this.getOverallFailures(this.player_ips[i]);
+			if(failures < minFailures){
+				ips = [];
+				ips.push(this.player_ips[i]);
+				minFailures = failures;
+			} else if(failures == minFailures){
+				ips.push(this.player_ips[i]);
+			}
+		}
+		return ips.filter(n => n);
 	}
 
 	getUptime(ip){
@@ -2767,36 +2798,25 @@ class Heos extends utils.Adapter {
 		}).pop();
 	}
 
-	getBestNextLeaderCandidates(){
-		let candidateIps = [];
-		const minFailures = this.getMinFailures();
-		const minReboots = this.getMinReboots();
-		const minLeaderFailures = this.getMinLeaderFailures();
-		const maxUptime = this.getMaxUptime();
-		
-		if(minFailures.length){
-			candidateIps.concat(minFailures);
-		}
-		if(minReboots.length){
-			candidateIps.concat(minReboots);
-		}
-		if(minLeaderFailures.length){
-			candidateIps.concat(minLeaderFailures);
-		}
-		if(maxUptime.length){
-			candidateIps.concat(maxUptime);
-		}
-		candidateIps = candidateIps.filter(n => n); //Filter empty strings
-		return candidateIps;
-	}
-
 	getBestNextLeader(){
 		let nextIp = '';
-		const candidateIps = this.getBestNextLeaderCandidates();
+		let maxUptime = 0;
+		const candidateIps = this.getMinOverallFailures();
 
-		if(candidateIps.length && this.ssdp_retry_counter < 2){
-			nextIp = this.mode(candidateIps); //Get most often value
+		if(candidateIps.length > 0){
+			nextIp = this.player_ips[Math.floor(Math.random() * this.player_ips.length)];
+			maxUptime = this.getUptime(nextIp);
 		}
+
+		for (let i = 0; i < candidateIps.length; i++) {
+			if(nextIp.length == 0 || this.getUptime(candidateIps[i]) > maxUptime){
+				nextIp = candidateIps[i];
+				maxUptime = this.getUptime(candidateIps[i]);
+			}
+		}
+		//if(candidateIps.length && this.ssdp_retry_counter < 2){
+		//	nextIp = this.mode(candidateIps); //Get most often value
+		//}
 		if(nextIp.length == 0 && this.player_ips.length){
 			nextIp = this.player_ips[Math.floor(Math.random() * this.player_ips.length)];
 		}
