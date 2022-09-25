@@ -58,6 +58,7 @@ class Heos extends utils.Adapter {
 		this.net_client = undefined;
 		this.nodessdp_client = undefined;
 		this.msgs = [];
+		this.request_time = {};
 		this.unfinished_responses = '';
 		this.ssdp_search_target_name = 'urn:schemas-denon-com:device:ACT-Denon:1';
 
@@ -356,9 +357,9 @@ class Heos extends utils.Adapter {
 	 * Is called when adapter shuts down - callback has to be called under any circumstances!
 	 * @param {() => void} callback
 	 */
-	onUnload(callback) {
+	async onUnload(callback) {
 		try {
-			this.disconnect();
+			await this.disconnect();
 			callback();
 		} catch (e) {
 			callback();
@@ -675,11 +676,10 @@ class Heos extends utils.Adapter {
 
 		if (commandFallback && this.state == STATES.Connected) {
 			if(cmd_group == null){
-				this.msgs.push('heos://' + cmd + '\n');
+				this.queueMsg(cmd);
 			} else {
-				this.msgs.push('heos://' + cmd_group + '/' + cmd + '\n');
+				this.queueMsg(cmd_group + '/' + cmd);
 			}
-			this.sendNextMsg();
 		}
 	}
 
@@ -769,8 +769,9 @@ class Heos extends utils.Adapter {
 				}
 			}
 			// wenn weitere Msg zum Senden vorhanden sind, die nächste senden
-			if (this.msgs.length > 0)
+			if (this.msgs.length > 0){
 				this.sendNextMsg();
+			}
 		} catch (err) { this.logError('[onData] ' + err, false); }
 	}
 
@@ -1279,6 +1280,9 @@ class Heos extends utils.Adapter {
 					}
 				});
 			}
+
+			//Clear request timeout
+			this.deleteRequestTime(command);
 
 			// cmd auswerten
 			let cmd = jdata.heos.command.split('/');
@@ -2103,8 +2107,7 @@ class Heos extends utils.Adapter {
 
 	getPlayers() {
 		if (this.state == STATES.Connected) {
-			this.msgs.push('heos://player/get_players\n');
-			this.sendNextMsg();
+			this.queueMsg('player/get_players');
 		}
 	}
 
@@ -2137,8 +2140,7 @@ class Heos extends utils.Adapter {
 	getGroups() {
 		if (this.state == STATES.Connected) {
 			// heos://group/get_groups
-			this.msgs.push('heos://group/get_groups');
-			this.sendNextMsg();
+			this.queueMsg('group/get_groups');
 		}
 	}
 
@@ -2147,8 +2149,7 @@ class Heos extends utils.Adapter {
 			for(const pid in this.players){
 				const player = this.players[pid];
 				if(player && player.group_leader === true){
-					this.msgs.push('heos://group/set_group?pid=' + pid);
-					this.sendNextMsg();
+					this.queueMsg('group/set_group?pid=' + pid);
 				}
 			}
 		}
@@ -2157,16 +2158,14 @@ class Heos extends utils.Adapter {
 	groupAll() {
 		if (this.state == STATES.Connected) {
 			const pids = Object.keys(this.players).join(',');
-			this.msgs.push('heos://group/set_group?pid=' + pids);
-			this.sendNextMsg();
+			this.queueMsg('group/set_group?pid=' + pids);
 		}
 	}
 
 	getMusicSources() {
 		if (this.state == STATES.Connected) {
 			// heos://browse/get_music_sources
-			this.msgs.push('heos://browse/get_music_sources');
-			this.sendNextMsg();
+			this.queueMsg('browse/get_music_sources');
 		}
 	}
 
@@ -2175,16 +2174,14 @@ class Heos extends utils.Adapter {
 			this.logInfo('Skip sign in, because offline mode is activated or credentials missing.', false);
 		} else if (this.state == STATES.Connected) {
 			// heos://system/sign_in?un=heos_username&pw=heos_password
-			this.msgs.push('heos://system/sign_in?un=' + this.config.username + '&pw=' + this.config.password);
-			this.sendNextMsg();
+			this.queueMsg('system/sign_in?un=' + this.config.username + '&pw=' + this.config.password);
 		}
 	}
 
 	signOut() {
 		if (this.state == STATES.Connected) {
 			// heos://system/sign_out
-			this.msgs.push('heos://system/sign_out');
-			this.sendNextMsg();
+			this.queueMsg('system/sign_out');
 		}
 	}
 
@@ -2216,8 +2213,7 @@ class Heos extends utils.Adapter {
 			this.clearFailures(this.ip);
 
 			// heos://system/reboot
-			this.msgs.push('heos://system/reboot');
-			this.sendNextMsg();
+			this.queueMsg('system/reboot');
 			this.removeRebootIp(this.ip);
 		}
 		if (this.reboot_timeout) {
@@ -2244,16 +2240,17 @@ class Heos extends utils.Adapter {
 	browseSource(sid) {
 		if (this.state == STATES.Connected) {
 			// heos://browse/browse?sid=source_id
-			this.msgs.push('heos://browse/browse?sid=' + sid);
-			this.sendNextMsg();
+			this.queueMsg('browse/browse?sid=' + sid);
 		}
 	}
 
 	registerChangeEvents(b) {
 		if (this.state == STATES.Connected || this.state == STATES.Reconnecting || this.state == STATES.Disconnecting) {
-			if (b) this.msgs.push('heos://system/register_for_change_events?enable=on');
-			else this.msgs.push('heos://system/register_for_change_events?enable=off');
-			this.sendNextMsg();
+			if (b) {
+				this.queueMsg('system/register_for_change_events?enable=on');
+			} else {
+				this.queueMsg('system/register_for_change_events?enable=off');
+			}
 		}
 	}
 
@@ -2263,8 +2260,7 @@ class Heos extends utils.Adapter {
 			this.logDebug('[HEARTBEAT] start interval', false);
 			this.heartbeat_interval = setInterval(() => {
 				that.logDebug('[HEARTBEAT] ping', false);
-				that.msgs.push('heos://system/heart_beat');
-				that.sendNextMsg();
+				this.queueMsg('system/heart_beat');
 				that.heartbeat_retries += 1;
 				if(that.heartbeat_retries >= that.config.heartbeatRetries){
 					that.logWarn('[HEARTBEAT] retries exceeded', false);
@@ -2300,18 +2296,55 @@ class Heos extends utils.Adapter {
 		await this.resetHeartbeatRetries(false);
 	}
 
+	deleteRequestTime(msg){
+		for (const cmd in this.request_time) {
+			if(msg.startsWith(cmd)){
+				delete this.request_time[cmd];
+			}
+		}
+	}
+
+	checkDuplicateRequest(msg){
+		let duplicate = false;
+		const now = new Date();
+		if(msg in this.request_time){ //5 Sekunden Request Timeout
+			if(Math.floor((now - this.request_time[msg])/1000) < 5) {
+				duplicate = true;
+				this.logDebug('Skip duplicate request: ' + msg);
+			} else {
+				this.logWarn('[checkDuplicateRequest] Response timed out. Increase leader failure counter.');
+				this.raiseLeaderFailures(this.ip);
+			}
+		}
+		this.logDebug('Request times: ' + JSON.stringify(this.request_time));
+		return duplicate;
+	}
+
+	queueMsg(msg){
+		if(!this.checkDuplicateRequest(msg)){ //5 Sekunden Request Timeout
+			this.msgs.push(msg);
+			this.sendNextMsg();
+		}
+	}
+
 	sendNextMsg() {
 		if (this.msgs.length > 0) {
 			const msg = this.msgs.shift();
-			this.sendMsg(msg);
+			if(!this.checkDuplicateRequest(msg)){
+				this.sendMsg(msg);
+			}
 		}
 	}
 
 	// Nachricht an player senden
 	sendMsg(msg) {
+		const now = new Date();
 		if(this.net_client){
 			try {
-				this.net_client.write(msg + '\n');
+				this.net_client.write('heos://' + msg + '\n');
+				if(!msg.startsWith('system/')) {
+					this.request_time[msg] = now;
+				}
 			} catch (err) {
 				this.logError('[sendMsg] ' + err, false);
 				this.raiseLeaderFailures(this.ip);
@@ -2875,6 +2908,7 @@ class Heos extends utils.Adapter {
 		this.state = STATES.Disconnected;
 		//this.ip = '';
 		this.msgs = [];
+		this.request_time = {};
 		this.unfinished_responses = '';
 		this.players = {};
 
