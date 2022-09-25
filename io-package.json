@@ -139,7 +139,8 @@
       {
         "js-controller": ">=3.0.0"
       }
-    ]
+    ],
+    "stopTimeout": "5000"
   },
   "protectedNative": [
     "password"
