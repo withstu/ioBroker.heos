@@ -1,7 +1,9 @@
-.git
-.idea
+# No dot-directories except github/vscode
+.*/
+!.vscode/
+!.github/
+
 *.code-workspace
-.vscode
 node_modules
 nbproject
 
