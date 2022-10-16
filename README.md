@@ -131,6 +131,10 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (withstu) fix release
+
 ### 1.11.0 (2022-10-16)
 * (withstu) improve player failure detection
 * (withstu) fix bug in regex mute
