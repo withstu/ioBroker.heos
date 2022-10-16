@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "1.10.0",
+    "version": "1.11.0",
     "news": {
+      "1.11.0": {
+        "en": "improve player failure detection\nfix bug in regex mute\nfix upnp NaN warning #192",
+        "de": "verbesserung der fehlererkennung\nfehler in regex mute beheben\nfix upnp NaN Warnung #192",
+        "ru": "улучшить обнаружение сбоя игрока\nисправить ошибку в regex mute\nисправить upnp NaN предупреждение #192",
+        "pt": "melhorar a detecção de falhas do jogador\ncorrigir o erro em regex mute\ncorrigir upnp NaN aviso #192",
+        "nl": "verbeter spelerfalen\nvertaling:\nvertaling:",
+        "fr": "améliorer la détection de défaillance du joueur\ncorrection de bug dans regex mute\ncorrection de l'avertissement NaN #192",
+        "it": "migliorare il rilevamento dei guasti del giocatore\nfix bug in regex mute\nfix upnp Avvertenza NaN #192",
+        "es": "mejorar la detección del fallo del jugador\ncorregir fallo en regex mute\narreglar la alarma NaN #192",
+        "pl": "udoskonalenie\nnaprawić bug w rejestrze\nnr #92",
+        "uk": "поліпшення виявлення несправностей гравця\nвиправлення помилки в regex mute\nзафіксувати попередження NaN #192",
+        "zh-cn": "b. 改进发现的失败\nf 隔离的混凝土\nfixnp NaN警戒线192"
+      },
       "1.10.0": {
         "en": "fix default value of `sid` (closes #174)",
         "de": "fix standardwert von sid (schließt #174)",
@@ -74,18 +87,6 @@
         "es": "mejorar la estabilidad",
         "pl": "poprawić stabilność",
         "zh-cn": "提高稳定性"
-      },
-      "1.8.3": {
-        "en": "fix upnp values on failure",
-        "de": "Korrigieren Sie die Upnp-Werte bei einem Fehler",
-        "ru": "исправить значения upnp при сбое",
-        "pt": "corrigir valores upnp em caso de falha",
-        "nl": "repareer upnp-waarden bij mislukking",
-        "fr": "corriger les valeurs upnp en cas d'échec",
-        "it": "correggere i valori upnp in caso di errore",
-        "es": "corregir los valores upnp en caso de falla",
-        "pl": "napraw wartości upnp w przypadku awarii",
-        "zh-cn": "修复失败时的upnp值"
       }
     },
     "title": "HEOS",
