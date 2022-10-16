@@ -6,10 +6,20 @@ updates:
     interval: monthly
     time: "04:00"
     timezone: Europe/Berlin
-  open-pull-requests-limit: 20
+  open-pull-requests-limit: 5
   assignees:
   - withstu
   versioning-strategy: increase
   ignore:
     - dependency-name: "got"
       update-types: ["version-update:semver-major"]
+      
+- package-ecosystem: github-actions
+  directory: "/"
+  schedule:
+    interval: monthly
+    time: "04:00"
+    timezone: Europe/Berlin
+  open-pull-requests-limit: 5
+  assignees:
+    - withstu
