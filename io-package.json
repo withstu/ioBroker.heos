@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "1.11.0",
+    "version": "1.11.1",
     "news": {
+      "1.11.1": {
+        "en": "fix release",
+        "de": "zurück zur übersicht",
+        "ru": "исправить релиз",
+        "pt": "liberação de correção",
+        "nl": "loslaten",
+        "fr": "correction",
+        "it": "rilascio corretto",
+        "es": "corrección de liberación",
+        "pl": "naprawa",
+        "uk": "фіксувати реліз",
+        "zh-cn": "f 固定释放"
+      },
       "1.11.0": {
         "en": "improve player failure detection\nfix bug in regex mute\nfix upnp NaN warning #192",
         "de": "verbesserung der fehlererkennung\nfehler in regex mute beheben\nfix upnp NaN Warnung #192",
@@ -75,18 +88,6 @@
         "es": "prueba de tubería fija",
         "pl": "przetestować stały rurociąg",
         "zh-cn": "测试固定管道"
-      },
-      "1.8.4": {
-        "en": "improve stability",
-        "de": "Stabilität verbessern",
-        "ru": "улучшить стабильность",
-        "pt": "melhorar a estabilidade",
-        "nl": "stabiliteit verbeteren",
-        "fr": "améliorer la stabilité",
-        "it": "migliorare la stabilità",
-        "es": "mejorar la estabilidad",
-        "pl": "poprawić stabilność",
-        "zh-cn": "提高稳定性"
       }
     },
     "title": "HEOS",
