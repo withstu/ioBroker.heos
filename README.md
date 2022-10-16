@@ -134,6 +134,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 
 ### **WORK IN PROGRESS**
 * (withstu) improve player failure detection
+* (withstu) fix bug in regex mute
 
 ### 1.10.0 (2022-06-16)
 * (foxriver76) fix default value of `sid` (closes #174)
