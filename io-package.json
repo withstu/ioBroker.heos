@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "1.11.1",
+    "version": "1.11.2",
     "news": {
+      "1.11.2": {
+        "en": "adopt to new adapter structure",
+        "de": "neue adapterstruktur übernehmen",
+        "ru": "принять к новой структуре адаптера",
+        "pt": "adotar a nova estrutura do adaptador",
+        "nl": "adopteren",
+        "fr": "adopter à la nouvelle structure de l'adaptateur",
+        "it": "adottare per la nuova struttura adattatore",
+        "es": "adoptar a nueva estructura de adaptador",
+        "pl": "zaadoptowanie nowej struktury adapterowej",
+        "uk": "прийняти до нової структури адаптера",
+        "zh-cn": "通过新的适应结构"
+      },
       "1.11.1": {
         "en": "fix release",
         "de": "zurück zur übersicht",
@@ -76,18 +89,6 @@
         "es": "Agregar opción para configurar el puerto de origen udp",
         "pl": "Dodaj opcję konfiguracji portu źródłowego UDP",
         "zh-cn": "添加配置udp源端口的选项"
-      },
-      "1.8.6": {
-        "en": "test fixed pipeline",
-        "de": "feste Pipeline testen",
-        "ru": "испытать фиксированный трубопровод",
-        "pt": "teste de pipeline fixo",
-        "nl": "test vaste pijplijn",
-        "fr": "tester le pipeline fixe",
-        "it": "prova la conduttura fissa",
-        "es": "prueba de tubería fija",
-        "pl": "przetestować stały rurociąg",
-        "zh-cn": "测试固定管道"
       }
     },
     "title": "HEOS",
