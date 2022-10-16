@@ -131,6 +131,10 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (withstu) update some dependencies
+
 ### 1.11.2 (2022-10-16)
 * (withstu) adopt to new adapter structure
 
