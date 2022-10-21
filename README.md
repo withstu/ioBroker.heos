@@ -134,6 +134,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 
 ### **WORK IN PROGRESS**
 * (withstu) update some dependencies
+* (withstu) improve failure handling
 
 ### 1.11.2 (2022-10-16)
 * (withstu) adopt to new adapter structure
