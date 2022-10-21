@@ -2043,7 +2043,7 @@ class Heos extends utils.Adapter {
 			//Check for players in fail state
 			for(const id in this.ssdp_player_ips){
 				const ip = this.ssdp_player_ips[id];
-				if(!foundPlayerIps.includes(ip)){
+				if(this.getUptime(ip) >= 5 && !foundPlayerIps.includes(ip)){
 					this.raiseLeaderFailures(this.ip);
 					this.raiseFailures(ip, ERROR_CODES.General);
 					this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps) + ' | Announced Players: ' + JSON.stringify(this.ssdp_player_ips), true);
@@ -2209,7 +2209,7 @@ class Heos extends utils.Adapter {
 			this.logPlayerStatistics();
 
 			this.raiseReboots(this.ip);
-			this.reduceLeaderFailures(this.ip);
+			this.clearLeaderFailures(this.ip);
 			this.clearFailures(this.ip);
 
 			// heos://system/reboot
@@ -2312,7 +2312,7 @@ class Heos extends utils.Adapter {
 				duplicate = true;
 				this.logDebug('Skip duplicate request: ' + msg);
 			} else {
-				this.logWarn('[checkDuplicateRequest] Response timed out. Increase leader failure counter.');
+				this.logWarn('[checkDuplicateRequest] Response timed out: ' + msg +'. Increase leader failure counter.');
 				this.raiseLeaderFailures(this.ip);
 			}
 		}
