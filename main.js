@@ -1506,23 +1506,29 @@ class Heos extends utils.Adapter {
 								}
 
 								//Add play all
-								if (jdata.hasOwnProperty('options')) {
-									const options = jdata.options[0].browse;
-									for(i = 0; i < options.length; i++){
-										if(options[i].id == 21){
-											browseResult['payload'].push(
-												{
-													'name': 'play_all',
-													'image_url': '',
-													'type': 'control',
-													'available': true,
-													'commands': {
-														'play': 'scope/add_to_queue&sid=' + sid + '&cid=' + jmsg.cid + '&aid=' + this.config.queueMode
-													}
-												}
-											);
-										}
+								let playable = false;
+								for (i = 0; i < jdata.payload.length; i++) {
+									const payload = jdata.payload[i];
+									if(payload.playable == 'yes'){
+										playable = true;
 									}
+									if(payload.container == 'yes'){
+										playable = false;
+										break;
+									}
+								}
+								if (playable) {
+									browseResult['payload'].push(
+										{
+											'name': 'play_all',
+											'image_url': '',
+											'type': 'control',
+											'available': true,
+											'commands': {
+												'play': 'scope/add_to_queue&sid=' + sid + '&cid=' + jmsg.cid + '&aid=' + this.config.queueMode
+											}
+										}
+									);
 								}
 
 								//Load previous
