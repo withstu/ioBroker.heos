@@ -1253,6 +1253,10 @@ class Heos extends utils.Adapter {
 			if(jdata.heos.message != null && jdata.heos.message.trim().length > 0){
 				command += '?' + jdata.heos.message;
 			}
+
+			//Clear request timeout
+			this.deleteRequestTime(command);
+
 			// msg auswerten
 			const jmsg = this.parseMessage(jdata.heos.message);
 
@@ -1280,9 +1284,6 @@ class Heos extends utils.Adapter {
 					}
 				});
 			}
-
-			//Clear request timeout
-			this.deleteRequestTime(command);
 
 			// cmd auswerten
 			let cmd = jdata.heos.command.split('/');
@@ -1512,7 +1513,7 @@ class Heos extends utils.Adapter {
 									if(payload.playable == 'yes'){
 										playable = true;
 									}
-									if(payload.container == 'yes'){
+									if(payload.type != 'song'){
 										playable = false;
 										break;
 									}
