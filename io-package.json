@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "1.11.2",
+    "version": "1.11.3",
     "news": {
+      "1.11.3": {
+        "en": "update some dependencies\nimprove failure handling\nimprove play all button in browse feature",
+        "de": "einige abhängigkeiten aktualisieren\nverbesserung der fehlerbehebung\nverbessern spielen alle taste in der browser-funktion",
+        "ru": "обновить некоторые зависимости\nулучшить обработку сбоев\nулучшить играть все кнопки в функции просмотра",
+        "pt": "atualizar algumas dependências\nmelhorar o manuseio de falhas\nmelhorar jogar todos os botões em procurar recurso",
+        "nl": "vertaling:\nverbeter falen\nverbeter alle knoppen in browse",
+        "fr": "mettre à jour certaines dépendances\naméliorer la manipulation des défaillances\naméliorer jouer tous les boutons dans la fonction de navigation",
+        "it": "aggiornare alcune dipendenze\nmigliorare la gestione dei guasti\nmigliorare giocare tutto il pulsante nella funzione di navigazione",
+        "es": "actualizar algunas dependencias\nmejorar el manejo de fallos\nmejorar el juego de todos los botones en la función de navegación",
+        "pl": "aktualizacja\npolepszenie\nulepszenie przycisków w przeglądarce",
+        "uk": "оновлення деяких залежностей\nполіпшення безпеки\nпокращувати відтворення всіх кнопок у функції перегляду",
+        "zh-cn": "二. 更新一些依赖性\n改进失败\nb. 代管特区改善所有但顿作用"
+      },
       "1.11.2": {
         "en": "adopt to new adapter structure",
         "de": "neue adapterstruktur übernehmen",
@@ -77,18 +90,6 @@
         "es": "corregir problemas de tipo y repetir estado",
         "pl": "napraw problemy z typami i powtórz stan",
         "zh-cn": "修复类型问题并重复状态"
-      },
-      "1.9.0": {
-        "en": "Add option to configure udp source port",
-        "de": "Option zum Konfigurieren des UDP-Quellports hinzufügen",
-        "ru": "Добавить параметр для настройки порта источника udp",
-        "pt": "Adicionar opção para configurar a porta de origem udp",
-        "nl": "Optie toevoegen om udp-bronpoort te configureren",
-        "fr": "Ajouter une option pour configurer le port source udp",
-        "it": "Aggiungi l'opzione per configurare la porta sorgente udp",
-        "es": "Agregar opción para configurar el puerto de origen udp",
-        "pl": "Dodaj opcję konfiguracji portu źródłowego UDP",
-        "zh-cn": "添加配置udp源端口的选项"
       }
     },
     "title": "HEOS",
