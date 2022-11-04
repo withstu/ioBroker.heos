@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "1.11.3",
+    "version": "1.11.4",
     "news": {
+      "1.11.4": {
+        "en": "improve play all button in browse feature",
+        "de": "verbessern spielen alle taste in der browser-funktion",
+        "ru": "улучшить играть все кнопки в функции просмотра",
+        "pt": "melhorar jogar todos os botões em procurar recurso",
+        "nl": "verbeter alle knoppen in browse",
+        "fr": "améliorer jouer tous les boutons dans la fonction de navigation",
+        "it": "migliorare giocare tutto il pulsante nella funzione di navigazione",
+        "es": "mejorar el juego de todos los botones en la función de navegación",
+        "pl": "ulepszenie przycisków w przeglądarce",
+        "uk": "покращувати відтворення всіх кнопок у функції перегляду",
+        "zh-cn": "b. 代管特区改善所有但顿作用"
+      },
       "1.11.3": {
         "en": "update some dependencies\nimprove failure handling\nimprove play all button in browse feature",
         "de": "einige abhängigkeiten aktualisieren\nverbesserung der fehlerbehebung\nverbessern spielen alle taste in der browser-funktion",
@@ -78,18 +91,6 @@
         "es": "añadir bloqueo de volumen",
         "pl": "dodaj blokadę głośności",
         "zh-cn": "添加音量锁"
-      },
-      "1.9.1": {
-        "en": "fix type issues & repeat state",
-        "de": "Typprobleme beheben und Status wiederholen",
-        "ru": "исправить проблемы с типом и повторить состояние",
-        "pt": "corrigir problemas de tipo e repetir estado",
-        "nl": "typeproblemen oplossen en status herhalen",
-        "fr": "résoudre les problèmes de type et répéter l'état",
-        "it": "risolvi i problemi di tipo e ripeti lo stato",
-        "es": "corregir problemas de tipo y repetir estado",
-        "pl": "napraw problemy z typami i powtórz stan",
-        "zh-cn": "修复类型问题并重复状态"
       }
     },
     "title": "HEOS",

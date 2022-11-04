@@ -131,8 +131,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-
-### **WORK IN PROGRESS**
+### 1.11.4 (2022-11-04)
 * (withstu) improve play all button in browse feature
 
 ### 1.11.3 (2022-11-04)
