@@ -2209,7 +2209,6 @@ class Heos extends utils.Adapter {
 	}
 
 	reboot() {
-		const that = this;
 		if (this.state == STATES.Connected || this.state == STATES.Reconnecting || this.state == STATES.Disconnecting) {
 			this.logWarn('rebooting player ' + this.ip, true);
 
@@ -2228,7 +2227,7 @@ class Heos extends utils.Adapter {
 			this.reboot_timeout = undefined;
 		}
 		this.reboot_timeout = setTimeout(() => {
-			that.reconnect();
+			this.reconnect();
 		}, 1000);
 	}
 
@@ -2262,21 +2261,20 @@ class Heos extends utils.Adapter {
 	}
 
 	startHeartbeat() {
-		const that = this;
 		if (this.state == STATES.Connected) {
 			this.logDebug('[HEARTBEAT] start interval', false);
 			this.heartbeat_interval = setInterval(() => {
-				that.logDebug('[HEARTBEAT] ping', false);
+				this.logDebug('[HEARTBEAT] ping', false);
 				this.queueMsg('system/heart_beat');
-				that.heartbeat_retries += 1;
-				if(that.heartbeat_retries >= that.config.heartbeatRetries){
-					that.logWarn('[HEARTBEAT] retries exceeded', false);
-					that.resetHeartbeatRetries(false);
-					that.reboot();
+				this.heartbeat_retries += 1;
+				if(this.heartbeat_retries >= this.config.heartbeatRetries){
+					this.logWarn('[HEARTBEAT] retries exceeded', false);
+					this.resetHeartbeatRetries(false);
+					this.reboot();
 				}
 				//Check Player Health
-				for (const pid in that.players){
-					const player = that.players[pid];
+				for (const pid in this.players){
+					const player = this.players[pid];
 					if(player){
 						player.checkHealth();
 					}
@@ -2424,7 +2422,6 @@ class Heos extends utils.Adapter {
 
 	/** Verbindung zum HEOS System herstellen **/
 	search() {
-		const that = this;
 		try {
 			//Reset connect states
 			this.setStateChanged('info.connection', false, true);
@@ -2465,17 +2462,17 @@ class Heos extends utils.Adapter {
 				this.ssdp_search_interval = undefined;
 			}
 			this.ssdp_search_interval = setInterval(() => {
-				if (typeof that.net_client == 'undefined') {
-					that.ssdp_retry_counter += 1;
+				if (typeof this.net_client == 'undefined') {
+					this.ssdp_retry_counter += 1;
 				}
-				if(that.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
-					that.manual_search_mode = true;
-					that.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false);
-					that.rebootAll();
+				if(this.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
+					this.manual_search_mode = true;
+					this.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false);
+					this.rebootAll();
 				} else {
-					that.logDebug('searching for HEOS devices ...', true);
-					that.ssdp_player_ips = [];
-					that.nodessdp_client.search(this.ssdp_search_target_name);
+					this.logDebug('searching for HEOS devices ...', true);
+					this.ssdp_player_ips = [];
+					this.nodessdp_client.search(this.ssdp_search_target_name);
 				}
 			}, this.config.searchInterval);
 		} catch (err) { this.logError('[search] ' + err, false); }
@@ -2932,7 +2929,6 @@ class Heos extends utils.Adapter {
 	}
 
 	async reconnect() {
-		const that = this;
 		if(this.state == STATES.Reconnecting || this.state == STATES.Disconnecting) return;
 
 		this.logInfo('reconnecting to HEOS ...', false);
@@ -2945,7 +2941,7 @@ class Heos extends utils.Adapter {
 			this.reconnect_timeout = undefined;
 		}
 		this.reconnect_timeout = setTimeout(() => {
-			that.search();
+			this.search();
 		}, this.config.reconnectTimeout);
 	}
 
