@@ -398,27 +398,27 @@ class Heos extends utils.Adapter {
 					this.signIn();
 				}
 			} else if (id.device === 'sources' && id.channel === '1025' && id.state && fullId[fullId.length-1] === 'play') {
-				this.sendCommandToAllPlayers('add_to_queue&sid=1025&aid=' + this.config.queueMode + '&cid=' + id.state, true);
+				this.sendCommandToAllPlayers('add_to_queue?sid=1025&aid=' + this.config.queueMode + '&cid=' + id.state, true);
 			} else if (id.device === 'sources' && id.channel === '1028' && id.state && fullId[fullId.length-1] === 'play') {
-				this.sendCommandToAllPlayers('play_preset&preset=' + id.state, true);
+				this.sendCommandToAllPlayers('play_preset?preset=' + id.state, true);
 			} else if (id.device === 'sources' && id.channel && id.state === 'browse') {
 				this.browseSource(id.channel);
 			} else if (id.device === 'players' && id.channel && id.state){
 				if(id.channel in this.players && this.players[id.channel]) {
 					const player = this.players[id.channel];
 					if(id.state === 'muted'){
-						player.sendCommand('set_mute&state=' + (state.val === true ? 'on' : 'off'));
+						player.sendCommand('set_mute?state=' + (state.val === true ? 'on' : 'off'));
 					} else if(id.state === 'repeat'){
-						player.sendCommand('set_play_mode&repeat=' + player.getRepeatStateName(state.val));
+						player.sendCommand('set_play_mode?repeat=' + player.getRepeatStateName(state.val));
 					} else if(id.state === 'shuffle'){
-						player.sendCommand('set_play_mode&shuffle=' + (state.val === true ? 'on' : 'off'));
+						player.sendCommand('set_play_mode?shuffle=' + (state.val === true ? 'on' : 'off'));
 					} else if(id.state === 'state'){
-						player.sendCommand('set_play_state&state=' + state.val);
+						player.sendCommand('set_play_state?state=' + state.val);
 					} else if(id.state === 'state_simple'){
 						if(state.val === true){
-							player.sendCommand('set_play_state&state=play');
+							player.sendCommand('set_play_state?state=play');
 						} else {
-							player.sendCommand('set_play_state&state=pause');
+							player.sendCommand('set_play_state?state=pause');
 						}
 					} else if(id.state === 'volume'){
 						let volume = state.val;
@@ -430,15 +430,15 @@ class Heos extends utils.Adapter {
 							this.logInfo(player.name + ': Volume lock enabled. Reset to: ' + player.volume, false);
 							volume = player.volume;
 						}
-						player.sendCommand('set_volume&level=' + volume);
+						player.sendCommand('set_volume?level=' + volume);
 					} else if(id.state === 'volume_limit'){
 						player.volume_limit = state.val;
 					} else if(id.state === 'volume_lock'){
 						player.volume_lock = state.val;
 					} else if(id.state === 'group_volume'){
-						player.sendCommand('set_group_volume&level=' + state.val);
+						player.sendCommand('set_group_volume?level=' + state.val);
 					} else if(id.state === 'group_muted'){
-						player.sendCommand('set_group_mute&state=' + (state.val === true ? 'on' : 'off'));
+						player.sendCommand('set_group_mute?state=' + (state.val === true ? 'on' : 'off'));
 					} else if(id.state === 'command'){
 						player.sendCommand(state.val);
 					} else if(id.state === 'power'){
@@ -494,19 +494,19 @@ class Heos extends utils.Adapter {
 							}
 						}
 					} else if(id.state === 'play'){
-						player.sendCommand('set_play_state&state=play');
+						player.sendCommand('set_play_state?state=play');
 					} else if(id.state === 'pause'){
-						player.sendCommand('set_play_state&state=pause');
+						player.sendCommand('set_play_state?state=pause');
 					} else if(id.state === 'stop'){
-						player.sendCommand('set_play_state&state=stop');
+						player.sendCommand('set_play_state?state=stop');
 					} else if(id.state === 'prev'){
 						player.sendCommand('play_previous');
 					} else if(id.state === 'next'){
 						player.sendCommand('play_next');
 					} else if(id.state === 'volume_up'){
-						player.sendCommand('volume_up&step=' + this.config.volumeStepLevel);
+						player.sendCommand('volume_up?step=' + this.config.volumeStepLevel);
 					} else if(id.state === 'volume_down'){
-						player.sendCommand('volume_down&step=' + this.config.volumeStepLevel);
+						player.sendCommand('volume_down?step=' + this.config.volumeStepLevel);
 					} else if(id.state === 'clear_queue'){
 						player.sendCommand('clear_queue');
 					} else if(id.state === 'reboot'){
@@ -906,7 +906,7 @@ class Heos extends utils.Adapter {
 			type: 'state',
 			common: {
 				name: 'Browse Source',
-				desc: 'Browse Source. Output is written to browse_result.',
+				desc: 'Browse and update source. Output is written to browse_result.',
 				type: 'boolean',
 				role: 'button',
 				read: true,
@@ -1526,7 +1526,7 @@ class Heos extends utils.Adapter {
 											'type': 'control',
 											'available': true,
 											'commands': {
-												'play': 'scope/add_to_queue&sid=' + sid + '&cid=' + jmsg.cid + '&aid=' + this.config.queueMode
+												'play': 'scope/add_to_queue?sid=' + sid + '&cid=' + jmsg.cid + '&aid=' + this.config.queueMode
 											}
 										}
 									);
@@ -1589,7 +1589,7 @@ class Heos extends utils.Adapter {
 													'type': 'media',
 													'available': true,
 													'commands': {
-														'play': 'scope/add_to_queue&sid=1025&aid=' + this.config.queueMode + '&cid=' + payload.cid
+														'play': 'scope/add_to_queue?sid=1025&aid=' + this.config.queueMode + '&cid=' + payload.cid
 													}
 												}
 											);
@@ -1630,7 +1630,7 @@ class Heos extends utils.Adapter {
 													'type': 'media',
 													'available': true,
 													'commands': {
-														'play': 'scope/play_preset&preset=' + presetId
+														'play': 'scope/play_preset?preset=' + presetId
 													}
 												}
 											);
@@ -1906,16 +1906,16 @@ class Heos extends utils.Adapter {
 		if(playable && type){
 			if (type == 'station' && mid){
 				if(mid.includes('inputs/')){
-					cmd.play = 'scope/play_input&input=' + mid;
+					cmd.play = 'scope/play_input?input=' + mid;
 				} else if(mcid){
-					cmd.play = 'scope/play_stream&sid=' + msid + '&cid=' + mcid + '&mid=' + mid;
+					cmd.play = 'scope/play_stream?sid=' + msid + '&cid=' + mcid + '&mid=' + mid;
 				} else {
-					cmd.play = 'scope/play_stream&sid=' + msid + '&mid=' + mid;
+					cmd.play = 'scope/play_stream?sid=' + msid + '&mid=' + mid;
 				}
 			} else if(container && pcid){
-				cmd.play = 'scope/add_to_queue&sid=' + msid + '&cid=' + pcid + '&aid=' + this.config.queueMode;
+				cmd.play = 'scope/add_to_queue?sid=' + msid + '&cid=' + pcid + '&aid=' + this.config.queueMode;
 			} else if(mcid && mid){
-				cmd.play = 'scope/add_to_queue&sid=' + msid + '&cid=' + mcid + '&mid=' + mid + '&aid=' + this.config.queueMode;
+				cmd.play = 'scope/add_to_queue?sid=' + msid + '&cid=' + mcid + '&mid=' + mid + '&aid=' + this.config.queueMode;
 			}
 		}
 
