@@ -141,8 +141,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-
-### **WORK IN PROGRESS**
+### 1.12.0 (2023-02-25)
 * (withstu) optimize scope handling
 * (withstu) switch to HEOS default cmd delimiter
 * (withstu) add configuration to prefer list of IPs for adapter connection
