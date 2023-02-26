@@ -24,6 +24,7 @@
     "Regex for muting": "Регулярний вираз для вимкнення звуку",
     "Replace and play": "Замініть і грайте",
     "Search interval": "Інтервал пошуку",
+    "Search timeout": "Тайм-аут пошуку",
     "Source port [UDP] for SSDP client (0 = automatic)": "Порт джерела [UDP] для клієнта SSDP (0 = автоматично)",
     "Username": "Ім'я користувача",
     "Volume step": "Крок гучності"

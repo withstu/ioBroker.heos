@@ -24,6 +24,7 @@
     "Regex for muting": "Regex para silenciar",
     "Replace and play": "Reemplazar y jugar",
     "Search interval": "Intervalo de búsqueda",
+    "Search timeout": "Tiempo de espera de búsqueda",
     "Source port [UDP] for SSDP client (0 = automatic)": "Puerto de origen [UDP] para cliente SSDP (0 = automático)",
     "Username": "Nombre de usuario",
     "Volume step": "Paso de volumen"

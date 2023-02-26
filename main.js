@@ -34,12 +34,14 @@ class Heos extends utils.Adapter {
 		this.ip = '';
 		this.state = STATES.Disconnected;
 		this.manual_search_mode = true;
+		this.silent_log_mode = false;
 		this.signed_in = false;
 		this.offline_mode = false;
 
 		this.heartbeat_retries = 0;
 		this.heartbeat_interval = undefined;
 		this.ssdp_search_interval = undefined;
+		this.ssdp_search_timeout = undefined;
 
 		this.start_players_errors = 0;
 		this.ssdp_retry_counter = 0;
@@ -160,7 +162,7 @@ class Heos extends utils.Adapter {
 	}
 
 	logInfo(msg, force) {
-		if (!force && this.manual_search_mode) {
+		if (!force && this.silent_log_mode) {
 			this.log.debug(msg);
 		} else {
 			this.log.info(msg);
@@ -168,7 +170,7 @@ class Heos extends utils.Adapter {
 	}
 
 	logWarn(msg, force) {
-		if (!force && this.manual_search_mode) {
+		if (!force && this.silent_log_mode) {
 			this.log.debug(msg);
 		} else {
 			this.log.warn(msg);
@@ -176,7 +178,7 @@ class Heos extends utils.Adapter {
 	}
 
 	logError(msg, force) {
-		if (!force && this.manual_search_mode) {
+		if (!force && this.silent_log_mode) {
 			this.log.debug(msg);
 		} else {
 			this.log.error(msg);
@@ -355,16 +357,10 @@ class Heos extends utils.Adapter {
 	}
 
 	/**
-	 * Is called when adapter shuts down - callback has to be called under any circumstances!
-	 * @param {() => void} callback
+	 * Is called when adapter shuts down
 	 */
-	async onUnload(callback) {
-		try {
-			await this.disconnect();
-			callback();
-		} catch (e) {
-			callback();
-		}
+	async onUnload() {
+		await this.disconnect();
 	}
 
 	/**
@@ -539,7 +535,7 @@ class Heos extends utils.Adapter {
 
 	/**
 	 * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
-	 * Using this method requires "common.message" property to be set to true in io-package.jsongetBestNextLeader
+	 * Using this method requires "common.message" property to be set to true in io-package.json
 	 * @param {ioBroker.Message} obj
 	 */
 	onMessage(obj) {
@@ -563,21 +559,6 @@ class Heos extends utils.Adapter {
 			if (headers.ST == this.ssdp_search_target_name && !this.ssdp_player_ips.includes(ip)) {
 				this.ssdp_player_ips.push(ip);
 				this.logDebug('SSDP Announced IPs ' + JSON.stringify(this.ssdp_player_ips), false);
-			}
-			if (typeof this.net_client == 'undefined') {
-				if (headers.ST !== this.ssdp_search_target_name) { // korrektes SSDP
-					this.logDebug('[onNodeSSDPResponse] Getting wrong SSDP entry. Keep trying...', false);
-				} else if (this.ssdp_retry_counter < 2 && this.getBestNextLeader().length > 0 && this.getBestNextLeader() != ip) {
-					this.logDebug('[onNodeSSDPResponse] IP ' + ip + ' is not next best leader IP (' + this.getBestNextLeader() + '). Keep trying...', false);
-				} else if (this.ssdp_retry_counter < 5 && this.getMinOverallFailures().length > 0 && !this.getMinOverallFailures().includes(ip)) {
-					this.logDebug('[onNodeSSDPResponse] IP ' + ip + ' is not one of the next best leader IPs (' + JSON.stringify(this.getMinOverallFailures) + '). Keep trying...', false);
-				} else if (this.reboot_ips.length > 0 && !this.reboot_ips.includes(ip) && this.ssdp_retry_counter < 2) {
-					this.logDebug('[onNodeSSDPResponse] Reboot IP activated. Getting wrong SSDP entry. Keep trying...', false);
-				} else {
-					this.connect(ip);
-				}
-			} else {
-				//Connected
 			}
 		} catch (err) { this.logError('[onNodeSSDPResponse] ' + err, false); }
 	}
@@ -2108,7 +2089,7 @@ class Heos extends utils.Adapter {
 			const ips = this.config.preferedIPs.split(',').map(function (item) {
 				return item.trim();
 			});
-			if (this.manual_search_mode){
+			if (this.manual_search_mode) {
 				if (this.prefered_player_ips.length == 0) {
 					this.prefered_player_ips = ips;
 				}
@@ -2123,7 +2104,7 @@ class Heos extends utils.Adapter {
 	removePreferedPlayerIp(ip) {
 		if (this.ip == ip && this.prefered_player_ips.includes(ip)) {
 			const index = this.prefered_player_ips.indexOf(ip);
-			if(this.prefered_player_ips.length == 1){
+			if (this.prefered_player_ips.length == 1) {
 				this.manual_search_mode = false;
 			}
 			if (index > -1) {
@@ -2395,14 +2376,14 @@ class Heos extends utils.Adapter {
 	}
 
 	connect(ip) {
+		this.state = STATES.Connecting;
+
 		this.ip = ip;
 		this.logInfo('connecting to HEOS (' + this.ip + ') ...', false);
 		this.net_client = net.connect({ host: this.ip, port: 1255 });
 		this.net_client.setKeepAlive(true, 60000);
 		//this.net_client.setNoDelay(true);
 		this.net_client.setTimeout(60000);
-
-		this.state = STATES.Connecting;
 
 		if (this.next_connect_ip == ip) {
 			this.next_connect_ip = '';
@@ -2450,6 +2431,26 @@ class Heos extends utils.Adapter {
 		this.net_client.on('data', (data) => this.onData(data));
 	}
 
+	ssdpLeaderElection() {
+		if (this.ssdp_search_timeout) {
+			clearTimeout(this.ssdp_search_timeout);
+			this.ssdp_search_timeout = undefined;
+		}
+		if (typeof this.net_client == 'undefined' && this.state == STATES.Searching) {
+			this.ssdp_search_timeout = setTimeout(() => {
+				if (this.state == STATES.Searching && this.ssdp_player_ips.length > 0) {
+					let ip = this.getRandomArrayElement(this.ssdp_player_ips);
+					const maxUptimeIps = this.ssdp_player_ips.filter(element => this.getMaxUptime().includes(element));
+					const minFailureIps = this.ssdp_player_ips.filter(element => this.getMinOverallFailures().includes(element));
+					if (maxUptimeIps.length > 0 || minFailureIps.length > 0) {
+						ip = this.getRandomArrayElement(maxUptimeIps.concat(minFailureIps));
+					}
+					this.connect(ip);
+				}
+			}, this.config.searchTimeout);
+		}
+	}
+
 	/** Verbindung zum HEOS System herstellen **/
 	search() {
 		try {
@@ -2469,6 +2470,9 @@ class Heos extends utils.Adapter {
 			this.updatePlayerIPs();
 			this.updatePreferedPlayerIPs();
 
+			if (this.reboot_ips.length == 0) {
+				this.silent_log_mode = false;
+			}
 			if (this.reboot_ips.length > 0) {
 				this.logDebug('following ips need to be rebooted: ' + this.reboot_ips.join(','), false);
 				const ip = this.reboot_ips[0];
@@ -2487,17 +2491,16 @@ class Heos extends utils.Adapter {
 				this.nodessdp_client.on('response', (headers, statusCode, rinfo) => this.onNodeSSDPResponse(headers, statusCode, rinfo));
 				this.nodessdp_client.on('error', error => { this.nodessdp_client.close(); this.logError('[nodessdp] ' + error, false); });
 				this.nodessdp_client.search(this.ssdp_search_target_name);
-				if (this.ssdp_search_interval) {
-					clearInterval(this.ssdp_search_interval);
-					this.ssdp_search_interval = undefined;
-				}
+				this.ssdpLeaderElection();
 				this.ssdp_search_interval = setInterval(() => {
 					if (typeof this.net_client == 'undefined') {
 						this.ssdp_retry_counter += 1;
 					}
+					this.ssdpLeaderElection();
 					if (this.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
 						this.manual_search_mode = true;
-						this.logDebug("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false);
+						this.silent_log_mode = true;
+						this.logWarn("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false);
 						this.rebootAll();
 					} else {
 						this.logDebug('searching for HEOS devices ...', true);
@@ -2515,7 +2518,7 @@ class Heos extends utils.Adapter {
 		this.logDebug('failure statistics: ' + JSON.stringify(this.failure_counter));
 		this.logDebug('leader failure statistics: ' + JSON.stringify(this.leader_failure_counter));
 		this.logDebug('min overall failure statistics: ' + JSON.stringify(this.getMinOverallFailures()));
-		this.logDebug('best next leader: ' + this.getBestNextLeader());
+		this.logDebug('max uptime statistics: ' + JSON.stringify(this.getMaxUptime()));
 	}
 
 	initPlayerStatistics(ip) {
@@ -2866,29 +2869,8 @@ class Heos extends utils.Adapter {
 		}).pop();
 	}
 
-	getBestNextLeader() {
-		let nextIp = '';
-		let maxUptime = 0;
-		const candidateIps = this.getMinOverallFailures();
-
-		if (candidateIps.length > 0) {
-			nextIp = this.player_ips[Math.floor(Math.random() * this.player_ips.length)];
-			maxUptime = this.getUptime(nextIp);
-		}
-
-		for (let i = 0; i < candidateIps.length; i++) {
-			if (nextIp.length == 0 || this.getUptime(candidateIps[i]) > maxUptime) {
-				nextIp = candidateIps[i];
-				maxUptime = this.getUptime(candidateIps[i]);
-			}
-		}
-		//if(candidateIps.length && this.ssdp_retry_counter < 2){
-		//	nextIp = this.mode(candidateIps); //Get most often value
-		//}
-		if (nextIp.length == 0 && this.player_ips.length) {
-			nextIp = this.player_ips[Math.floor(Math.random() * this.player_ips.length)];
-		}
-		return nextIp;
+	getRandomArrayElement(arr) {
+		return arr[Math.floor(Math.random() * arr.length)];
 	}
 
 	async resetIntervals() {
@@ -2910,6 +2892,10 @@ class Heos extends utils.Adapter {
 		if (this.reboot_timeout) {
 			clearTimeout(this.reboot_timeout);
 			this.reboot_timeout = undefined;
+		}
+		if (this.ssdp_search_timeout) {
+			clearTimeout(this.ssdp_search_timeout);
+			this.ssdp_search_timeout = undefined;
 		}
 	}
 
