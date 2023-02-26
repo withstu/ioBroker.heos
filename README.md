@@ -20,6 +20,10 @@ or any associated subsidiaries, logos or trademarks.
 ## Reference
 The used HEOS API is documented here: https://rn.dmglobal.com/euheos/HEOS_CLI_ProtocolSpecification_2021.pdf
 
+## Network Requirements
+The protocol SSDP is used for finding the players. UPnP requires multicast access to the 239.255.255.250:1900 along with the appropriate IGMP messages. The source port for receiving SSDP Messages can be configured in the adapter settings (Default setting is ```0``` means the port is automatically choosen). Further Details: https://support.denon.com/app/answers/detail/a_id/4717/~/network-requirements-for-heos
+For the API access to the HEOS Players the adapter uses the port ```1255```.
+
 ## Configuration
 
 * **AutoPlay**: Automatically plays music after the player is connected or on unmute. Can be configured globally in configuration. If it is enabled globally you can disable it for one specific player with the state ```auto_play```.
@@ -27,7 +31,6 @@ The used HEOS API is documented here: https://rn.dmglobal.com/euheos/HEOS_CLI_Pr
 * **Mute Regex**:
 In the configuration you can activate a function to mute the player based on a regex match on the song information. That can be used to mute ads automatically. For example for Spotify you can use the following regex: ```spotify:ad:|Advertisement```.
 * **ignore_broadcast_cmd**: This player state configures, if the player should ignore commands to all players e.g. player/set_mute&state=on or pressing the play button for presets/playlists
-
 
 ## States and their meanings
 
@@ -141,6 +144,9 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (withstu) optimize leader election
+
 ### 1.12.0 (2023-02-25)
 * (withstu) optimize scope handling
 * (withstu) switch to HEOS default cmd delimiter

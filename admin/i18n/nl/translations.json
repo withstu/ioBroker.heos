@@ -24,6 +24,7 @@
     "Regex for muting": "Regex voor dempen",
     "Replace and play": "Vervangen en spelen",
     "Search interval": "Zoek interval",
+    "Search timeout": "Zoek time-out",
     "Source port [UDP] for SSDP client (0 = automatic)": "Bronpoort [UDP] voor SSDP-client (0 = automatisch)",
     "Username": "Gebruikersnaam",
     "Volume step": "Volume stap"
