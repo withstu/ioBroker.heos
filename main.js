@@ -29,14 +29,15 @@ class Heos extends utils.Adapter {
 		this.on('message', this.onMessage.bind(this));
 		this.on('unload', this.onUnload.bind(this));
 
+		this.resetVars(true);
+	}
+
+	resetVars(initMode) {
 		this.players = {};
 		this.browse_cmd_map = {};
 		this.ip = '';
 		this.state = STATES.Disconnected;
-		this.manual_search_mode = true;
-		this.silent_log_mode = false;
 		this.signed_in = false;
-		this.offline_mode = false;
 
 		this.heartbeat_retries = 0;
 		this.heartbeat_interval = undefined;
@@ -46,14 +47,8 @@ class Heos extends utils.Adapter {
 		this.start_players_errors = 0;
 		this.ssdp_retry_counter = 0;
 		this.player_ips = [];
-		this.prefered_player_ips = [];
+
 		this.ssdp_player_ips = [];
-		this.reboot_ips = [];
-		this.reboot_counter = {};
-		this.reboot_time = {};
-		this.failure_counter = {};
-		this.leader_failure_counter = {};
-		this.next_connect_ip = '';
 
 		this.reconnect_timeout = undefined;
 		this.reboot_timeout = undefined;
@@ -159,6 +154,21 @@ class Heos extends utils.Adapter {
 				image_url: 'https://production.ws.skyegloup.com/media/images/service/logos/musicsource_logo_favorites.png'
 			}
 		};
+
+		if (initMode) {
+			this.manual_search_mode = true;
+			this.silent_log_mode = false;
+			this.offline_mode = false;
+
+			this.reboot_ips = [];
+			this.reboot_counter = {};
+			this.reboot_time = {};
+			this.failure_counter = {};
+			this.leader_failure_counter = {};
+			this.prefered_player_ips = [];
+
+			this.next_connect_ip = '';
+		}
 	}
 
 	logInfo(msg, force) {
@@ -2023,12 +2033,21 @@ class Heos extends utils.Adapter {
 					}
 				}
 			}
-			//Remove disconnected players
+			//Remove disconnected players && Update reboot times for not connected players
+			let connectedPlayerIps = [];
 			for (var pid in this.players) {
 				if (!connectedPlayers.includes(pid)) {
 					await this.stopPlayer(pid);
+				} else {
+					connectedPlayerIps.push(this.players[pid].ip)
 				}
 			}
+			for(const ip in this.reboot_time){
+				if(!connectedPlayerIps.includes(ip)){
+					this.resetRebootTime(ip);
+				}
+			}
+
 			//Check for players in fail state
 			for (const id in this.ssdp_player_ips) {
 				const ip = this.ssdp_player_ips[id];
@@ -2061,7 +2080,7 @@ class Heos extends utils.Adapter {
 				}
 			}
 			this.getGroups();
-			this.updatePlayerIPs();
+			await this.updatePlayerIPs();
 		} catch (err) {
 			this.logError('[startPlayers] ' + err);
 			this.raiseLeaderFailures(this.ip);
@@ -2069,19 +2088,18 @@ class Heos extends utils.Adapter {
 		}
 	}
 
-	updatePlayerIPs() {
-		this.getStates('players.*', async (err, states) => {
-			this.player_ips = [];
-			for (const id in states) {
-				if (states[id] && states[id].val) {
-					const idSplit = id.split('.');
-					const state = idSplit[idSplit.length - 1];
-					if (state == 'ip') {
-						this.player_ips.push(states[id].val);
-					}
+	async updatePlayerIPs() {
+		const states = await this.getStatesAsync('players.*');
+		this.player_ips = [];
+		for (const id in states) {
+			if (states[id] && states[id].val) {
+				const idSplit = id.split('.');
+				const state = idSplit[idSplit.length - 1];
+				if (state == 'ip') {
+					this.player_ips.push(states[id].val);
 				}
 			}
-		});
+		}
 	}
 
 	updatePreferedPlayerIPs() {
@@ -2226,8 +2244,6 @@ class Heos extends utils.Adapter {
 			this.logPlayerStatistics();
 
 			this.raiseReboots(this.ip);
-			this.clearLeaderFailures(this.ip);
-			this.clearFailures(this.ip);
 
 			// heos://system/reboot
 			this.queueMsg('system/reboot');
@@ -2247,9 +2263,6 @@ class Heos extends utils.Adapter {
 		this.reboot_ips = [];
 		for (let i = 0; i < this.player_ips.length; i++) {
 			this.addRebootIp(this.player_ips[i]);
-			this.clearReboots(this.player_ips[i]);
-			this.clearLeaderFailures(this.player_ips[i]);
-			this.clearFailures(this.player_ips[i]);
 		}
 		this.reboot();
 	}
@@ -2281,7 +2294,7 @@ class Heos extends utils.Adapter {
 				if (this.heartbeat_retries >= this.config.heartbeatRetries) {
 					this.logWarn('[HEARTBEAT] retries exceeded', false);
 					this.resetHeartbeatRetries(false);
-					this.reboot();
+					this.reconnect();
 				}
 				//Check Player Health
 				for (const pid in this.players) {
@@ -2423,7 +2436,7 @@ class Heos extends utils.Adapter {
 
 		// Gegenseite hat die Verbindung geschlossen
 		this.net_client.on('end', () => {
-			this.logWarn('HEOS closed the connection to ' + this.ip, false);
+			this.logWarn('HEOS Player ' + this.ip + ' closed the connection.', false);
 			this.reconnect();
 		});
 
@@ -2441,9 +2454,10 @@ class Heos extends utils.Adapter {
 				if (this.state == STATES.Searching && this.ssdp_player_ips.length > 0) {
 					let ip = this.getRandomArrayElement(this.ssdp_player_ips);
 					const maxUptimeIps = this.ssdp_player_ips.filter(element => this.getMaxUptime().includes(element));
-					const minFailureIps = this.ssdp_player_ips.filter(element => this.getMinOverallFailures().includes(element));
-					if (maxUptimeIps.length > 0 || minFailureIps.length > 0) {
-						ip = this.getRandomArrayElement(maxUptimeIps.concat(minFailureIps));
+					const minFailureIps = this.ssdp_player_ips.filter(element => this.getMinFailures().includes(element));
+					const minLeaderFailureIps = this.ssdp_player_ips.filter(element => this.getMinLeaderFailures().includes(element));
+					if (maxUptimeIps.length > 0 || minFailureIps.length > 0 || minLeaderFailureIps.length > 0) {
+						ip = this.getRandomArrayElement(maxUptimeIps.concat(minFailureIps, minLeaderFailureIps));
 					}
 					this.connect(ip);
 				}
@@ -2452,24 +2466,22 @@ class Heos extends utils.Adapter {
 	}
 
 	/** Verbindung zum HEOS System herstellen **/
-	search() {
+	async search() {
 		try {
 			//Reset connect states
 			this.setStateChanged('info.connection', false, true);
 			this.setStateChanged('connected_ip', '', true);
-			this.getChannels('players', (err, list) => {
-				if (list) {
-					list.forEach((item) => {
-						this.setState(item._id + '.connected', false, true);
-					});
-				}
-			});
+			const list = await this.getChannelsAsync('players');
+			if (list) {
+				list.forEach(async(item) => {
+					await this.setStateAsync(item._id + '.connected', false, true);
+				});
+			}
 			this.state = STATES.Searching;
 
 			//Update Player IPs
-			this.updatePlayerIPs();
+			await this.updatePlayerIPs();
 			this.updatePreferedPlayerIPs();
-
 			if (this.reboot_ips.length == 0) {
 				this.silent_log_mode = false;
 			}
@@ -2497,7 +2509,7 @@ class Heos extends utils.Adapter {
 						this.ssdp_retry_counter += 1;
 					}
 					this.ssdpLeaderElection();
-					if (this.ssdp_retry_counter > 10 && this.player_ips.length > 0) {
+					if (this.ssdp_retry_initPlayerStatisticscounter > 10 && this.player_ips.length > 0) {
 						this.manual_search_mode = true;
 						this.silent_log_mode = true;
 						this.logWarn("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false);
@@ -2579,13 +2591,19 @@ class Heos extends utils.Adapter {
 		return ips;
 	}
 
+	resetRebootTime(ip){
+		if (ip.length > 0) {
+			this.reboot_time[ip] = new Date();
+		}
+	}
+
 	initReboots(ip) {
 		if (ip.length > 0) {
 			if (!(ip in this.reboot_counter)) {
 				this.reboot_counter[ip] = 0;
 			}
 			if (!(ip in this.reboot_time)) {
-				this.reboot_time[ip] = new Date();
+				this.resetRebootTime(ip);
 			}
 		}
 		this.logPlayerStatistics();
@@ -2610,7 +2628,7 @@ class Heos extends utils.Adapter {
 			} else {
 				this.reboot_counter[ip] = 1;
 			}
-			this.reboot_time[ip] = new Date();
+			this.resetRebootTime(ip);
 		}
 		this.logPlayerStatistics();
 	}
@@ -2744,6 +2762,18 @@ class Heos extends utils.Adapter {
 		if (ip.length > 0) {
 			this.failure_counter[ip] = {};
 			this.initFailures(ip);
+		}
+		this.logPlayerStatistics();
+	}
+
+	clearFailuresByCode(ip, code) {
+		if (ip.length > 0) {
+			if (!(ip in this.failure_counter)) {
+				this.initFailures(ip);
+			}
+			if (ip in this.failure_counter && code in this.failure_counter[ip]) {
+				this.failure_counter[ip][code] = 0;
+			}
 		}
 		this.logPlayerStatistics();
 	}
@@ -2911,37 +2941,34 @@ class Heos extends utils.Adapter {
 		await this.stopPlayers();
 
 		if (typeof this.net_client !== 'undefined') {
-			this.registerChangeEvents(false);
-			this.net_client.destroy();
-			this.net_client.unref();
+			try {
+				this.registerChangeEvents(false);
+				this.net_client.destroy();
+				this.net_client.unref();
+			}catch(e){}
 			this.net_client = undefined;
 		}
 		if (typeof this.nodessdp_client !== 'undefined') {
-			this.nodessdp_client.stop();
+			try {
+				this.nodessdp_client.stop();
+			}catch(e){}
 			this.nodessdp_client = undefined;
 		}
-		this.setState('error', false, true);
-		this.setState('last_error', '', true);
-		this.setState('signed_in', false, true);
-		this.signed_in = false;
-		this.setState('signed_in_user', '', true);
+		await this.setStateAsync('error', false, true);
+		await this.setStateAsync('last_error', '', true);
+		await this.setState('signed_in', false, true);
+		await this.setState('signed_in_user', '', true);
 
-		this.state = STATES.Disconnected;
-		//this.ip = '';
-		this.msgs = [];
-		this.request_time = {};
-		this.unfinished_responses = '';
-		this.players = {};
+		const list = await this.getChannelsAsync('players');
+		if (list) {
+			list.forEach(async(item) => {
+				await this.setStateAsync(item._id + '.connected', false, true);
+			});
+		}
+		this.resetVars(false);
 
-		this.getChannels('players', (err, list) => {
-			if (list) {
-				list.forEach((item) => {
-					this.setState(item._id + '.connected', false, true);
-				});
-			}
-		});
-		this.setStateChanged('info.connection', false, true);
-		this.setStateChanged('connected_ip', '', true);
+		await this.setStateChangedAsync('info.connection', false, true);
+		await this.setStateChangedAsync('connected_ip', '', true);
 		this.logInfo('disconnected from HEOS', false);
 	}
 
