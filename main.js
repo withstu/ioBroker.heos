@@ -2049,38 +2049,29 @@ class Heos extends utils.Adapter {
 			}
 
 			//Check for players in fail state
+			let playerInFailState = false
 			for (const id in this.ssdp_player_ips) {
 				const ip = this.ssdp_player_ips[id];
 				if (this.getUptime(ip) >= 5 && !foundPlayerIps.includes(ip)) {
 					this.raiseLeaderFailures(this.ip);
 					this.raiseFailures(ip, ERROR_CODES.General);
 					this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps) + ' | Announced Players: ' + JSON.stringify(this.ssdp_player_ips), true);
-
-					if (this.config.rebootOnFailure === true) {
-						this.logWarn('Announced player not found by HEOS.');
-						if (this.getFailures(ip) > 10) {
-							this.addRebootIp(ip);
-						}
-						if (this.getLeaderFailures(this.ip) > 10) {
-							this.addRebootIp(this.ip);
-						}
-					} else {
-						this.logWarn('Announced player not found by HEOS. Activate "reboot on failure" in the configuration or reboot manually the device: ' + ip, true);
-					}
-					this.reconnect();
-					return;
+					this.logWarn('SSDP announced player ' + ip + ' not found by HEOS.');
 				}
 			}
-			if (connectedPlayers.length == 0) {
+			if (playerInFailState) {
+				this.reconnect();
+			} else if (connectedPlayers.length == 0) {
 				if (this.config.rebootOnFailure === true) {
 					this.logWarn('Can\'t connect any players. Reboot.', true);
 					this.rebootAll();
 				} else {
 					this.logWarn('Can\'t connect any players. Activate "reboot on failure" in the configuration or reboot manually.', true);
 				}
+			} else {
+				this.getGroups();
+				await this.updatePlayerIPs();
 			}
-			this.getGroups();
-			await this.updatePlayerIPs();
 		} catch (err) {
 			this.logError('[startPlayers] ' + err);
 			this.raiseLeaderFailures(this.ip);
