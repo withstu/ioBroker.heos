@@ -27,5 +27,6 @@
     "Search timeout": "Zoek time-out",
     "Source port [UDP] for SSDP client (0 = automatic)": "Bronpoort [UDP] voor SSDP-client (0 = automatisch)",
     "Username": "Gebruikersnaam",
-    "Volume step": "Volume stap"
+    "Volume step": "Volume stap",
+    "Request timeout": "Verzoek time-out"
 }

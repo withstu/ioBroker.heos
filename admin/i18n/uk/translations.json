@@ -27,5 +27,6 @@
     "Search timeout": "Тайм-аут пошуку",
     "Source port [UDP] for SSDP client (0 = automatic)": "Порт джерела [UDP] для клієнта SSDP (0 = автоматично)",
     "Username": "Ім'я користувача",
-    "Volume step": "Крок гучності"
+    "Volume step": "Крок гучності",
+    "Request timeout": "Час очікування запиту минув"
 }

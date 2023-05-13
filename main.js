@@ -2057,6 +2057,7 @@ class Heos extends utils.Adapter {
 					this.raiseFailures(ip, ERROR_CODES.General);
 					this.logDebug('Connected Players: ' + JSON.stringify(foundPlayerIps) + ' | Announced Players: ' + JSON.stringify(this.ssdp_player_ips), true);
 					this.logWarn('SSDP announced player ' + ip + ' not found by HEOS.');
+					playerInFailState = true;
 				}
 			}
 			if (playerInFailState) {
@@ -2213,12 +2214,15 @@ class Heos extends utils.Adapter {
 	}
 
 	removeRebootIp(ip) {
+		let removed = false;
 		if (this.ip == ip && this.reboot_ips.includes(ip)) {
 			const index = this.reboot_ips.indexOf(ip);
 			if (index > -1) {
 				this.reboot_ips.splice(index, 1);
+				removed = true;
 			}
 		}
+		return removed;
 	}
 
 	addRebootIp(ip) {
@@ -2327,30 +2331,31 @@ class Heos extends utils.Adapter {
 	checkDuplicateRequest(msg) {
 		let duplicate = false;
 		const now = new Date();
-		if (msg in this.request_time) { //5 Sekunden Request Timeout
-			if (Math.floor((now - this.request_time[msg]) / 1000) < 5) {
+		if (msg in this.request_time) { //Request Timeout
+			if (Math.floor((now - this.request_time[msg]) / 1000) < this.config.requestTimeout) {
 				duplicate = true;
 				this.logDebug('Skip duplicate request: ' + msg);
 			} else {
 				this.logWarn('[checkDuplicateRequest] Response timed out: ' + msg + '. Increase leader failure counter.');
 				this.raiseLeaderFailures(this.ip);
+				this.deleteRequestTime(msg);
 			}
 		}
 		this.logDebug('Request times: ' + JSON.stringify(this.request_time));
 		return duplicate;
 	}
 
-	queueMsg(msg) {
-		if (!this.checkDuplicateRequest(msg)) { //5 Sekunden Request Timeout
+	queueMsg(msg, ignore_duplicate_check = false) {
+		if (ignore_duplicate_check || !this.checkDuplicateRequest(msg)) { //Request Timeout
 			this.msgs.push(msg);
-			this.sendNextMsg();
+			this.sendNextMsg(ignore_duplicate_check);
 		}
 	}
 
-	sendNextMsg() {
+	sendNextMsg(ignore_duplicate_check = false) {
 		if (this.msgs.length > 0) {
 			const msg = this.msgs.shift();
-			if (!this.checkDuplicateRequest(msg)) {
+			if (ignore_duplicate_check || !this.checkDuplicateRequest(msg)) {
 				this.sendMsg(msg);
 			}
 		}
@@ -2395,16 +2400,18 @@ class Heos extends utils.Adapter {
 
 		this.net_client.on('error', (error) => {
 			this.logError('[connect] ' + error, false);
-			this.removeRebootIp(ip);
-			this.raiseLeaderFailures(this.ip);
+			if(!this.removeRebootIp(ip)){
+				this.raiseLeaderFailures(this.ip);
+			}
 			this.reconnect();
 		});
 
 		// timeout
 		this.net_client.on('timeout', () => {
 			this.logWarn('timeout trying connect to ' + this.ip, false);
-			this.removeRebootIp(ip);
-			this.raiseLeaderFailures(this.ip);
+			if(!this.removeRebootIp(ip)){
+				this.raiseLeaderFailures(this.ip);
+			}
 			this.reconnect();
 		});
 

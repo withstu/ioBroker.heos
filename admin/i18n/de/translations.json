@@ -27,5 +27,6 @@
     "Search timeout": "Suchzeitüberschreitung",
     "Source port [UDP] for SSDP client (0 = automatic)": "Quellport [UDP] für SSDP-Client (0 = automatisch)",
     "Username": "Nutzername",
-    "Volume step": "Volumenschritt"
+    "Volume step": "Volumenschritt",
+    "Request timeout": "Zeitüberschreitung der Anforderung"
 }

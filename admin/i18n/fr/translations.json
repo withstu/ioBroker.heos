@@ -27,5 +27,6 @@
     "Search timeout": "Délai de recherche",
     "Source port [UDP] for SSDP client (0 = automatic)": "Port source [UDP] pour client SSDP (0 = automatique)",
     "Username": "Nom d'utilisateur",
-    "Volume step": "Pas de volume"
+    "Volume step": "Pas de volume",
+    "Request timeout": "Délai d'expiration de la demande"
 }

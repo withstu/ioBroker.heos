@@ -27,5 +27,6 @@
     "Search timeout": "搜索超时",
     "Source port [UDP] for SSDP client (0 = automatic)": "SSDP 客户端的源端口 [UDP]（0 = 自动）",
     "Username": "用户名",
-    "Volume step": "音量步长"
+    "Volume step": "音量步长",
+    "Request timeout": "请求超时"
 }

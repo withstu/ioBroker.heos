@@ -21,6 +21,7 @@
     "Queue settings": "Queue settings",
     "Reboot, if device failure is detected": "Reboot, if device failure is detected",
     "Reconnect timeout": "Reconnect timeout",
+    "Request timeout": "Request timeout",
     "Regex for muting": "Regex for muting",
     "Replace and play": "Replace and play",
     "Search interval": "Search interval",

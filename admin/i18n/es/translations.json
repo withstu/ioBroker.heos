@@ -27,5 +27,6 @@
     "Search timeout": "Tiempo de espera de búsqueda",
     "Source port [UDP] for SSDP client (0 = automatic)": "Puerto de origen [UDP] para cliente SSDP (0 = automático)",
     "Username": "Nombre de usuario",
-    "Volume step": "Paso de volumen"
+    "Volume step": "Paso de volumen",
+    "Request timeout": "Pide tiempo fuera"
 }
