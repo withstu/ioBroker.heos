@@ -1,203 +1,203 @@
 {
-    "common": {
-        "name": "heos",
-        "version": "1.12.1",
-        "news": {
-            "1.12.1": {
-                "en": "optimize leader election",
-                "de": "optimieren sie die wahl",
-                "ru": "оптимизировать выборы лидеров",
-                "pt": "otimizar a eleição do líder",
-                "nl": "vertaling:",
-                "fr": "optimiser le leadership électoral",
-                "it": "ottimizzare le elezioni leader",
-                "es": "optimizar las elecciones líderes",
-                "pl": "lider optymalizacji wyborów",
-                "uk": "оптимізація виборів лідера",
-                "zh-cn": "优化领导人选举"
-            },
-            "1.12.0": {
-                "en": "optimize scope handling\nswitch to HEOS default cmd delimiter\nadd configuration to prefer list of IPs for adapter connection\noptimize error handling",
-                "de": "optimieren sie die handhabung des anwendungsbereichs\nschalter zu HEOS Standard cmd Begrenzung\nkonfiguration hinzufügen, um die Liste der IPs für Adapteranschluss zu bevorzugen\noptimierung der fehlerbehandlung",
-                "ru": "оптимизация обработки сфер\nпереключиться на HEOS по умолчанию cmd delimiter\nдобавить конфигурацию, чтобы предпочитать список IP для подключения адаптера\nоптимизировать обработку ошибок",
-                "pt": "otimizar o gerenciamento de escopo\nmudar para delimitador cmd padrão HEOS\nadicionar configuração para preferir lista de IPs para conexão de adaptador\notimizar o manuseio de erros",
-                "nl": "vertaling:\nwissel naar HOS default cmd delimiter\nvoeg configuratie toe aan de lijst van IP's voor aanpassingsverbinding\nvertaling:",
-                "fr": "optimiser la manipulation de la portée\npasser à HEOS délimiteur cmd par défaut\najouter la configuration pour préférer la liste des IP pour la connexion d'adaptateur\noptimiser la manipulation des erreurs",
-                "it": "ottimizzare la gestione delle aree\npassare al delimitatore cmd predefinito HEOS\naggiungere la configurazione per preferire l'elenco degli IP per la connessione dell'adattatore\nottimizzare la gestione degli errori",
-                "es": "optimizar el manejo del alcance\nconmutación al delimitador por defecto HEOS cmd\nañadir configuración para preferir la lista de IPs para la conexión del adaptador\noptimizar el manejo del error",
-                "pl": "optymalizacja zakresu obsługi\nprzełącz do HEOS do domyślnie cm delimiter\ndodawanie konfiguracji do preferowania listy IP do połączenia adapterowego\noptymalizowanie błędów",
-                "uk": "оптимізація управління обсягами\nпереключення до HEOS за замовчуванням cmd delimiter\nдодати конфігурацію для вибору IP-адреси адаптера\nоптимізація обробки помилок",
-                "zh-cn": "优化处理范围\n转换到HEOS违约情况\n备选案文:\n优化错误处理"
-            },
-            "1.11.4": {
-                "en": "improve play all button in browse feature",
-                "de": "verbessern spielen alle taste in der browser-funktion",
-                "ru": "улучшить играть все кнопки в функции просмотра",
-                "pt": "melhorar jogar todos os botões em procurar recurso",
-                "nl": "verbeter alle knoppen in browse",
-                "fr": "améliorer jouer tous les boutons dans la fonction de navigation",
-                "it": "migliorare giocare tutto il pulsante nella funzione di navigazione",
-                "es": "mejorar el juego de todos los botones en la función de navegación",
-                "pl": "ulepszenie przycisków w przeglądarce",
-                "uk": "покращувати відтворення всіх кнопок у функції перегляду",
-                "zh-cn": "b. 代管特区改善所有但顿作用"
-            },
-            "1.11.3": {
-                "en": "update some dependencies\nimprove failure handling\nimprove play all button in browse feature",
-                "de": "einige abhängigkeiten aktualisieren\nverbesserung der fehlerbehebung\nverbessern spielen alle taste in der browser-funktion",
-                "ru": "обновить некоторые зависимости\nулучшить обработку сбоев\nулучшить играть все кнопки в функции просмотра",
-                "pt": "atualizar algumas dependências\nmelhorar o manuseio de falhas\nmelhorar jogar todos os botões em procurar recurso",
-                "nl": "vertaling:\nverbeter falen\nverbeter alle knoppen in browse",
-                "fr": "mettre à jour certaines dépendances\naméliorer la manipulation des défaillances\naméliorer jouer tous les boutons dans la fonction de navigation",
-                "it": "aggiornare alcune dipendenze\nmigliorare la gestione dei guasti\nmigliorare giocare tutto il pulsante nella funzione di navigazione",
-                "es": "actualizar algunas dependencias\nmejorar el manejo de fallos\nmejorar el juego de todos los botones en la función de navegación",
-                "pl": "aktualizacja\npolepszenie\nulepszenie przycisków w przeglądarce",
-                "uk": "оновлення деяких залежностей\nполіпшення безпеки\nпокращувати відтворення всіх кнопок у функції перегляду",
-                "zh-cn": "二. 更新一些依赖性\n改进失败\nb. 代管特区改善所有但顿作用"
-            },
-            "1.11.2": {
-                "en": "adopt to new adapter structure",
-                "de": "neue adapterstruktur übernehmen",
-                "ru": "принять к новой структуре адаптера",
-                "pt": "adotar a nova estrutura do adaptador",
-                "nl": "adopteren",
-                "fr": "adopter à la nouvelle structure de l'adaptateur",
-                "it": "adottare per la nuova struttura adattatore",
-                "es": "adoptar a nueva estructura de adaptador",
-                "pl": "zaadoptowanie nowej struktury adapterowej",
-                "uk": "прийняти до нової структури адаптера",
-                "zh-cn": "通过新的适应结构"
-            },
-            "1.11.1": {
-                "en": "fix release",
-                "de": "zurück zur übersicht",
-                "ru": "исправить релиз",
-                "pt": "liberação de correção",
-                "nl": "loslaten",
-                "fr": "correction",
-                "it": "rilascio corretto",
-                "es": "corrección de liberación",
-                "pl": "naprawa",
-                "uk": "фіксувати реліз",
-                "zh-cn": "f 固定释放"
-            },
-            "1.11.0": {
-                "en": "improve player failure detection\nfix bug in regex mute\nfix upnp NaN warning #192",
-                "de": "verbesserung der fehlererkennung\nfehler in regex mute beheben\nfix upnp NaN Warnung #192",
-                "ru": "улучшить обнаружение сбоя игрока\nисправить ошибку в regex mute\nисправить upnp NaN предупреждение #192",
-                "pt": "melhorar a detecção de falhas do jogador\ncorrigir o erro em regex mute\ncorrigir upnp NaN aviso #192",
-                "nl": "verbeter spelerfalen\nvertaling:\nvertaling:",
-                "fr": "améliorer la détection de défaillance du joueur\ncorrection de bug dans regex mute\ncorrection de l'avertissement NaN #192",
-                "it": "migliorare il rilevamento dei guasti del giocatore\nfix bug in regex mute\nfix upnp Avvertenza NaN #192",
-                "es": "mejorar la detección del fallo del jugador\ncorregir fallo en regex mute\narreglar la alarma NaN #192",
-                "pl": "udoskonalenie\nnaprawić bug w rejestrze\nnr #92",
-                "uk": "поліпшення виявлення несправностей гравця\nвиправлення помилки в regex mute\nзафіксувати попередження NaN #192",
-                "zh-cn": "b. 改进发现的失败\nf 隔离的混凝土\nfixnp NaN警戒线192"
-            }
-        },
-        "title": "HEOS",
-        "titleLang": {
-            "en": "HEOS",
-            "de": "HEOS",
-            "ru": "HEOS",
-            "pt": "HEOS",
-            "nl": "HEOS",
-            "fr": "HEOS",
-            "it": "HEOS",
-            "es": "HEOS",
-            "pl": "HEOS",
-            "zh-cn": "HEOS",
-            "uk": "HEOS"
-        },
-        "desc": {
-            "en": "The adapter lets control HEOS from ioBroker",
-            "de": "Mit dem Adapter können Sie HEOS von ioBroker aus steuern",
-            "ru": "Адаптер позволяет управлять HEOS от ioBroker",
-            "pt": "O adaptador permite controlar o HEOS do ioBroker",
-            "nl": "Met de adapter kan HEOS worden bediend vanaf ioBroker",
-            "fr": "L'adaptateur permet de contrôler HEOS depuis ioBroker",
-            "it": "L'adattatore consente di controllare HEOS da ioBroker",
-            "es": "El adaptador permite controlar HEOS desde ioBroker",
-            "pl": "Adapter umożliwia sterowanie HEOS z ioBroker",
-            "zh-cn": "该适配器可以从ioBroker控制HEOS",
-            "uk": "Адаптер дозволяє керувати HEOS з ioBroker"
-        },
-        "authors": [
-            "withstu <withstu@gmx.de>"
-        ],
-        "keywords": [
-            "ioBroker",
-            "HEOS"
-        ],
-        "license": "MIT",
-        "platform": "Javascript/Node.js",
-        "main": "main.js",
-        "icon": "heos.png",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/withstu/ioBroker.heos/master/admin/heos.png",
-        "readme": "https://github.com/withstu/ioBroker.heos/blob/master/README.md",
-        "loglevel": "info",
-        "messagebox": true,
-        "mode": "daemon",
-        "type": "multimedia",
-        "compact": true,
-        "connectionType": "local",
-        "dataSource": "poll",
-        "materialize": true,
-        "dependencies": [
-            {
-                "js-controller": ">=3.0.0"
-            }
-        ]
+  "common": {
+    "name": "heos",
+    "version": "1.12.2",
+    "news": {
+      "1.12.2": {
+        "en": "optimize error handling",
+        "de": "optimierung der fehlerbehandlung",
+        "ru": "оптимизировать обработку ошибок",
+        "pt": "otimizar o manuseio de erros",
+        "nl": "vertaling:",
+        "fr": "optimiser la manipulation des erreurs",
+        "it": "ottimizzare la gestione degli errori",
+        "es": "optimizar el manejo del error",
+        "pl": "optymalizowanie błędów",
+        "uk": "оптимізація обробки помилок",
+        "zh-cn": "优化错误处理"
+      },
+      "1.12.1": {
+        "en": "optimize leader election",
+        "de": "optimieren sie die wahl",
+        "ru": "оптимизировать выборы лидеров",
+        "pt": "otimizar a eleição do líder",
+        "nl": "vertaling:",
+        "fr": "optimiser le leadership électoral",
+        "it": "ottimizzare le elezioni leader",
+        "es": "optimizar las elecciones líderes",
+        "pl": "lider optymalizacji wyborów",
+        "uk": "оптимізація виборів лідера",
+        "zh-cn": "优化领导人选举"
+      },
+      "1.12.0": {
+        "en": "optimize scope handling\nswitch to HEOS default cmd delimiter\nadd configuration to prefer list of IPs for adapter connection\noptimize error handling",
+        "de": "optimieren sie die handhabung des anwendungsbereichs\nschalter zu HEOS Standard cmd Begrenzung\nkonfiguration hinzufügen, um die Liste der IPs für Adapteranschluss zu bevorzugen\noptimierung der fehlerbehandlung",
+        "ru": "оптимизация обработки сфер\nпереключиться на HEOS по умолчанию cmd delimiter\nдобавить конфигурацию, чтобы предпочитать список IP для подключения адаптера\nоптимизировать обработку ошибок",
+        "pt": "otimizar o gerenciamento de escopo\nmudar para delimitador cmd padrão HEOS\nadicionar configuração para preferir lista de IPs para conexão de adaptador\notimizar o manuseio de erros",
+        "nl": "vertaling:\nwissel naar HOS default cmd delimiter\nvoeg configuratie toe aan de lijst van IP's voor aanpassingsverbinding\nvertaling:",
+        "fr": "optimiser la manipulation de la portée\npasser à HEOS délimiteur cmd par défaut\najouter la configuration pour préférer la liste des IP pour la connexion d'adaptateur\noptimiser la manipulation des erreurs",
+        "it": "ottimizzare la gestione delle aree\npassare al delimitatore cmd predefinito HEOS\naggiungere la configurazione per preferire l'elenco degli IP per la connessione dell'adattatore\nottimizzare la gestione degli errori",
+        "es": "optimizar el manejo del alcance\nconmutación al delimitador por defecto HEOS cmd\nañadir configuración para preferir la lista de IPs para la conexión del adaptador\noptimizar el manejo del error",
+        "pl": "optymalizacja zakresu obsługi\nprzełącz do HEOS do domyślnie cm delimiter\ndodawanie konfiguracji do preferowania listy IP do połączenia adapterowego\noptymalizowanie błędów",
+        "uk": "оптимізація управління обсягами\nпереключення до HEOS за замовчуванням cmd delimiter\nдодати конфігурацію для вибору IP-адреси адаптера\nоптимізація обробки помилок",
+        "zh-cn": "优化处理范围\n转换到HEOS违约情况\n备选案文:\n优化错误处理"
+      },
+      "1.11.4": {
+        "en": "improve play all button in browse feature",
+        "de": "verbessern spielen alle taste in der browser-funktion",
+        "ru": "улучшить играть все кнопки в функции просмотра",
+        "pt": "melhorar jogar todos os botões em procurar recurso",
+        "nl": "verbeter alle knoppen in browse",
+        "fr": "améliorer jouer tous les boutons dans la fonction de navigation",
+        "it": "migliorare giocare tutto il pulsante nella funzione di navigazione",
+        "es": "mejorar el juego de todos los botones en la función de navegación",
+        "pl": "ulepszenie przycisków w przeglądarce",
+        "uk": "покращувати відтворення всіх кнопок у функції перегляду",
+        "zh-cn": "b. 代管特区改善所有但顿作用"
+      },
+      "1.11.3": {
+        "en": "update some dependencies\nimprove failure handling\nimprove play all button in browse feature",
+        "de": "einige abhängigkeiten aktualisieren\nverbesserung der fehlerbehebung\nverbessern spielen alle taste in der browser-funktion",
+        "ru": "обновить некоторые зависимости\nулучшить обработку сбоев\nулучшить играть все кнопки в функции просмотра",
+        "pt": "atualizar algumas dependências\nmelhorar o manuseio de falhas\nmelhorar jogar todos os botões em procurar recurso",
+        "nl": "vertaling:\nverbeter falen\nverbeter alle knoppen in browse",
+        "fr": "mettre à jour certaines dépendances\naméliorer la manipulation des défaillances\naméliorer jouer tous les boutons dans la fonction de navigation",
+        "it": "aggiornare alcune dipendenze\nmigliorare la gestione dei guasti\nmigliorare giocare tutto il pulsante nella funzione di navigazione",
+        "es": "actualizar algunas dependencias\nmejorar el manejo de fallos\nmejorar el juego de todos los botones en la función de navegación",
+        "pl": "aktualizacja\npolepszenie\nulepszenie przycisków w przeglądarce",
+        "uk": "оновлення деяких залежностей\nполіпшення безпеки\nпокращувати відтворення всіх кнопок у функції перегляду",
+        "zh-cn": "二. 更新一些依赖性\n改进失败\nb. 代管特区改善所有但顿作用"
+      },
+      "1.11.2": {
+        "en": "adopt to new adapter structure",
+        "de": "neue adapterstruktur übernehmen",
+        "ru": "принять к новой структуре адаптера",
+        "pt": "adotar a nova estrutura do adaptador",
+        "nl": "adopteren",
+        "fr": "adopter à la nouvelle structure de l'adaptateur",
+        "it": "adottare per la nuova struttura adattatore",
+        "es": "adoptar a nueva estructura de adaptador",
+        "pl": "zaadoptowanie nowej struktury adapterowej",
+        "uk": "прийняти до нової структури адаптера",
+        "zh-cn": "通过新的适应结构"
+      },
+      "1.11.1": {
+        "en": "fix release",
+        "de": "zurück zur übersicht",
+        "ru": "исправить релиз",
+        "pt": "liberação de correção",
+        "nl": "loslaten",
+        "fr": "correction",
+        "it": "rilascio corretto",
+        "es": "corrección de liberación",
+        "pl": "naprawa",
+        "uk": "фіксувати реліз",
+        "zh-cn": "f 固定释放"
+      }
     },
-    "protectedNative": [
-        "password"
-    ],
-    "encryptedNative": [
-        "password"
-    ],
-    "native": {
-        "username": "",
-        "password": "",
-        "requestTimeout": 10,
-        "reconnectTimeout": 5000,
-        "searchTimeout": 5000,
-        "searchInterval": 30000,
-        "heartbeatInterval": 15000,
-        "heartbeatRetries": 4,
-        "rebootOnFailure": false,
-        "muteOnRegex": false,
-        "muteRegex": "spotify:ad:|Advertisement",
-        "autoPlay": false,
-        "autoPlayCmd": "set_group_volume?level=15|play_preset?preset=1",
-        "volumeStepLevel": 2,
-        "queueMode": 4,
-        "cmdScope": "leader",
-        "sourcePort": 0,
-        "preferedIPs": ""
+    "title": "HEOS",
+    "titleLang": {
+      "en": "HEOS",
+      "de": "HEOS",
+      "ru": "HEOS",
+      "pt": "HEOS",
+      "nl": "HEOS",
+      "fr": "HEOS",
+      "it": "HEOS",
+      "es": "HEOS",
+      "pl": "HEOS",
+      "zh-cn": "HEOS",
+      "uk": "HEOS"
     },
-    "objects": [],
-    "instanceObjects": [
-        {
-            "_id": "info",
-            "type": "channel",
-            "common": {
-                "name": "Information"
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.connection",
-            "type": "state",
-            "common": {
-                "role": "indicator.connected",
-                "name": "Device or service connected",
-                "type": "boolean",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
-        }
+    "desc": {
+      "en": "The adapter lets control HEOS from ioBroker",
+      "de": "Mit dem Adapter können Sie HEOS von ioBroker aus steuern",
+      "ru": "Адаптер позволяет управлять HEOS от ioBroker",
+      "pt": "O adaptador permite controlar o HEOS do ioBroker",
+      "nl": "Met de adapter kan HEOS worden bediend vanaf ioBroker",
+      "fr": "L'adaptateur permet de contrôler HEOS depuis ioBroker",
+      "it": "L'adattatore consente di controllare HEOS da ioBroker",
+      "es": "El adaptador permite controlar HEOS desde ioBroker",
+      "pl": "Adapter umożliwia sterowanie HEOS z ioBroker",
+      "zh-cn": "该适配器可以从ioBroker控制HEOS",
+      "uk": "Адаптер дозволяє керувати HEOS з ioBroker"
+    },
+    "authors": [
+      "withstu <withstu@gmx.de>"
+    ],
+    "keywords": [
+      "ioBroker",
+      "HEOS"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "main.js",
+    "icon": "heos.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/withstu/ioBroker.heos/master/admin/heos.png",
+    "readme": "https://github.com/withstu/ioBroker.heos/blob/master/README.md",
+    "loglevel": "info",
+    "messagebox": true,
+    "mode": "daemon",
+    "type": "multimedia",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "materialize": true,
+    "dependencies": [
+      {
+        "js-controller": ">=3.0.0"
+      }
     ]
+  },
+  "protectedNative": [
+    "password"
+  ],
+  "encryptedNative": [
+    "password"
+  ],
+  "native": {
+    "username": "",
+    "password": "",
+    "requestTimeout": 10,
+    "reconnectTimeout": 5000,
+    "searchTimeout": 5000,
+    "searchInterval": 30000,
+    "heartbeatInterval": 15000,
+    "heartbeatRetries": 4,
+    "rebootOnFailure": false,
+    "muteOnRegex": false,
+    "muteRegex": "spotify:ad:|Advertisement",
+    "autoPlay": false,
+    "autoPlayCmd": "set_group_volume?level=15|play_preset?preset=1",
+    "volumeStepLevel": 2,
+    "queueMode": 4,
+    "cmdScope": "leader",
+    "sourcePort": 0,
+    "preferedIPs": ""
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Device or service connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
 }
