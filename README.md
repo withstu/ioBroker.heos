@@ -144,6 +144,10 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+
+### **WORK IN PROGRESS**
+* (withstu) replace got with axios
+
 ### 2.0.0 (2023-08-05)
 * (withstu) fix pipelines and remove node 14.x support
 

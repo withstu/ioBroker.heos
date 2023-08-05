@@ -46,7 +46,7 @@ class Heos extends utils.Adapter {
 
 		this.start_players_errors = 0;
 		this.ssdp_retry_counter = 0;
-		this.player_ips = [];
+		this.known_player_ips = [];
 
 		this.ssdp_player_ips = [];
 
@@ -2039,7 +2039,7 @@ class Heos extends utils.Adapter {
 				if (!connectedPlayers.includes(pid)) {
 					await this.stopPlayer(pid);
 				} else {
-					connectedPlayerIps.push(this.players[pid].ip)
+					connectedPlayerIps.push(this.players[pid].ip);
 				}
 			}
 			for(const ip in this.reboot_time){
@@ -2049,7 +2049,7 @@ class Heos extends utils.Adapter {
 			}
 
 			//Check for players in fail state
-			let playerInFailState = false
+			let playerInFailState = false;
 			for (const id in this.ssdp_player_ips) {
 				const ip = this.ssdp_player_ips[id];
 				if (this.getUptime(ip) >= 5 && !foundPlayerIps.includes(ip)) {
@@ -2071,7 +2071,7 @@ class Heos extends utils.Adapter {
 				}
 			} else {
 				this.getGroups();
-				await this.updatePlayerIPs();
+				await this.updateKnownPlayerIPs();
 			}
 		} catch (err) {
 			this.logError('[startPlayers] ' + err);
@@ -2080,15 +2080,15 @@ class Heos extends utils.Adapter {
 		}
 	}
 
-	async updatePlayerIPs() {
+	async updateKnownPlayerIPs() {
 		const states = await this.getStatesAsync('players.*');
-		this.player_ips = [];
+		this.known_player_ips = [];
 		for (const id in states) {
 			if (states[id] && states[id].val) {
 				const idSplit = id.split('.');
 				const state = idSplit[idSplit.length - 1];
 				if (state == 'ip') {
-					this.player_ips.push(states[id].val);
+					this.known_player_ips.push(states[id].val);
 				}
 			}
 		}
@@ -2256,8 +2256,8 @@ class Heos extends utils.Adapter {
 	rebootAll() {
 		this.logWarn('rebooting all players', false);
 		this.reboot_ips = [];
-		for (let i = 0; i < this.player_ips.length; i++) {
-			this.addRebootIp(this.player_ips[i]);
+		for (let i = 0; i < this.known_player_ips.length; i++) {
+			this.addRebootIp(this.known_player_ips[i]);
 		}
 		this.reboot();
 	}
@@ -2478,7 +2478,7 @@ class Heos extends utils.Adapter {
 			this.state = STATES.Searching;
 
 			//Update Player IPs
-			await this.updatePlayerIPs();
+			await this.updateKnownPlayerIPs();
 			this.updatePreferedPlayerIPs();
 			if (this.reboot_ips.length == 0) {
 				this.silent_log_mode = false;
@@ -2507,7 +2507,7 @@ class Heos extends utils.Adapter {
 						this.ssdp_retry_counter += 1;
 					}
 					this.ssdpLeaderElection();
-					if (this.ssdp_retry_initPlayerStatisticscounter > 10 && this.player_ips.length > 0) {
+					if (this.ssdp_retry_counter > 10 && this.known_player_ips.length > 0) {
 						this.manual_search_mode = true;
 						this.silent_log_mode = true;
 						this.logWarn("can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...", false);
@@ -2516,6 +2516,7 @@ class Heos extends utils.Adapter {
 						this.logDebug('searching for HEOS devices ...', true);
 						this.ssdp_player_ips = [];
 						this.nodessdp_client.search(this.ssdp_search_target_name);
+						this.getPlayers();
 					}
 				}, this.config.searchInterval);
 			}
@@ -2551,14 +2552,14 @@ class Heos extends utils.Adapter {
 		let ips = [];
 		let minFailures = 999;
 
-		for (let i = 0; i < this.player_ips.length; i++) {
-			const failures = this.getOverallFailures(this.player_ips[i]);
+		for (let i = 0; i < this.known_player_ips.length; i++) {
+			const failures = this.getOverallFailures(this.known_player_ips[i]);
 			if (failures < minFailures) {
 				ips = [];
-				ips.push(this.player_ips[i]);
+				ips.push(this.known_player_ips[i]);
 				minFailures = failures;
 			} else if (failures == minFailures) {
-				ips.push(this.player_ips[i]);
+				ips.push(this.known_player_ips[i]);
 			}
 		}
 		return ips.filter(n => n);
