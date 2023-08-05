@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "1.12.3",
+    "version": "2.0.0",
     "news": {
+      "2.0.0": {
+        "en": "fix pipelines and remove node 14.x support",
+        "de": "pipelines fixieren und knoten 14.x-unterstützung entfernen",
+        "ru": "исправить трубопроводы и удалить node 14.x поддержка",
+        "pt": "corrigir pipelines e remover o nó 14.x suporte",
+        "nl": "verwijder node 14.x ondersteuning",
+        "fr": "fixer les pipelines et retirer le support node 14.x",
+        "it": "fissare le tubazioni e rimuovere il supporto nodo 14.x",
+        "es": "arreglar los oleoductos y eliminar el nodo 14.x soporte",
+        "pl": "ustawienie rurociągów i usunięcie węzła 14x",
+        "uk": "кріплення трубопроводів і видалення вузла 14.x",
+        "zh-cn": "f 配件和取消14x的支助"
+      },
       "1.12.3": {
         "en": "update dependencies",
         "de": "aktualisierung der abhängigkeiten",
@@ -80,19 +93,6 @@
         "pl": "aktualizacja\npolepszenie\nulepszenie przycisków w przeglądarce",
         "uk": "оновлення деяких залежностей\nполіпшення безпеки\nпокращувати відтворення всіх кнопок у функції перегляду",
         "zh-cn": "二. 更新一些依赖性\n改进失败\nb. 代管特区改善所有但顿作用"
-      },
-      "1.11.2": {
-        "en": "adopt to new adapter structure",
-        "de": "neue adapterstruktur übernehmen",
-        "ru": "принять к новой структуре адаптера",
-        "pt": "adotar a nova estrutura do adaptador",
-        "nl": "adopteren",
-        "fr": "adopter à la nouvelle structure de l'adaptateur",
-        "it": "adottare per la nuova struttura adattatore",
-        "es": "adoptar a nueva estructura de adaptador",
-        "pl": "zaadoptowanie nowej struktury adapterowej",
-        "uk": "прийняти до нової структури адаптера",
-        "zh-cn": "通过新的适应结构"
       }
     },
     "title": "HEOS",
