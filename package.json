@@ -23,7 +23,7 @@
     "url": "https://github.com/withstu/ioBroker.heos"
   },
   "engines": {
-    "node": ">= 14"
+    "node": ">= 16"
   },
   "dependencies": {
     "@iobroker/adapter-core": "^2.6.8",
