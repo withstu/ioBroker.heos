@@ -2023,6 +2023,7 @@ class Heos extends utils.Adapter {
 						} catch (err) {
 							this.logDebug("can't connect error: " + err, false);
 							this.logWarn("can't connect player " + player.name + ' (' + player.ip + '). Skip.', false);
+							this.raiseFailures(player.ip, ERROR_CODES.General);
 							playerConnected = false;
 						}
 					} else {
@@ -2731,7 +2732,7 @@ class Heos extends utils.Adapter {
 	}
 
 	raiseFailures(ip, code) {
-		if (ip.length > 0 && this.getUptime(ip) >= 5) {
+		if (ip.length > 0 && (this.state != STATES.Connected || this.getUptime(ip) >= 5)) {
 			if (!(ip in this.failure_counter)) {
 				this.initFailures(ip);
 			}
@@ -2829,7 +2830,7 @@ class Heos extends utils.Adapter {
 	}
 
 	raiseLeaderFailures(ip) {
-		if (ip.length > 0 && this.getUptime(ip) >= 5) {
+		if (ip.length > 0 && (this.state != STATES.Connected || this.getUptime(ip) >= 5)) {
 			if (ip in this.leader_failure_counter) {
 				this.leader_failure_counter[ip] += 1;
 			} else {

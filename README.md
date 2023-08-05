@@ -147,6 +147,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 
 ### **WORK IN PROGRESS**
 * (withstu) replace got with axios
+* (withstu) improve upnp handling
 
 ### 2.0.0 (2023-08-05)
 * (withstu) fix pipelines and remove node 14.x support
