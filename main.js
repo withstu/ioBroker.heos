@@ -2014,10 +2014,9 @@ class Heos extends utils.Adapter {
 					throw new Error('HEOS responded with invalid data.');
 				} else {
 					if (!(pid in this.players)) {
-						const heosPlayer = new HeosPlayer(this, player);
+						const heosPlayer = this.players[pid] = new HeosPlayer(this, player);
 						// wait until objects are created before connecting, because states shouldn't be set before objects exist
 						await heosPlayer.initMetaData(player);
-						this.players[pid] = heosPlayer;
 						try {
 							await heosPlayer.connect();
 						} catch (err) {
