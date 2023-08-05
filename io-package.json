@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "2.0.0",
+    "version": "2.1.0",
     "news": {
+      "2.1.0": {
+        "en": "replace got with axios\nimprove upnp handling\nprevent duplicate connect messages",
+        "de": "ersetzen mit axios\nverbesserte upnp-behandlung\ndoppelte verbindungsnachrichten verhindern",
+        "ru": "заменить получилось с axios\nулучшить работу upnp\nпредотвратить дублирование сообщений подключения",
+        "pt": "substituir adquirido com axios\nmelhorar o manuseio de upnp\nevitar mensagens de conexão duplicadas",
+        "nl": "vertaling:\nverbeter de bovenste hand\nverhinder dubbele berichten",
+        "fr": "remplacer obtenu par axios\naméliorer la manutention des ailes\nempêcher les messages de connexion",
+        "it": "sostituire ottenuto con assios\nmigliorare la gestione della upnp\nimpedire i messaggi di connessione duplicati",
+        "es": "reemplazado por axios\nmejorar el manejo de upnp\nevitar duplicados mensajes de conexión",
+        "pl": "zastępować\npoprawić\nlinkować",
+        "uk": "заміну отримав з аксіосом\nполіпшити процес обробки\nзапобігання дублікатів повідомлень з'єднання",
+        "zh-cn": "改为\n改进处理\n防止信息重复"
+      },
       "2.0.0": {
         "en": "fix pipelines and remove node 14.x support",
         "de": "pipelines fixieren und knoten 14.x-unterstützung entfernen",
@@ -80,19 +93,6 @@
         "pl": "ulepszenie przycisków w przeglądarce",
         "uk": "покращувати відтворення всіх кнопок у функції перегляду",
         "zh-cn": "b. 代管特区改善所有但顿作用"
-      },
-      "1.11.3": {
-        "en": "update some dependencies\nimprove failure handling\nimprove play all button in browse feature",
-        "de": "einige abhängigkeiten aktualisieren\nverbesserung der fehlerbehebung\nverbessern spielen alle taste in der browser-funktion",
-        "ru": "обновить некоторые зависимости\nулучшить обработку сбоев\nулучшить играть все кнопки в функции просмотра",
-        "pt": "atualizar algumas dependências\nmelhorar o manuseio de falhas\nmelhorar jogar todos os botões em procurar recurso",
-        "nl": "vertaling:\nverbeter falen\nverbeter alle knoppen in browse",
-        "fr": "mettre à jour certaines dépendances\naméliorer la manipulation des défaillances\naméliorer jouer tous les boutons dans la fonction de navigation",
-        "it": "aggiornare alcune dipendenze\nmigliorare la gestione dei guasti\nmigliorare giocare tutto il pulsante nella funzione di navigazione",
-        "es": "actualizar algunas dependencias\nmejorar el manejo de fallos\nmejorar el juego de todos los botones en la función de navegación",
-        "pl": "aktualizacja\npolepszenie\nulepszenie przycisków w przeglądarce",
-        "uk": "оновлення деяких залежностей\nполіпшення безпеки\nпокращувати відтворення всіх кнопок у функції перегляду",
-        "zh-cn": "二. 更新一些依赖性\n改进失败\nb. 代管特区改善所有但顿作用"
       }
     },
     "title": "HEOS",
