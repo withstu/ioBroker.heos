@@ -1,6 +1,6 @@
 {
-    "type": "tabs",
     "i18n": true,
+    "type": "tabs",
     "items": {
         "loginTab": {
             "type": "panel",
