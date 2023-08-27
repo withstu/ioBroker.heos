@@ -95,7 +95,6 @@
         "zh-cn": "b. 代管特区改善所有但顿作用"
       }
     },
-    "title": "HEOS",
     "titleLang": {
       "en": "HEOS",
       "de": "HEOS",
@@ -126,7 +125,6 @@
       "withstu <withstu@gmx.de>"
     ],
     "keywords": [
-      "ioBroker",
       "HEOS"
     ],
     "license": "MIT",
@@ -134,8 +132,8 @@
     "main": "main.js",
     "icon": "heos.png",
     "enabled": true,
-    "extIcon": "https://raw.githubusercontent.com/withstu/ioBroker.heos/master/admin/heos.png",
-    "readme": "https://github.com/withstu/ioBroker.heos/blob/master/README.md",
+    "extIcon": "https://raw.githubusercontent.com/withstu/ioBroker.heos/main/admin/heos.png",
+    "readme": "https://github.com/withstu/ioBroker.heos/blob/main/README.md",
     "loglevel": "info",
     "messagebox": true,
     "mode": "daemon",
