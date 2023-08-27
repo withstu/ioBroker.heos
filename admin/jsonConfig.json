@@ -1,0 +1,248 @@
+{
+    "type": "tabs",
+    "i18n": true,
+    "items": {
+        "loginTab": {
+            "type": "panel",
+            "label": "account_settings",
+            "items": {
+                "_header_login": {
+                    "type": "header",
+                    "size": 2,
+                    "text": "heos_account"
+                },
+                "username": {
+                    "type": "text",
+                    "label": "username",
+                    "help": "",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "password": {
+                    "type": "password",
+                    "label": "password",
+                    "help": "",
+                    "visible": true,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                }
+            }
+        },
+        "generalTab": {
+            "type": "panel",
+            "label": "general_settings",
+            "items": {
+                "_header_play": {
+                    "type": "header",
+                    "size": 2,
+                    "text": "play_settings"
+                },
+                "queueMode": {
+                    "type": "select",
+                    "label": "queue_settings",
+                    "help": "",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6,
+                    "options": [
+                      {"value": "1", "label": "play_now"},
+                      {"value": "2", "label": "play_next"},
+                      {"value": "3", "label": "add_to_end"},
+                      {"value": "4", "label": "replace_and_play"}
+                    ]
+                },
+                "cmdScope": {
+                    "type": "select",
+                    "label": "command_scope",
+                    "help": "",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6,
+                    "options": [
+                      {"value": "all", "label": "all_player"},
+                      {"value": "leader", "label": "all_leading_and_nongroup_player"},
+                      {"value": "pid", "label": "player_ids_in_state_command_scope_pid"}
+                    ]
+                },
+                "volumeStepLevel": {
+                    "type": "number",
+                    "label": "volume_step",
+                    "help": "",
+                    "min": 1,
+                    "max": 10,
+                    "step": 1,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "_header_comfort": {
+                    "type": "header",
+                    "size": 2,
+                    "text": "comforts_settings"
+                },
+                "autoPlay": {
+                    "type": "checkbox",
+                    "label": "automatic_playback_on_startup_and_unmute",
+                    "help": "",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "autoPlayCmd": {
+                    "type": "text",
+                    "label": "default_automatic_playback_command",
+                    "help": "",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "muteOnRegex": {
+                    "type": "checkbox",
+                    "label": "mute_on_regex_match",
+                    "help": "",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "muteRegex": {
+                    "type": "text",
+                    "label": "mute_regex",
+                    "help": "",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "rebootOnFailure": {
+                    "type": "checkbox",
+                    "label": "reboot_on_failure",
+                    "help": "",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                }
+            }
+        },
+        "advancedTab": {
+            "type": "panel",
+            "label": "advanced_settings",
+            "items": {
+                "_header_heartbeat": {
+                    "type": "header",
+                    "size": 2,
+                    "text": "heartbeat"
+                },
+                "heartbeatInterval": {
+                    "type": "number",
+                    "label": "volume_step",
+                    "help": "",
+                    "min": 0,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "heartbeatRetries": {
+                    "type": "number",
+                    "label": "heartbeat_retries",
+                    "help": "",
+                    "min": 0,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "_header_search": {
+                    "type": "header",
+                    "size": 2,
+                    "text": "search"
+                },
+                "searchTimeout": {
+                    "type": "number",
+                    "label": "search_timeout",
+                    "help": "",
+                    "min": 0,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "searchInterval": {
+                    "type": "number",
+                    "label": "search_interval",
+                    "help": "",
+                    "min": 0,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "_header_reconnect": {
+                    "type": "header",
+                    "size": 2,
+                    "text": "reconnect"
+                },
+                "reconnectTimeout": {
+                    "type": "number",
+                    "label": "reconnect_timeout",
+                    "help": "",
+                    "min": 0,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "_header_request": {
+                    "type": "header",
+                    "size": 2,
+                    "text": "request"
+                },
+                "requestTimeout": {
+                    "type": "number",
+                    "label": "request_timeout",
+                    "help": "",
+                    "min": 0,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "_header_network": {
+                    "type": "header",
+                    "size": 2,
+                    "text": "network"
+                },
+                "sourcePort": {
+                    "type": "number",
+                    "label": "udp_source_port",
+                    "help": "",
+                    "min": 0,
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                },
+                "preferedIPs": {
+                    "type": "text",
+                    "label": "prefered_ip",
+                    "help": "",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6
+                }
+            }
+        }
+    }
+}
