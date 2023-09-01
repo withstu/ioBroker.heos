@@ -29,7 +29,7 @@
     "@iobroker/adapter-core": "^3.0.3",
     "fast-xml-parser": "^4.2.7",
     "axios": "^1.4.0",
-    "html-entities": "^2.3.3",
+    "html-entities": "^2.4.0",
     "node-ssdp": "^4.0.1",
     "node-vibrant": "^3.1.6"
   },
