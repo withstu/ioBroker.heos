@@ -19,7 +19,7 @@
     "play_now": "Jogue agora",
     "play_settings": "Configurações de jogo",
     "player_ids_in_state_command_scope_pid": "IDs de jogadores no estado command_scope_pid",
-    "prefered_ip": "Endereços IP preferidos para conexão, se a pesquisa automática não for bem-sucedida (separados por vírgula)",
+    "preferred_ip": "Endereços IP preferidos para conexão, se a pesquisa automática não for bem-sucedida (separados por vírgula)",
     "queue_settings": "Configurações de fila",
     "eboot_on_failure": "Reinicialize, se for detectada falha no dispositivo",
     "reconnect_timeout": "Tempo limite de reconexão",

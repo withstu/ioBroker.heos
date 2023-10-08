@@ -19,7 +19,7 @@
     "play_now": "Nu afspelen",
     "play_settings": "Speel instellingen",
     "player_ids_in_state_command_scope_pid": "Speler-ID's met de status command_scope_pid",
-    "prefered_ip": "Voorkeurs-IP-adressen voor verbinding, als automatisch zoeken niet succesvol was (door komma's gescheiden)",
+    "preferred_ip": "Voorkeurs-IP-adressen voor verbinding, als automatisch zoeken niet succesvol was (door komma's gescheiden)",
     "queue_settings": "Wachtrij-instellingen",
     "eboot_on_failure": "Start opnieuw op als er een apparaatfout wordt gedetecteerd",
     "reconnect_timeout": "Time-out opnieuw verbinden",

@@ -19,7 +19,7 @@
     "play_now": "Joue maintenant",
     "play_settings": "Paramètres de lecture",
     "player_ids_in_state_command_scope_pid": "ID de joueur dans l'état command_scope_pid",
-    "prefered_ip": "Adresses IP préférées pour la connexion, si la recherche automatique n'a pas abouti (séparées par des virgules)",
+    "preferred_ip": "Adresses IP préférées pour la connexion, si la recherche automatique n'a pas abouti (séparées par des virgules)",
     "queue_settings": "Paramètres de file d'attente",
     "eboot_on_failure": "Redémarrer, si une panne de périphérique est détectée",
     "reconnect_timeout": "Délai de reconnexion",

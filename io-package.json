@@ -179,7 +179,7 @@
         "queueMode": 4,
         "cmdScope": "leader",
         "sourcePort": 0,
-        "preferedIPs": ""
+        "preferredIPs": ""
     },
     "objects": [],
     "instanceObjects": [

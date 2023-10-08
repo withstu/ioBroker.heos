@@ -233,9 +233,9 @@
                     "md": 6,
                     "lg": 6
                 },
-                "preferedIPs": {
+                "preferredIPs": {
                     "type": "text",
-                    "label": "prefered_ip",
+                    "label": "preferred_ip",
                     "help": "",
                     "xs": 12,
                     "sm": 12,

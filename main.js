@@ -165,9 +165,8 @@ class Heos extends utils.Adapter {
 			this.reboot_time = {};
 			this.failure_counter = {};
 			this.leader_failure_counter = {};
-			this.prefered_player_ips = [];
-
-			this.next_connect_ip = '';
+			this.preferred_player_ips = [];
+			this.next_connect_ips = [];
 		}
 	}
 
@@ -2017,6 +2016,13 @@ class Heos extends utils.Adapter {
 						const heosPlayer = this.players[pid] = new HeosPlayer(this, player);
 						// wait until objects are created before connecting, because states shouldn't be set before objects exist
 						await heosPlayer.initMetaData(player);
+						if (this.preferred_player_ips.length > 0
+							&& this.preferred_player_ips.indexOf(this.ip) === -1
+							&& this.preferred_player_ips.indexOf(player.ip) !== -1) {
+								this.manual_search_mode = true;
+								this.logInfo('preferred player ' + player.ip + ' found. Reconnect.');
+								this.reconnect();
+						}
 						try {
 							await heosPlayer.connect();
 						} catch (err) {
@@ -2094,31 +2100,30 @@ class Heos extends utils.Adapter {
 		}
 	}
 
-	updatePreferedPlayerIPs() {
-		if (this.config.preferedIPs.length > 0) {
-			const ips = this.config.preferedIPs.split(',').map(function (item) {
+	updatePreferredPlayerIPs() {
+		if (this.config.preferredIPs.length > 0) {
+			const ips = this.config.preferredIPs.split(',').map(function (item) {
 				return item.trim();
 			});
+			this.preferred_player_ips = ips;
 			if (this.manual_search_mode) {
-				if (this.prefered_player_ips.length == 0) {
-					this.prefered_player_ips = ips;
+				if (this.next_connect_ips.length == 0) {
+					this.next_connect_ips = ips;
 				}
-				this.next_connect_ip = this.prefered_player_ips[0];
-				this.removePreferedPlayerIp(this.prefered_player_ips[0]);
 			}
 		} else {
 			this.manual_search_mode = false;
 		}
 	}
 
-	removePreferedPlayerIp(ip) {
-		if (this.ip == ip && this.prefered_player_ips.includes(ip)) {
-			const index = this.prefered_player_ips.indexOf(ip);
-			if (this.prefered_player_ips.length == 1) {
+	removeNextConnectPlayerIp(ip) {
+		if (this.next_connect_ips.includes(ip)) {
+			const index = this.next_connect_ips.indexOf(ip);
+			if (this.next_connect_ips.length == 1) {
 				this.manual_search_mode = false;
 			}
 			if (index > -1) {
-				this.prefered_player_ips.splice(index, 1);
+				this.next_connect_ips.splice(index, 1);
 			}
 		}
 	}
@@ -2394,9 +2399,7 @@ class Heos extends utils.Adapter {
 		//this.net_client.setNoDelay(true);
 		this.net_client.setTimeout(60000);
 
-		if (this.next_connect_ip == ip) {
-			this.next_connect_ip = '';
-		}
+		this.removeNextConnectPlayerIp(ip);
 
 		this.net_client.on('error', (error) => {
 			this.logError('[connect] ' + error, false);
@@ -2479,7 +2482,7 @@ class Heos extends utils.Adapter {
 
 			//Update Player IPs
 			await this.updateKnownPlayerIPs();
-			this.updatePreferedPlayerIPs();
+			this.updatePreferredPlayerIPs();
 			if (this.reboot_ips.length == 0) {
 				this.silent_log_mode = false;
 			}
@@ -2488,9 +2491,9 @@ class Heos extends utils.Adapter {
 				const ip = this.reboot_ips[0];
 				this.logDebug('try to connect to ' + ip + ' to reboot device', false);
 				this.connect(ip);
-			} else if (this.next_connect_ip.length > 0) {
-				this.logDebug('try to connect to ' + this.next_connect_ip, false);
-				this.connect(this.next_connect_ip);
+			} else if (this.next_connect_ips.length > 0) {
+				this.logDebug('try to connect to ' + this.next_connect_ips[0], false);
+				this.connect(this.next_connect_ips[0]);
 			} else {
 				this.ssdp_retry_counter = 0;
 

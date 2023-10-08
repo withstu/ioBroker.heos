@@ -19,7 +19,7 @@
     "play_now": "Jetzt spielen",
     "play_settings": "Spieleinstellungen",
     "player_ids_in_state_command_scope_pid": "Spieler-IDs im Status command_scope_pid",
-    "prefered_ip": "Bevorzugte IP-Adressen für die Verbindung, wenn die automatische Suche nicht erfolgreich war (durch Kommas getrennt)",
+    "preferred_ip": "Bevorzugte IP-Adressen für die Verbindung, wenn die automatische Suche nicht erfolgreich war (durch Kommas getrennt)",
     "queue_settings": "Warteschlangeneinstellungen",
     "eboot_on_failure": "Starten Sie neu, wenn ein Gerätefehler erkannt wird",
     "reconnect_timeout": "Zeitüberschreitung bei erneuter Verbindung",

@@ -19,7 +19,7 @@
     "play_now": "Zagraj teraz",
     "play_settings": "Ustawienia odtwarzania",
     "player_ids_in_state_command_scope_pid": "Identyfikatory graczy w stanie Command_scope_pid",
-    "prefered_ip": "Preferowane adresy IP do połączenia, jeśli automatyczne wyszukiwanie nie powiodło się (oddzielone przecinkami)",
+    "preferred_ip": "Preferowane adresy IP do połączenia, jeśli automatyczne wyszukiwanie nie powiodło się (oddzielone przecinkami)",
     "queue_settings": "Ustawienia kolejki",
     "eboot_on_failure": "Uruchom ponownie, jeśli wykryta zostanie awaria urządzenia",
     "reconnect_timeout": "Przekroczono limit czasu ponownego połączenia",

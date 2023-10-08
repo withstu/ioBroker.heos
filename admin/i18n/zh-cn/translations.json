@@ -19,7 +19,7 @@
     "play_now": "现在播放",
     "play_settings": "播放设置",
     "player_ids_in_state_command_scope_pid": "处于 command_scope_pid 状态的玩家 ID",
-    "prefered_ip": "如果自动搜索不成功，则首选连接 IP 地址（逗号分隔）",
+    "preferred_ip": "如果自动搜索不成功，则首选连接 IP 地址（逗号分隔）",
     "queue_settings": "队列设置",
     "eboot_on_failure": "如果检测到设备故障，请重新启动",
     "reconnect_timeout": "重新连接超时",
