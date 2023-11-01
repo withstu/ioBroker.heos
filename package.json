@@ -26,7 +26,7 @@
     "node": ">= 16"
   },
   "dependencies": {
-    "@iobroker/adapter-core": "^3.0.3",
+    "@iobroker/adapter-core": "^3.0.4",
     "fast-xml-parser": "^4.2.7",
     "axios": "^1.5.1",
     "html-entities": "^2.3.3",
