@@ -1,208 +1,208 @@
 {
-    "common": {
-        "name": "heos",
-        "version": "2.1.0",
-        "news": {
-            "2.1.0": {
-                "en": "replace got with axios\nimprove upnp handling\nprevent duplicate connect messages",
-                "de": "ersetzen mit axios\nverbesserte upnp-behandlung\ndoppelte verbindungsnachrichten verhindern",
-                "ru": "заменить получилось с axios\nулучшить работу upnp\nпредотвратить дублирование сообщений подключения",
-                "pt": "substituir adquirido com axios\nmelhorar o manuseio de upnp\nevitar mensagens de conexão duplicadas",
-                "nl": "vertaling:\nverbeter de bovenste hand\nverhinder dubbele berichten",
-                "fr": "remplacer obtenu par axios\naméliorer la manutention des ailes\nempêcher les messages de connexion",
-                "it": "sostituire ottenuto con assios\nmigliorare la gestione della upnp\nimpedire i messaggi di connessione duplicati",
-                "es": "reemplazado por axios\nmejorar el manejo de upnp\nevitar duplicados mensajes de conexión",
-                "pl": "zastępować\npoprawić\nlinkować",
-                "uk": "заміну отримав з аксіосом\nполіпшити процес обробки\nзапобігання дублікатів повідомлень з'єднання",
-                "zh-cn": "改为\n改进处理\n防止信息重复"
-            },
-            "2.0.0": {
-                "en": "fix pipelines and remove node 14.x support",
-                "de": "pipelines fixieren und knoten 14.x-unterstützung entfernen",
-                "ru": "исправить трубопроводы и удалить node 14.x поддержка",
-                "pt": "corrigir pipelines e remover o nó 14.x suporte",
-                "nl": "verwijder node 14.x ondersteuning",
-                "fr": "fixer les pipelines et retirer le support node 14.x",
-                "it": "fissare le tubazioni e rimuovere il supporto nodo 14.x",
-                "es": "arreglar los oleoductos y eliminar el nodo 14.x soporte",
-                "pl": "ustawienie rurociągów i usunięcie węzła 14x",
-                "uk": "кріплення трубопроводів і видалення вузла 14.x",
-                "zh-cn": "f 配件和取消14x的支助"
-            },
-            "1.12.3": {
-                "en": "update dependencies",
-                "de": "aktualisierung der abhängigkeiten",
-                "ru": "обновление зависимостей",
-                "pt": "dependências",
-                "nl": "vertaling:",
-                "fr": "mettre à jour les dépendances",
-                "it": "aggiornamento dipendenze",
-                "es": "dependencias de actualización",
-                "pl": "zależności",
-                "uk": "оновлення залежності",
-                "zh-cn": "a. 最新受扶养人"
-            },
-            "1.12.2": {
-                "en": "optimize error handling",
-                "de": "optimierung der fehlerbehandlung",
-                "ru": "оптимизировать обработку ошибок",
-                "pt": "otimizar o manuseio de erros",
-                "nl": "vertaling:",
-                "fr": "optimiser la manipulation des erreurs",
-                "it": "ottimizzare la gestione degli errori",
-                "es": "optimizar el manejo del error",
-                "pl": "optymalizowanie błędów",
-                "uk": "оптимізація обробки помилок",
-                "zh-cn": "优化错误处理"
-            },
-            "1.12.1": {
-                "en": "optimize leader election",
-                "de": "optimieren sie die wahl",
-                "ru": "оптимизировать выборы лидеров",
-                "pt": "otimizar a eleição do líder",
-                "nl": "vertaling:",
-                "fr": "optimiser le leadership électoral",
-                "it": "ottimizzare le elezioni leader",
-                "es": "optimizar las elecciones líderes",
-                "pl": "lider optymalizacji wyborów",
-                "uk": "оптимізація виборів лідера",
-                "zh-cn": "优化领导人选举"
-            },
-            "1.12.0": {
-                "en": "optimize scope handling\nswitch to HEOS default cmd delimiter\nadd configuration to prefer list of IPs for adapter connection\noptimize error handling",
-                "de": "optimieren sie die handhabung des anwendungsbereichs\nschalter zu HEOS Standard cmd Begrenzung\nkonfiguration hinzufügen, um die Liste der IPs für Adapteranschluss zu bevorzugen\noptimierung der fehlerbehandlung",
-                "ru": "оптимизация обработки сфер\nпереключиться на HEOS по умолчанию cmd delimiter\nдобавить конфигурацию, чтобы предпочитать список IP для подключения адаптера\nоптимизировать обработку ошибок",
-                "pt": "otimizar o gerenciamento de escopo\nmudar para delimitador cmd padrão HEOS\nadicionar configuração para preferir lista de IPs para conexão de adaptador\notimizar o manuseio de erros",
-                "nl": "vertaling:\nwissel naar HOS default cmd delimiter\nvoeg configuratie toe aan de lijst van IP's voor aanpassingsverbinding\nvertaling:",
-                "fr": "optimiser la manipulation de la portée\npasser à HEOS délimiteur cmd par défaut\najouter la configuration pour préférer la liste des IP pour la connexion d'adaptateur\noptimiser la manipulation des erreurs",
-                "it": "ottimizzare la gestione delle aree\npassare al delimitatore cmd predefinito HEOS\naggiungere la configurazione per preferire l'elenco degli IP per la connessione dell'adattatore\nottimizzare la gestione degli errori",
-                "es": "optimizar el manejo del alcance\nconmutación al delimitador por defecto HEOS cmd\nañadir configuración para preferir la lista de IPs para la conexión del adaptador\noptimizar el manejo del error",
-                "pl": "optymalizacja zakresu obsługi\nprzełącz do HEOS do domyślnie cm delimiter\ndodawanie konfiguracji do preferowania listy IP do połączenia adapterowego\noptymalizowanie błędów",
-                "uk": "оптимізація управління обсягами\nпереключення до HEOS за замовчуванням cmd delimiter\nдодати конфігурацію для вибору IP-адреси адаптера\nоптимізація обробки помилок",
-                "zh-cn": "优化处理范围\n转换到HEOS违约情况\n备选案文:\n优化错误处理"
-            },
-            "1.11.4": {
-                "en": "improve play all button in browse feature",
-                "de": "verbessern spielen alle taste in der browser-funktion",
-                "ru": "улучшить играть все кнопки в функции просмотра",
-                "pt": "melhorar jogar todos os botões em procurar recurso",
-                "nl": "verbeter alle knoppen in browse",
-                "fr": "améliorer jouer tous les boutons dans la fonction de navigation",
-                "it": "migliorare giocare tutto il pulsante nella funzione di navigazione",
-                "es": "mejorar el juego de todos los botones en la función de navegación",
-                "pl": "ulepszenie przycisków w przeglądarce",
-                "uk": "покращувати відтворення всіх кнопок у функції перегляду",
-                "zh-cn": "b. 代管特区改善所有但顿作用"
-            }
-        },
-        "titleLang": {
-            "en": "HEOS",
-            "de": "HEOS",
-            "ru": "HEOS",
-            "pt": "HEOS",
-            "nl": "HEOS",
-            "fr": "HEOS",
-            "it": "HEOS",
-            "es": "HEOS",
-            "pl": "HEOS",
-            "zh-cn": "HEOS",
-            "uk": "HEOS"
-        },
-        "desc": {
-            "en": "The adapter lets control HEOS from ioBroker",
-            "de": "Mit dem Adapter können Sie HEOS von ioBroker aus steuern",
-            "ru": "Адаптер позволяет управлять HEOS от ioBroker",
-            "pt": "O adaptador permite controlar o HEOS do ioBroker",
-            "nl": "Met de adapter kan HEOS worden bediend vanaf ioBroker",
-            "fr": "L'adaptateur permet de contrôler HEOS depuis ioBroker",
-            "it": "L'adattatore consente di controllare HEOS da ioBroker",
-            "es": "El adaptador permite controlar HEOS desde ioBroker",
-            "pl": "Adapter umożliwia sterowanie HEOS z ioBroker",
-            "zh-cn": "该适配器可以从ioBroker控制HEOS",
-            "uk": "Адаптер дозволяє керувати HEOS з ioBroker"
-        },
-        "authors": [
-            "withstu <withstu@gmx.de>"
-        ],
-        "keywords": [
-            "HEOS"
-        ],
-        "license": "MIT",
-        "platform": "Javascript/Node.js",
-        "main": "main.js",
-        "icon": "heos.png",
-        "enabled": true,
-        "extIcon": "https://raw.githubusercontent.com/withstu/ioBroker.heos/main/admin/heos.png",
-        "readme": "https://github.com/withstu/ioBroker.heos/blob/main/README.md",
-        "loglevel": "info",
-        "messagebox": true,
-        "mode": "daemon",
-        "type": "multimedia",
-        "compact": true,
-        "connectionType": "local",
-        "dataSource": "poll",
-        "adminUI": {
-            "config": "json"
-        },
-        "dependencies": [
-            {
-                "js-controller": ">=3.3.22"
-            }
-        ],
-        "globalDependencies": [
-            {
-                "admin": ">=5.1.13"
-            }
-        ]
+  "common": {
+    "name": "heos",
+    "version": "2.2.0",
+    "news": {
+      "2.2.0": {
+        "en": "update dependencies\nadd admin 5 UI support\nimprove preferred IP handling\nimprove undefined station handling #299\nreduce upnp requests",
+        "de": "aktualisierung der abhängigkeiten\nadmin 5 UI Unterstützung hinzufügen\nverbesserung der bevorzugten IP-Behandlung\nundefinierte stationshandling #299 verbessern\nreduzieren von upp-anfragen",
+        "ru": "обновление зависимостей\nadmin 5 Поддержка UI\nулучшение предпочтительной обработки IP\n#299\nуменьшить количество запросов",
+        "pt": "dependências\nadicionar suporte de administrador 5 UI\nmelhorar o manuseio IP preferido\nmelhorar o manuseio de estação indefinido #299\nreduzir pedidos de upnp",
+        "nl": "afhankelijkheden bijwerken\nadmin 5 UI-ondersteuning toevoegen\nverbeteren van voorkeur IP-behandeling\nverbetering van ongedefinieerde stationsafhandeling #299\nverzoeken om upnp verminderen",
+        "fr": "mettre à jour les dépendances\najouter admin 5 soutien UI\naméliorer la gestion de la propriété intellectuelle préférée\naméliorer la gestion de station non définie #299\nréduire les requêtes upnp",
+        "it": "aggiornamento dipendenze\naggiungere admin 5 supporto UI\nmigliorare la gestione IP preferita\nmigliorare la gestione delle stazioni non definite #299\nridurre le richieste di upnp",
+        "es": "dependencias de actualización\nadd admin 5 UI support\nmejorar el manejo IP preferido\nmejorar el manejo no definido de la estación #299\nreducir las solicitudes de respuesta",
+        "pl": "aktualizacji zależności\ndodaj obsługę interfejsu użytkownika admin 5\npoprawić preferowaną obsługę IP\npoprawić nieokreśloną obsługę stacji # 299\nzmniejszyć wnioski upnp",
+        "uk": "оновлення залежності\nдодати підтримку адміністратора 5 UI\nпокращувати кращий IP-сервіс\nполіпшити невизнане обслуговування станції #299\nзменшити кількість запитів",
+        "zh-cn": "更新依赖关系\n添加管理员 5 UI 支持\n改进首选的 IP 处理\n改进未定义的站台处理# 299\n减少上调请求"
+      },
+      "2.1.0": {
+        "en": "replace got with axios\nimprove upnp handling\nprevent duplicate connect messages",
+        "de": "ersetzen mit axios\nverbesserte upnp-behandlung\ndoppelte verbindungsnachrichten verhindern",
+        "ru": "заменить получилось с axios\nулучшить работу upnp\nпредотвратить дублирование сообщений подключения",
+        "pt": "substituir adquirido com axios\nmelhorar o manuseio de upnp\nevitar mensagens de conexão duplicadas",
+        "nl": "vertaling:\nverbeter de bovenste hand\nverhinder dubbele berichten",
+        "fr": "remplacer obtenu par axios\naméliorer la manutention des ailes\nempêcher les messages de connexion",
+        "it": "sostituire ottenuto con assios\nmigliorare la gestione della upnp\nimpedire i messaggi di connessione duplicati",
+        "es": "reemplazado por axios\nmejorar el manejo de upnp\nevitar duplicados mensajes de conexión",
+        "pl": "zastępować\npoprawić\nlinkować",
+        "uk": "заміну отримав з аксіосом\nполіпшити процес обробки\nзапобігання дублікатів повідомлень з'єднання",
+        "zh-cn": "改为\n改进处理\n防止信息重复"
+      },
+      "2.0.0": {
+        "en": "fix pipelines and remove node 14.x support",
+        "de": "pipelines fixieren und knoten 14.x-unterstützung entfernen",
+        "ru": "исправить трубопроводы и удалить node 14.x поддержка",
+        "pt": "corrigir pipelines e remover o nó 14.x suporte",
+        "nl": "verwijder node 14.x ondersteuning",
+        "fr": "fixer les pipelines et retirer le support node 14.x",
+        "it": "fissare le tubazioni e rimuovere il supporto nodo 14.x",
+        "es": "arreglar los oleoductos y eliminar el nodo 14.x soporte",
+        "pl": "ustawienie rurociągów i usunięcie węzła 14x",
+        "uk": "кріплення трубопроводів і видалення вузла 14.x",
+        "zh-cn": "f 配件和取消14x的支助"
+      },
+      "1.12.3": {
+        "en": "update dependencies",
+        "de": "aktualisierung der abhängigkeiten",
+        "ru": "обновление зависимостей",
+        "pt": "dependências",
+        "nl": "vertaling:",
+        "fr": "mettre à jour les dépendances",
+        "it": "aggiornamento dipendenze",
+        "es": "dependencias de actualización",
+        "pl": "zależności",
+        "uk": "оновлення залежності",
+        "zh-cn": "a. 最新受扶养人"
+      },
+      "1.12.2": {
+        "en": "optimize error handling",
+        "de": "optimierung der fehlerbehandlung",
+        "ru": "оптимизировать обработку ошибок",
+        "pt": "otimizar o manuseio de erros",
+        "nl": "vertaling:",
+        "fr": "optimiser la manipulation des erreurs",
+        "it": "ottimizzare la gestione degli errori",
+        "es": "optimizar el manejo del error",
+        "pl": "optymalizowanie błędów",
+        "uk": "оптимізація обробки помилок",
+        "zh-cn": "优化错误处理"
+      },
+      "1.12.1": {
+        "en": "optimize leader election",
+        "de": "optimieren sie die wahl",
+        "ru": "оптимизировать выборы лидеров",
+        "pt": "otimizar a eleição do líder",
+        "nl": "vertaling:",
+        "fr": "optimiser le leadership électoral",
+        "it": "ottimizzare le elezioni leader",
+        "es": "optimizar las elecciones líderes",
+        "pl": "lider optymalizacji wyborów",
+        "uk": "оптимізація виборів лідера",
+        "zh-cn": "优化领导人选举"
+      },
+      "1.12.0": {
+        "en": "optimize scope handling\nswitch to HEOS default cmd delimiter\nadd configuration to prefer list of IPs for adapter connection\noptimize error handling",
+        "de": "optimieren sie die handhabung des anwendungsbereichs\nschalter zu HEOS Standard cmd Begrenzung\nkonfiguration hinzufügen, um die Liste der IPs für Adapteranschluss zu bevorzugen\noptimierung der fehlerbehandlung",
+        "ru": "оптимизация обработки сфер\nпереключиться на HEOS по умолчанию cmd delimiter\nдобавить конфигурацию, чтобы предпочитать список IP для подключения адаптера\nоптимизировать обработку ошибок",
+        "pt": "otimizar o gerenciamento de escopo\nmudar para delimitador cmd padrão HEOS\nadicionar configuração para preferir lista de IPs para conexão de adaptador\notimizar o manuseio de erros",
+        "nl": "vertaling:\nwissel naar HOS default cmd delimiter\nvoeg configuratie toe aan de lijst van IP's voor aanpassingsverbinding\nvertaling:",
+        "fr": "optimiser la manipulation de la portée\npasser à HEOS délimiteur cmd par défaut\najouter la configuration pour préférer la liste des IP pour la connexion d'adaptateur\noptimiser la manipulation des erreurs",
+        "it": "ottimizzare la gestione delle aree\npassare al delimitatore cmd predefinito HEOS\naggiungere la configurazione per preferire l'elenco degli IP per la connessione dell'adattatore\nottimizzare la gestione degli errori",
+        "es": "optimizar el manejo del alcance\nconmutación al delimitador por defecto HEOS cmd\nañadir configuración para preferir la lista de IPs para la conexión del adaptador\noptimizar el manejo del error",
+        "pl": "optymalizacja zakresu obsługi\nprzełącz do HEOS do domyślnie cm delimiter\ndodawanie konfiguracji do preferowania listy IP do połączenia adapterowego\noptymalizowanie błędów",
+        "uk": "оптимізація управління обсягами\nпереключення до HEOS за замовчуванням cmd delimiter\nдодати конфігурацію для вибору IP-адреси адаптера\nоптимізація обробки помилок",
+        "zh-cn": "优化处理范围\n转换到HEOS违约情况\n备选案文:\n优化错误处理"
+      }
     },
-    "protectedNative": [
-        "password"
-    ],
-    "encryptedNative": [
-        "password"
-    ],
-    "native": {
-        "username": "",
-        "password": "",
-        "requestTimeout": 10,
-        "reconnectTimeout": 5000,
-        "searchTimeout": 5000,
-        "searchInterval": 30000,
-        "heartbeatInterval": 15000,
-        "heartbeatRetries": 4,
-        "rebootOnFailure": false,
-        "muteOnRegex": false,
-        "muteRegex": "spotify:ad:|Advertisement",
-        "autoPlay": false,
-        "autoPlayCmd": "set_group_volume?level=15|play_preset?preset=1",
-        "volumeStepLevel": 2,
-        "queueMode": 4,
-        "cmdScope": "leader",
-        "sourcePort": 0,
-        "preferredIPs": ""
+    "titleLang": {
+      "en": "HEOS",
+      "de": "HEOS",
+      "ru": "HEOS",
+      "pt": "HEOS",
+      "nl": "HEOS",
+      "fr": "HEOS",
+      "it": "HEOS",
+      "es": "HEOS",
+      "pl": "HEOS",
+      "zh-cn": "HEOS",
+      "uk": "HEOS"
     },
-    "objects": [],
-    "instanceObjects": [
-        {
-            "_id": "info",
-            "type": "channel",
-            "common": {
-                "name": "Information"
-            },
-            "native": {}
-        },
-        {
-            "_id": "info.connection",
-            "type": "state",
-            "common": {
-                "role": "indicator.connected",
-                "name": "Device or service connected",
-                "type": "boolean",
-                "read": true,
-                "write": false,
-                "def": false
-            },
-            "native": {}
-        }
+    "desc": {
+      "en": "The adapter lets control HEOS from ioBroker",
+      "de": "Mit dem Adapter können Sie HEOS von ioBroker aus steuern",
+      "ru": "Адаптер позволяет управлять HEOS от ioBroker",
+      "pt": "O adaptador permite controlar o HEOS do ioBroker",
+      "nl": "Met de adapter kan HEOS worden bediend vanaf ioBroker",
+      "fr": "L'adaptateur permet de contrôler HEOS depuis ioBroker",
+      "it": "L'adattatore consente di controllare HEOS da ioBroker",
+      "es": "El adaptador permite controlar HEOS desde ioBroker",
+      "pl": "Adapter umożliwia sterowanie HEOS z ioBroker",
+      "zh-cn": "该适配器可以从ioBroker控制HEOS",
+      "uk": "Адаптер дозволяє керувати HEOS з ioBroker"
+    },
+    "authors": [
+      "withstu <withstu@gmx.de>"
+    ],
+    "keywords": [
+      "HEOS"
+    ],
+    "license": "MIT",
+    "platform": "Javascript/Node.js",
+    "main": "main.js",
+    "icon": "heos.png",
+    "enabled": true,
+    "extIcon": "https://raw.githubusercontent.com/withstu/ioBroker.heos/main/admin/heos.png",
+    "readme": "https://github.com/withstu/ioBroker.heos/blob/main/README.md",
+    "loglevel": "info",
+    "messagebox": true,
+    "mode": "daemon",
+    "type": "multimedia",
+    "compact": true,
+    "connectionType": "local",
+    "dataSource": "poll",
+    "adminUI": {
+      "config": "json"
+    },
+    "dependencies": [
+      {
+        "js-controller": ">=3.3.22"
+      }
+    ],
+    "globalDependencies": [
+      {
+        "admin": ">=5.1.13"
+      }
     ]
+  },
+  "protectedNative": [
+    "password"
+  ],
+  "encryptedNative": [
+    "password"
+  ],
+  "native": {
+    "username": "",
+    "password": "",
+    "requestTimeout": 10,
+    "reconnectTimeout": 5000,
+    "searchTimeout": 5000,
+    "searchInterval": 30000,
+    "heartbeatInterval": 15000,
+    "heartbeatRetries": 4,
+    "rebootOnFailure": false,
+    "muteOnRegex": false,
+    "muteRegex": "spotify:ad:|Advertisement",
+    "autoPlay": false,
+    "autoPlayCmd": "set_group_volume?level=15|play_preset?preset=1",
+    "volumeStepLevel": 2,
+    "queueMode": 4,
+    "cmdScope": "leader",
+    "sourcePort": 0,
+    "preferredIPs": ""
+  },
+  "objects": [],
+  "instanceObjects": [
+    {
+      "_id": "info",
+      "type": "channel",
+      "common": {
+        "name": "Information"
+      },
+      "native": {}
+    },
+    {
+      "_id": "info.connection",
+      "type": "state",
+      "common": {
+        "role": "indicator.connected",
+        "name": "Device or service connected",
+        "type": "boolean",
+        "read": true,
+        "write": false,
+        "def": false
+      },
+      "native": {}
+    }
+  ]
 }
