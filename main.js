@@ -736,28 +736,34 @@ class Heos extends utils.Adapter {
 			data = this.unfinished_responses + data;
 			this.unfinished_responses = '';
 
-			let lastResponse = '';
 			const responses = data.split(/(?={"heos")/g);
+
+			let parseQueue = [];
 			for (let r = 0; r < responses.length; r++) {
 				if (responses[r].trim().length > 0) {
 					const response = responses[r].trim();
 					try {
 						JSON.parse(response); // check ob korrektes JSON Array
-						if (lastResponse !== response) {
-							if (this.state == STATES.Connected) {
-								this.parseResponse(response);
-								lastResponse = response;
-							} else {
-								this.logDebug('Received data in wrong state ' + this.state + '. Skip.', true);
-							}
+						if (this.state == STATES.Connected) {
+							parseQueue.push(response);
 						} else {
-							this.logData('Skip duplicate response', response);
+							this.logDebug('Received data in wrong state ' + this.state + '. Skip.', true);
 						}
+
 					} catch (e) {
 						this.logData('onData: invalid json (error: ' + e.message + ')', response);
 						this.unfinished_responses += responses[r];
 					}
 				}
+			}
+			const uniqueParseQueue = parseQueue.filter((value, index) => {
+				const _value = JSON.stringify(value);
+				return index === parseQueue.findIndex(obj => {
+					return JSON.stringify(obj) === _value;
+				});
+			});
+			for (let q = 0; q < uniqueParseQueue.length; q++) {
+				this.parseResponse(uniqueParseQueue[q]);
 			}
 			// wenn weitere Msg zum Senden vorhanden sind, die nächste senden
 			if (this.msgs.length > 0) {
