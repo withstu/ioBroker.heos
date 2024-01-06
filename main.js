@@ -1974,8 +1974,8 @@ class Heos extends utils.Adapter {
 
 			callback && callback();
 		} else {
-			this.logError('invalid filename specified');
-			callback && callback('invalid filename specified');
+			this.logError('invalid tts url specified');
+			callback && callback('invalid tts url specified');
 		}
 	}
 
