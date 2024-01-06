@@ -340,7 +340,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 ## License
 MIT License
 
-Copyright (c) 2023 withstu <withstu@gmx.de>
+Copyright (c) 2024 withstu <withstu@gmx.de>
 
 derived from https://forum.iobroker.net/topic/10420/vorlage-denon-heos-script by Uwe Uhula
 TTS derived from https://github.com/ioBroker/ioBroker.sonos
