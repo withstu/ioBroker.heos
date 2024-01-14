@@ -144,7 +144,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 2.2.1 (2024-01-14)
 * (withstu) add workaround for node 19+ ECONNRESET bug #299
 
 ### 2.2.0 (2024-01-06)

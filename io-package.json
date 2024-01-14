@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "2.2.0",
+    "version": "2.2.1",
     "news": {
+      "2.2.1": {
+        "en": "add workaround for node 19+ ECONNRESET bug #299",
+        "de": "workaround für Knoten hinzufügen 19+ ECONNRESET Bug #299",
+        "ru": "добавить обход для узла 19+ ECONNRESET bug #299",
+        "pt": "adicionar solução para o nó 19+ ECONNRESET bug #299",
+        "nl": "workaround toevoegen voor knooppunt 19+ ECONNRESET bug #299",
+        "fr": "ajouter une solution de rechange pour le noeud 19+ bug ECONNRESET #299",
+        "it": "aggiungere il lavoro per nodo 19+ ECONNRESET bug #299",
+        "es": "añadir trabajo alrededor del nodo 19+ ECONNRESET bug #299",
+        "pl": "dodaj pracę dla węzła 19 + ECONNRESET błąd # 299",
+        "uk": "add workaround для вершини 19+ ECONNRESET помилка #299",
+        "zh-cn": "为节点添加工作环路 19+ 经济错误 # 299"
+      },
       "2.2.0": {
         "en": "update dependencies\nadd admin 5 UI support\nimprove preferred IP handling\nimprove undefined station handling #299\nreduce upnp requests",
         "de": "aktualisierung der abhängigkeiten\nadmin 5 UI Unterstützung hinzufügen\nverbesserung der bevorzugten IP-Behandlung\nundefinierte stationshandling #299 verbessern\nreduzieren von upp-anfragen",
@@ -80,19 +93,6 @@
         "pl": "lider optymalizacji wyborów",
         "uk": "оптимізація виборів лідера",
         "zh-cn": "优化领导人选举"
-      },
-      "1.12.0": {
-        "en": "optimize scope handling\nswitch to HEOS default cmd delimiter\nadd configuration to prefer list of IPs for adapter connection\noptimize error handling",
-        "de": "optimieren sie die handhabung des anwendungsbereichs\nschalter zu HEOS Standard cmd Begrenzung\nkonfiguration hinzufügen, um die Liste der IPs für Adapteranschluss zu bevorzugen\noptimierung der fehlerbehandlung",
-        "ru": "оптимизация обработки сфер\nпереключиться на HEOS по умолчанию cmd delimiter\nдобавить конфигурацию, чтобы предпочитать список IP для подключения адаптера\nоптимизировать обработку ошибок",
-        "pt": "otimizar o gerenciamento de escopo\nmudar para delimitador cmd padrão HEOS\nadicionar configuração para preferir lista de IPs para conexão de adaptador\notimizar o manuseio de erros",
-        "nl": "vertaling:\nwissel naar HOS default cmd delimiter\nvoeg configuratie toe aan de lijst van IP's voor aanpassingsverbinding\nvertaling:",
-        "fr": "optimiser la manipulation de la portée\npasser à HEOS délimiteur cmd par défaut\najouter la configuration pour préférer la liste des IP pour la connexion d'adaptateur\noptimiser la manipulation des erreurs",
-        "it": "ottimizzare la gestione delle aree\npassare al delimitatore cmd predefinito HEOS\naggiungere la configurazione per preferire l'elenco degli IP per la connessione dell'adattatore\nottimizzare la gestione degli errori",
-        "es": "optimizar el manejo del alcance\nconmutación al delimitador por defecto HEOS cmd\nañadir configuración para preferir la lista de IPs para la conexión del adaptador\noptimizar el manejo del error",
-        "pl": "optymalizacja zakresu obsługi\nprzełącz do HEOS do domyślnie cm delimiter\ndodawanie konfiguracji do preferowania listy IP do połączenia adapterowego\noptymalizowanie błędów",
-        "uk": "оптимізація управління обсягами\nпереключення до HEOS за замовчуванням cmd delimiter\nдодати конфігурацію для вибору IP-адреси адаптера\nоптимізація обробки помилок",
-        "zh-cn": "优化处理范围\n转换到HEOS违约情况\n备选案文:\n优化错误处理"
       }
     },
     "titleLang": {
