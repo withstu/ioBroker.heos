@@ -195,11 +195,19 @@ class Heos extends utils.Adapter {
 	}
 
 	logDebug(msg, force) {
-		this.log.debug(msg);
+		if (!force && this.silent_log_mode) {
+			this.log.debug(msg);
+		} else {
+			this.log.debug(msg);
+		}
 	}
 
 	logSilly(msg, force) {
-		this.log.silly(msg);
+		if (!force && this.silent_log_mode) {
+			this.log.silly(msg);
+		} else {
+			this.log.silly(msg);
+		}
 	}
 
 	async onReady() {
@@ -708,7 +716,8 @@ class Heos extends utils.Adapter {
 	}
 
 	getAllIndexes(arr, val) {
-		let indexes = [], i;
+		const indexes = [];
+		let i;
 		for (i = 0; i < arr.length; i++)
 			if (arr[i] === val)
 				indexes.push(i);
@@ -738,7 +747,7 @@ class Heos extends utils.Adapter {
 
 			const responses = data.split(/(?={"heos")/g);
 
-			let parseQueue = [];
+			const parseQueue = [];
 			for (let r = 0; r < responses.length; r++) {
 				if (responses[r].trim().length > 0) {
 					const response = responses[r].trim();
@@ -781,7 +790,7 @@ class Heos extends utils.Adapter {
 				try {
 					entry = decodeURI(entry);
 				} catch (e) {
-					// ignore a malformed URI
+					this.logSilly('ignore a malformed URI: ' + e);
 				}
 				const param = entry.split('=');
 				if (param.length > 1) {
@@ -1330,7 +1339,7 @@ class Heos extends utils.Adapter {
 								if (jmsg.hasOwnProperty('level')) {
 									const leadHeosPlayer = this.players[jmsg.gid];
 									if (leadHeosPlayer) {
-										var memberPids = leadHeosPlayer.group_pid.split(',');
+										const memberPids = leadHeosPlayer.group_pid.split(',');
 										for (let i = 0; i < memberPids.length; i++) {
 											const pid = memberPids[i];
 											const heosPlayer = this.players[pid];
@@ -1343,7 +1352,7 @@ class Heos extends utils.Adapter {
 								if (jmsg.hasOwnProperty('mute')) {
 									const leadHeosPlayer = this.players[jmsg.gid];
 									if (leadHeosPlayer) {
-										var memberPids = leadHeosPlayer.group_pid.split(',');
+										const memberPids = leadHeosPlayer.group_pid.split(',');
 										for (let i = 0; i < memberPids.length; i++) {
 											const pid = memberPids[i];
 											const heosPlayer = this.players[pid];
@@ -1384,7 +1393,7 @@ class Heos extends utils.Adapter {
 					switch (cmd) {
 						case 'get_music_sources':
 							if ((jdata.hasOwnProperty('payload'))) {
-								var folderPath = 'sources';
+								const folderPath = 'sources';
 								//Folder
 								await this.setObjectAsync(folderPath, {
 									type: 'folder',
@@ -1531,9 +1540,9 @@ class Heos extends utils.Adapter {
 
 								//Load previous
 								if (jmsg.returned < jmsg.count) {
-									var start = 1;
-									var end = 50;
-									var pageCmd = '';
+									let start = 1;
+									let end = 50;
+									let pageCmd = '';
 									if (jmsg.hasOwnProperty('range')) {
 										const range = jmsg.range.split(',');
 										start = parseInt(range[0]) + 1;
@@ -1567,9 +1576,10 @@ class Heos extends utils.Adapter {
 									}
 								}
 
+								let folderPath = '';
 								switch (sid) {
 									case 1025:
-										var folderPath = 'sources.1025';
+										folderPath = 'sources.1025';
 										//Folder
 										const playlists = [];
 										for (i = 0; i < jdata.payload.length; i++) {
@@ -1609,7 +1619,7 @@ class Heos extends utils.Adapter {
 										}
 										break;
 									case 1028:
-										var folderPath = 'sources.1028';
+										folderPath = 'sources.1028';
 										//Folder
 										const presets = [];
 										for (i = 0; i < jdata.payload.length; i++) {
@@ -1670,9 +1680,9 @@ class Heos extends utils.Adapter {
 
 								//Load next
 								if (jmsg.returned < jmsg.count) {
-									var start = 1;
-									var end = 50;
-									var pageCmd = '';
+									let start = 1;
+									let end = 50;
+									let pageCmd = '';
 									if (jmsg.hasOwnProperty('range')) {
 										const range = jmsg.range.split(',');
 										start = parseInt(range[0]) + 1;
@@ -1728,7 +1738,7 @@ class Heos extends utils.Adapter {
 								if (jmsg.hasOwnProperty('level')) {
 									const leadHeosPlayer = this.players[jmsg.gid];
 									if (leadHeosPlayer) {
-										var memberPids = leadHeosPlayer.group_pid.split(',');
+										const memberPids = leadHeosPlayer.group_pid.split(',');
 										for (let i = 0; i < memberPids.length; i++) {
 											const pid = memberPids[i];
 											const heosPlayer = this.players[pid];
@@ -1747,7 +1757,7 @@ class Heos extends utils.Adapter {
 								if (jmsg.hasOwnProperty('state')) {
 									const leadHeosPlayer = this.players[jmsg.gid];
 									if (leadHeosPlayer) {
-										var memberPids = leadHeosPlayer.group_pid.split(',');
+										const memberPids = leadHeosPlayer.group_pid.split(',');
 										for (let i = 0; i < memberPids.length; i++) {
 											const pid = memberPids[i];
 											const heosPlayer = this.players[pid];
@@ -2000,7 +2010,7 @@ class Heos extends utils.Adapter {
 			for (let i = 0; i < payload.length; i++) {
 				let playerConnected = true;
 				const player = payload[i];
-				var pid = player.pid + ''; //Convert to String
+				const pid = player.pid + ''; //Convert to String
 				if (player.hasOwnProperty('ip') && player.ip != '127.0.0.1') {
 					foundPlayerIps.push(player.ip);
 				}
@@ -2046,8 +2056,8 @@ class Heos extends utils.Adapter {
 				}
 			}
 			//Remove disconnected players && Update reboot times for not connected players
-			let connectedPlayerIps = [];
-			for (var pid in this.players) {
+			const connectedPlayerIps = [];
+			for (const pid in this.players) {
 				if (!connectedPlayers.includes(pid)) {
 					await this.stopPlayer(pid);
 				} else {
@@ -2953,13 +2963,17 @@ class Heos extends utils.Adapter {
 				this.registerChangeEvents(false);
 				this.net_client.destroy();
 				this.net_client.unref();
-			}catch(e){}
+			}catch(e){
+				this.logSilly('disconnect failed: ' + e);
+			}
 			this.net_client = undefined;
 		}
 		if (typeof this.nodessdp_client !== 'undefined') {
 			try {
 				this.nodessdp_client.stop();
-			}catch(e){}
+			}catch(e){
+				this.logSilly('nodessdp client stop failed: ' + e);
+			}
 			this.nodessdp_client = undefined;
 		}
 		await this.setStateAsync('error', false, true);
