@@ -147,6 +147,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 ### **WORK IN PROGRESS**
 * (withstu) add workaround for tidal connect sid = 0 bug and fix audio format
 * (withstu) increase minimum node.js version to recommended version 18
+* (withstu) project maintenance
 
 ### 2.2.1 (2024-01-14)
 * (withstu) add workaround for node 19+ ECONNRESET bug #299
