@@ -2025,9 +2025,9 @@ class Heos extends utils.Adapter {
 						if (this.preferred_player_ips.length > 0
 							&& this.preferred_player_ips.indexOf(this.ip) === -1
 							&& this.preferred_player_ips.indexOf(player.ip) !== -1) {
-								this.manual_search_mode = true;
-								this.logInfo('preferred player ' + player.ip + ' found. Reconnect.');
-								this.reconnect();
+							this.manual_search_mode = true;
+							this.logInfo('preferred player ' + player.ip + ' found. Reconnect.');
+							this.reconnect();
 						}
 						try {
 							await heosPlayer.connect();
