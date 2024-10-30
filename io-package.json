@@ -55,19 +55,6 @@
         "uk": "кріплення трубопроводів і видалення вузла 14.x",
         "zh-cn": "f 配件和取消14x的支助"
       },
-      "1.12.3": {
-        "en": "update dependencies",
-        "de": "aktualisierung der abhängigkeiten",
-        "ru": "обновление зависимостей",
-        "pt": "dependências",
-        "nl": "vertaling:",
-        "fr": "mettre à jour les dépendances",
-        "it": "aggiornamento dipendenze",
-        "es": "dependencias de actualización",
-        "pl": "zależności",
-        "uk": "оновлення залежності",
-        "zh-cn": "a. 最新受扶养人"
-      },
       "1.12.2": {
         "en": "optimize error handling",
         "de": "optimierung der fehlerbehandlung",
@@ -127,9 +114,11 @@
     "keywords": [
       "HEOS"
     ],
-    "license": "MIT",
+    "licenseInformation": {
+      "license": "MIT",
+      "type": "free"
+    },
     "platform": "Javascript/Node.js",
-    "main": "main.js",
     "icon": "heos.png",
     "enabled": true,
     "extIcon": "https://raw.githubusercontent.com/withstu/ioBroker.heos/main/admin/heos.png",
@@ -141,12 +130,13 @@
     "compact": true,
     "connectionType": "local",
     "dataSource": "poll",
+    "tier": 2,
     "adminUI": {
       "config": "json"
     },
     "dependencies": [
       {
-        "js-controller": ">=3.3.22"
+        "js-controller": ">=5.0.19"
       }
     ],
     "globalDependencies": [
