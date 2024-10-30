@@ -144,6 +144,9 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (withstu) fix audio format
+
 ### 2.2.2 (2024-10-30)
 * (withstu) add workaround for tidal connect sid = 0 bug and fix audio format
 * (withstu) increase minimum node.js version to recommended version 18
