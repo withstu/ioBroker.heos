@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "2.2.1",
+    "version": "2.2.2",
     "news": {
+      "2.2.2": {
+        "en": "add workaround for tidal connect sid = 0 bug and fix audio format\nincrease minimum node.js version to recommended version 18\nproject maintenance",
+        "de": "fügen sie workaround für tidal connect sid = 0 bug hinzu und reparieren sie audioformat\nminimal node.js-version auf empfohlene version 18 erhöhen\nprojektwartung",
+        "ru": "добавить обход для приливного соединения sid = 0 клопов и исправить аудио формат\nувеличить минимальную версию node.js до рекомендуемой версии 18\nтехническое обслуживание проекта",
+        "pt": "adicionar solução alternativa para tidal conectar sid = 0 bug e corrigir o formato de áudio\naumentar a versão node.js mínima para a versão recomendada 18\nmanutenção do projeto",
+        "nl": "toe te voegen workaround voor getijdenverbinding sid = 0 bug en fix audio-formaat\nverhoog minimum node.js versie naar aanbevolen versie 18\nprojectonderhoud",
+        "fr": "ajouter une solution de rechange pour la connexion de marée sid = 0 bug et corriger le format audio\naugmenter la version minimum node.js à la version recommandée 18\nentretien des projets",
+        "it": "aggiungere workaround per tidal connect sid = 0 bug e correggere il formato audio\naumentare la versione minima node.js alla versione consigliata 18\nmanutenzione del progetto",
+        "es": "añadir workaround for tidal connect sid = 0 bug and fix audio format\naumentar la versión mínima node.js a la versión recomendada 18\nmantenimiento de proyectos",
+        "pl": "dodaj pracę dla połączenia pływowego sid = 0 błędów i napraw format audio\nzwiększenie minimalnej wersji node.js do zalecanej wersji 18\nutrzymanie projektu",
+        "uk": "add workaround for tidal connection sid = 0 помилка і виправити аудіо формат\nзбільшити мінімальний вузол.js версія для рекомендованої версії 18\nсупровід проекту",
+        "zh-cn": "添加潮汐连接 sid = 0 bug 的绕行并修正音频格式\n将最小节点.js版本增加到建议版本18\n项目维护"
+      },
       "2.2.1": {
         "en": "add workaround for node 19+ ECONNRESET bug #299",
         "de": "workaround für Knoten hinzufügen 19+ ECONNRESET Bug #299",
