@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "2.2.2",
+    "version": "2.2.3",
     "news": {
+      "2.2.3": {
+        "en": "fix audio format",
+        "de": "audioformat anpassen",
+        "ru": "аудио формат",
+        "pt": "corrigir o formato de áudio",
+        "nl": "vast audioformaat",
+        "fr": "correction du format audio",
+        "it": "correzione del formato audio",
+        "es": "formato de audio",
+        "pl": "naprawić format audio",
+        "uk": "фіксувати аудіо формат",
+        "zh-cn": "固定音频格式"
+      },
       "2.2.2": {
         "en": "add workaround for tidal connect sid = 0 bug and fix audio format\nincrease minimum node.js version to recommended version 18\nproject maintenance",
         "de": "fügen sie workaround für tidal connect sid = 0 bug hinzu und reparieren sie audioformat\nminimal node.js-version auf empfohlene version 18 erhöhen\nprojektwartung",
@@ -80,19 +93,6 @@
         "pl": "optymalizowanie błędów",
         "uk": "оптимізація обробки помилок",
         "zh-cn": "优化错误处理"
-      },
-      "1.12.1": {
-        "en": "optimize leader election",
-        "de": "optimieren sie die wahl",
-        "ru": "оптимизировать выборы лидеров",
-        "pt": "otimizar a eleição do líder",
-        "nl": "vertaling:",
-        "fr": "optimiser le leadership électoral",
-        "it": "ottimizzare le elezioni leader",
-        "es": "optimizar las elecciones líderes",
-        "pl": "lider optymalizacji wyborów",
-        "uk": "оптимізація виборів лідера",
-        "zh-cn": "优化领导人选举"
       }
     },
     "titleLang": {
