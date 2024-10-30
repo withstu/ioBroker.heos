@@ -1,14 +1,5 @@
 export default [
 	{
-		"env": {
-			"es6": true,
-			"node": true,
-			"mocha": true
-		},
-		"extends": [
-			"eslint:recommended"
-		],
-		"plugins": [],
 		"rules": {
 			"indent": [
 				"error",
@@ -41,8 +32,5 @@ export default [
 				"always"
 			]
 		},
-		"parserOptions": {
-			"ecmaVersion": 2020
-		}
 	}
 ];
