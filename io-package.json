@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "2.2.3",
+    "version": "2.2.4",
     "news": {
+      "2.2.4": {
+        "en": "improve tidal connect workaround",
+        "de": "verbesserung der tidal-verbindung workaround",
+        "ru": "улучшить приливное подключение обход",
+        "pt": "melhorar a ligação de maré",
+        "nl": "verbetering van de getijdenverbinding",
+        "fr": "améliorer la solution de rechange pour la connexion marémotrice",
+        "it": "migliorare la connessione tidale",
+        "es": "mejorar la unión de marea",
+        "pl": "poprawić pracę połączeń pływowych",
+        "uk": "поліпшити роботу з під'єднання tidal",
+        "zh-cn": "改进潮汐连接工作"
+      },
       "2.2.3": {
         "en": "fix audio format",
         "de": "audioformat anpassen",
@@ -80,19 +93,6 @@
         "pl": "ustawienie rurociągów i usunięcie węzła 14x",
         "uk": "кріплення трубопроводів і видалення вузла 14.x",
         "zh-cn": "f 配件和取消14x的支助"
-      },
-      "1.12.2": {
-        "en": "optimize error handling",
-        "de": "optimierung der fehlerbehandlung",
-        "ru": "оптимизировать обработку ошибок",
-        "pt": "otimizar o manuseio de erros",
-        "nl": "vertaling:",
-        "fr": "optimiser la manipulation des erreurs",
-        "it": "ottimizzare la gestione degli errori",
-        "es": "optimizar el manejo del error",
-        "pl": "optymalizowanie błędów",
-        "uk": "оптимізація обробки помилок",
-        "zh-cn": "优化错误处理"
       }
     },
     "titleLang": {
