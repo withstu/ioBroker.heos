@@ -1779,18 +1779,7 @@ class Heos extends utils.Adapter {
 						//               {"name":"'group name 2'","gid":"group id 2'",
 						//                "players":[{"name":"player name ...
 						case 'get_groups':
-							// bisherige groups leeren
-							for (const pid in this.players) {
-								const player = this.players[pid];
-								if (player) {
-									await player.setGroupName('');
-									await player.setGroupPid('');
-									await player.setGroupLeaderPid('');
-									await player.setGroupLeader(false);
-									await player.setGroupMember(false);
-								}
-							}
-
+							const updatedGroupPids = [];
 							// payload mit den groups auswerten
 							if ((jdata.hasOwnProperty('payload'))) {
 								for (i = 0; i < jdata.payload.length; i++) {
@@ -1799,12 +1788,24 @@ class Heos extends utils.Adapter {
 									// Player IDs addieren. Hinweis: "leader" ist nicht immer der 1.Playereintrag
 									group.pid = '';
 									for (let p = 0; p < players.length; p++) {
+										updatedGroupPids.push(players[p].pid + '');
 										if (players[p].role == 'leader')
 											group.pid = players[p].pid + (group.pid.length > 0 ? ',' : '') + group.pid;
 										else
 											group.pid = group.pid + (group.pid.length > 0 ? ',' : '') + players[p].pid;
 									}
 									this.setGroup(group);
+								}
+							}
+							//reset groups of non group pids
+							for (const pid in this.players) {
+								const player = this.players[pid];
+								if (player && !(updatedGroupPids.includes(pid))) {
+									await player.setGroupName('');
+									await player.setGroupPid('');
+									await player.setGroupLeaderPid('');
+									await player.setGroupLeader(false);
+									await player.setGroupMember(false);
 								}
 							}
 							break;

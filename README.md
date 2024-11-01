@@ -144,6 +144,9 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (withstu) improve group state updates
+
 ### 2.2.4 (2024-10-31)
 * (withstu) improve tidal connect workaround
 
