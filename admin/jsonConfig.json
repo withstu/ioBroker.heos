@@ -83,7 +83,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "_header_comfort": {
                     "type": "header",
