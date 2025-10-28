@@ -16,7 +16,7 @@ const { STATES, ERROR_CODES } = require('./lib/constants');
 
 class Heos extends utils.Adapter {
     /**
-     * @param {Partial<utils.AdapterOptions>} [options]
+     * @param {Partial<utils.AdapterOptions>} [options] options
      */
     constructor(options) {
         super({
@@ -386,8 +386,8 @@ class Heos extends utils.Adapter {
     /**
      * Is called if a subscribed state changes
      *
-     * @param {string} _id
-     * @param {ioBroker.State | null | undefined} state
+     * @param {string} _id _id
+     * @param {ioBroker.State | null | undefined} state state
      */
     onStateChange(_id, state) {
         if (!state || state.ack) {
@@ -581,7 +581,7 @@ class Heos extends utils.Adapter {
      * Some message was sent to this instance over message box. Used by email, pushover, text2speech, ...
      * Using this method requires "common.message" property to be set to true in io-package.json
      *
-     * @param {ioBroker.Message} obj
+     * @param {ioBroker.Message} obj obj
      */
     onMessage(obj) {
         if (typeof obj === 'object' && obj.message) {
@@ -774,7 +774,7 @@ class Heos extends utils.Adapter {
      * {"container": "no", "mid": "catalog/stations/A1O1J39JGVQ9U1/#chunk", "type": "station", "playable": "yes", "name": "Passenger", "image_url": "https://images-na.ssl-images-amazon.com/images/I/71DsYkU4QaL._SY500_CR150,0,488,488_SX200_SY200_.jpg"},
      * {"container": "no", "mid": "catalog/stations/A1W7U8U71CGE50/#chunk"
      *
-     * @param data
+     * @param data data
      */
     onData(data) {
         this.logData('onData', data);
@@ -1287,7 +1287,7 @@ class Heos extends utils.Adapter {
     /**
      * Antwort(en) verarbeiten.
      *
-     * @param response
+     * @param response response
      */
     async parseResponse(response) {
         try {
@@ -1304,7 +1304,10 @@ class Heos extends utils.Adapter {
 
             let i;
             const jdata = JSON.parse(response);
-            if (!jdata.hasOwnProperty('heos') || !jdata.heos.hasOwnProperty('command')) {
+            if (
+                !Object.prototype.hasOwnProperty.call(jdata, 'heos') ||
+                !Object.prototype.hasOwnProperty.call(jdata.heos, 'command')
+            ) {
                 return;
             }
 
@@ -1321,7 +1324,7 @@ class Heos extends utils.Adapter {
 
             // result ?
             let result = 'success';
-            if (jdata.heos.hasOwnProperty('result')) {
+            if (Object.prototype.hasOwnProperty.call(jdata.heos, 'result')) {
                 result = jdata.heos.result;
             }
             if (result != 'success') {
@@ -1359,6 +1362,7 @@ class Heos extends utils.Adapter {
                             //await this.setStateAsync('signed_in', true, true);
                             //await this.setStateAsync('signed_in_user', jmsg.un, true);
                             //this.getMusicSources();
+                            this.logInfo(`signed in: ${jdata.heos.result}`, false);
                             break;
                     }
                     break;
@@ -1389,8 +1393,8 @@ class Heos extends utils.Adapter {
                             break;
                         case 'group_volume_changed':
                             // "heos": {"command": "event/group_volume_changed ","message": "gid='group_id'&level='vol_level'&mute='on_or_off'"}
-                            if (jmsg.hasOwnProperty('gid')) {
-                                if (jmsg.hasOwnProperty('level')) {
+                            if (Object.prototype.hasOwnProperty.call(jmsg, 'gid')) {
+                                if (Object.prototype.hasOwnProperty.call(jmsg, 'level')) {
                                     const leadHeosPlayer = this.players[jmsg.gid];
                                     if (leadHeosPlayer) {
                                         const memberPids = leadHeosPlayer.group_pid.split(',');
@@ -1403,7 +1407,7 @@ class Heos extends utils.Adapter {
                                         }
                                     }
                                 }
-                                if (jmsg.hasOwnProperty('mute')) {
+                                if (Object.prototype.hasOwnProperty.call(jmsg, 'mute')) {
                                     const leadHeosPlayer = this.players[jmsg.gid];
                                     if (leadHeosPlayer) {
                                         const memberPids = leadHeosPlayer.group_pid.split(',');
@@ -1428,7 +1432,7 @@ class Heos extends utils.Adapter {
                         //              {"name": "HEOS 1 links", "pid": 68572158, "model": "HEOS 1", "version": "1.430.160", "ip": "192.168.2.219", "network": "wifi", "lineout": 0, "serial": "AMWG9170934433"}
                         //             ]}
                         case 'get_players':
-                            if (jdata.hasOwnProperty('payload')) {
+                            if (Object.prototype.hasOwnProperty.call(jdata, 'payload')) {
                                 this.startPlayers(jdata.payload);
                             }
                             break;
@@ -1446,7 +1450,7 @@ class Heos extends utils.Adapter {
                 case 'browse':
                     switch (cmd) {
                         case 'get_music_sources':
-                            if (jdata.hasOwnProperty('payload')) {
+                            if (Object.prototype.hasOwnProperty.call(jdata, 'payload')) {
                                 const folderPath = 'sources';
                                 //Folder
                                 await this.setObjectAsync(folderPath, {
@@ -1515,13 +1519,13 @@ class Heos extends utils.Adapter {
                         //              {"container": "no", "mid": "catalog/stations/A316JYMKQTS45I/#chunk", "type": "station", "playable": "yes", "name": "Johannes Oerding", "image_url": "https://images-na.ssl-images-amazon.com/images/G/01/Gotham/DE_artist/JohannesOerding._SX200_SY200_.jpg"}],
                         //  "options": [{"browse": [{"id": 20, "name": "Remove from HEOS Favorites"}]}]}
                         case 'browse':
-                            if (jdata.hasOwnProperty('payload')) {
+                            if (Object.prototype.hasOwnProperty.call(jdata, 'payload')) {
                                 const sid = parseInt(jmsg.sid, 10);
                                 const source = this.mapBrowseCmd(command, '', '', '');
-                                if (jmsg.hasOwnProperty('count')) {
+                                if (Object.prototype.hasOwnProperty.call(jmsg, 'count')) {
                                     jmsg.count = parseInt(jmsg.count);
                                 }
-                                if (jmsg.hasOwnProperty('returned')) {
+                                if (Object.prototype.hasOwnProperty.call(jmsg, 'returned')) {
                                     jmsg.returned = parseInt(jmsg.returned);
                                 }
                                 const browseResult = {
@@ -1596,7 +1600,7 @@ class Heos extends utils.Adapter {
                                     let start = 1;
                                     let end = 50;
                                     let pageCmd = '';
-                                    if (jmsg.hasOwnProperty('range')) {
+                                    if (Object.prototype.hasOwnProperty.call(jmsg, 'range')) {
                                         const range = jmsg.range.split(',');
                                         start = parseInt(range[0]) + 1;
                                         end = parseInt(range[1]) + 1;
@@ -1629,7 +1633,7 @@ class Heos extends utils.Adapter {
 
                                 let folderPath = '';
                                 switch (sid) {
-                                    case 1025:
+                                    case 1025: {
                                         folderPath = 'sources.1025';
                                         //Folder
                                         const playlists = [];
@@ -1674,7 +1678,8 @@ class Heos extends utils.Adapter {
                                             });
                                         }
                                         break;
-                                    case 1028:
+                                    }
+                                    case 1028: {
                                         folderPath = 'sources.1028';
                                         //Folder
                                         const presets = [];
@@ -1718,6 +1723,7 @@ class Heos extends utils.Adapter {
                                             });
                                         }
                                         break;
+                                    }
                                     default:
                                         //Add payload items
                                         for (i = 0; i < jdata.payload.length; i++) {
@@ -1740,7 +1746,7 @@ class Heos extends utils.Adapter {
                                     let start = 1;
                                     let end = 50;
                                     let pageCmd = '';
-                                    if (jmsg.hasOwnProperty('range')) {
+                                    if (Object.prototype.hasOwnProperty.call(jmsg, 'range')) {
                                         const range = jmsg.range.split(',');
                                         start = parseInt(range[0]) + 1;
                                         end = parseInt(range[1]) + 1;
@@ -1789,8 +1795,8 @@ class Heos extends utils.Adapter {
 
                         // { "heos": {"command":"group/get_volume","result":"success","message": "gid='group_id'&level='vol_level'"}
                         case 'get_volume':
-                            if (jmsg.hasOwnProperty('gid')) {
-                                if (jmsg.hasOwnProperty('level')) {
+                            if (Object.prototype.hasOwnProperty.call(jmsg, 'gid')) {
+                                if (Object.prototype.hasOwnProperty.call(jmsg, 'level')) {
                                     const leadHeosPlayer = this.players[jmsg.gid];
                                     if (leadHeosPlayer) {
                                         const memberPids = leadHeosPlayer.group_pid.split(',');
@@ -1808,8 +1814,8 @@ class Heos extends utils.Adapter {
 
                         // { "heos": {"command":"group/get_mute","result":"success","message": "gid='group_id'&state='on_or_off'"}
                         case 'get_mute':
-                            if (jmsg.hasOwnProperty('gid')) {
-                                if (jmsg.hasOwnProperty('state')) {
+                            if (Object.prototype.hasOwnProperty.call(jmsg, 'gid')) {
+                                if (Object.prototype.hasOwnProperty.call(jmsg, 'state')) {
                                     const leadHeosPlayer = this.players[jmsg.gid];
                                     if (leadHeosPlayer) {
                                         const memberPids = leadHeosPlayer.group_pid.split(',');
@@ -1833,10 +1839,10 @@ class Heos extends utils.Adapter {
                         //               },
                         //               {"name":"'group name 2'","gid":"group id 2'",
                         //                "players":[{"name":"player name ...
-                        case 'get_groups':
+                        case 'get_groups': {
                             const updatedGroupPids = [];
                             // payload mit den groups auswerten
-                            if (jdata.hasOwnProperty('payload')) {
+                            if (Object.prototype.hasOwnProperty.call(jdata, 'payload')) {
                                 for (i = 0; i < jdata.payload.length; i++) {
                                     const group = jdata.payload[i];
                                     const players = group.players;
@@ -1865,20 +1871,13 @@ class Heos extends utils.Adapter {
                                 }
                             }
                             break;
-                    }
-                    break;
-
-                case 'system':
-                    switch (cmd) {
-                        case 'sign_in':
-                            this.logInfo(`signed in: ${jdata.heos.result}`, false);
-                            break;
+                        }
                     }
                     break;
             }
 
             // an die zugehörigen Player weiterleiten
-            if (jmsg.hasOwnProperty('pid')) {
+            if (Object.prototype.hasOwnProperty.call(jmsg, 'pid')) {
                 const heosPlayer = this.players[jmsg.pid];
                 if (heosPlayer) {
                     heosPlayer.parseResponse(jdata, jmsg, cmd_group, cmd);
@@ -1900,25 +1899,25 @@ class Heos extends utils.Adapter {
         let container = false;
         let type;
 
-        if (message.hasOwnProperty('sid')) {
+        if (Object.prototype.hasOwnProperty.call(message, 'sid')) {
             msid = message.sid;
         }
-        if (payload.hasOwnProperty('sid')) {
+        if (Object.prototype.hasOwnProperty.call(payload, 'sid')) {
             psid = payload.sid;
         }
-        if (message.hasOwnProperty('cid')) {
+        if (Object.prototype.hasOwnProperty.call(message, 'cid')) {
             mcid = message.cid;
         }
-        if (payload.hasOwnProperty('cid')) {
+        if (Object.prototype.hasOwnProperty.call(payload, 'cid')) {
             pcid = payload.cid;
         }
-        if (payload.hasOwnProperty('mid')) {
+        if (Object.prototype.hasOwnProperty.call(payload, 'mid')) {
             mid = payload.mid;
         }
-        if (payload.hasOwnProperty('type')) {
+        if (Object.prototype.hasOwnProperty.call(payload, 'type')) {
             type = payload.type;
         }
-        if (payload.hasOwnProperty('playable')) {
+        if (Object.prototype.hasOwnProperty.call(payload, 'playable')) {
             playable = payload.playable == 'yes' ? true : false;
         }
         if (Object.prototype.hasOwnProperty.call(payload, 'container')) {
@@ -2017,9 +2016,9 @@ class Heos extends utils.Adapter {
     /**
      * Adapted from https://github.com/ioBroker/ioBroker.sonos
      *
-     * @param {*} fileName
-     * @param pid
-     * @param {*} callback
+     * @param {*} fileName fileName
+     * @param pid pid
+     * @param {*} callback callback
      */
     text2speech(fileName, pid, callback) {
         this.logInfo(`TTS: ${fileName} | PID: ${pid}`, false);
@@ -2055,8 +2054,9 @@ class Heos extends utils.Adapter {
     }
 
     /**
+     * stopPlayer
      *
-     * @param {string} pid
+     * @param {string} pid Pid
      */
     async stopPlayer(pid) {
         const player = this.players[pid];
@@ -2990,7 +2990,7 @@ class Heos extends utils.Adapter {
                 ips = [];
                 ips.push(key);
                 failures = this.leader_failure_counter[key];
-            } else if (this.leader_failure_counter[key] > failures) {
+            } else if (this.leader_failure_counter[key] == failures) {
                 ips.push(key);
             }
         }
@@ -3113,11 +3113,11 @@ class Heos extends utils.Adapter {
     }
 }
 
-// @ts-ignore parent is a valid property on module
+// @ts-expect-error parent is a valid property on module
 if (module.parent) {
     // Export the constructor in compact mode
     /**
-     * @param {Partial<utils.AdapterOptions>} [options]
+     * @param {Partial<utils.AdapterOptions>} [options] Options
      */
     module.exports = options => new Heos(options);
 } else {
