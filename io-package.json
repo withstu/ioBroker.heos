@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "2.2.4",
+    "version": "3.0.0",
     "news": {
+      "3.0.0": {
+        "en": "improve group state updates\nupgrade several packages",
+        "de": "verbesserung der gruppenstatus-updates\nmehrere pakete aktualisieren",
+        "ru": "улучшение групповых обновлений состояния\nобновление нескольких пакетов",
+        "pt": "melhorar as atualizações do estado do grupo\natualizar vários pacotes",
+        "nl": "groepstoestand updates verbeteren\nmeerdere pakketten upgraden",
+        "fr": "améliorer les mises à jour de l'état du groupe\nmise à jour de plusieurs paquets",
+        "it": "migliorare gli aggiornamenti di stato del gruppo\naggiornare diversi pacchetti",
+        "es": "mejorar las actualizaciones del estado de grupo\nactualizar varios paquetes",
+        "pl": "poprawić aktualizacje stanu grupy\nupgrade kilka pakietów",
+        "uk": "поліпшення оновлення групового стану\nоновлення декількох пакетів",
+        "zh-cn": "改进组状态更新\n升级多个软件包"
+      },
       "2.2.4": {
         "en": "improve tidal connect workaround",
         "de": "verbesserung der tidal-verbindung workaround",
@@ -80,19 +93,6 @@
         "pl": "zastępować\npoprawić\nlinkować",
         "uk": "заміну отримав з аксіосом\nполіпшити процес обробки\nзапобігання дублікатів повідомлень з'єднання",
         "zh-cn": "改为\n改进处理\n防止信息重复"
-      },
-      "2.0.0": {
-        "en": "fix pipelines and remove node 14.x support",
-        "de": "pipelines fixieren und knoten 14.x-unterstützung entfernen",
-        "ru": "исправить трубопроводы и удалить node 14.x поддержка",
-        "pt": "corrigir pipelines e remover o nó 14.x suporte",
-        "nl": "verwijder node 14.x ondersteuning",
-        "fr": "fixer les pipelines et retirer le support node 14.x",
-        "it": "fissare le tubazioni e rimuovere il supporto nodo 14.x",
-        "es": "arreglar los oleoductos y eliminar el nodo 14.x soporte",
-        "pl": "ustawienie rurociągów i usunięcie węzła 14x",
-        "uk": "кріплення трубопроводів і видалення вузла 14.x",
-        "zh-cn": "f 配件和取消14x的支助"
       }
     },
     "titleLang": {
