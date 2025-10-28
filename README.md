@@ -146,6 +146,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 -->
 ### **WORK IN PROGRESS**
 * (withstu) improve group state updates
+* (withstu) upgrade several packages
 
 ### 2.2.4 (2024-10-31)
 * (withstu) improve tidal connect workaround

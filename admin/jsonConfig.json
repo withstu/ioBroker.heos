@@ -21,7 +21,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "password": {
                     "type": "password",
@@ -31,7 +32,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 }
             }
         },
@@ -52,6 +54,7 @@
                     "sm": 12,
                     "md": 6,
                     "lg": 6,
+                    "xl": 6,
                     "options": [
                       {"value": "1", "label": "play_now"},
                       {"value": "2", "label": "play_next"},
@@ -67,6 +70,7 @@
                     "sm": 12,
                     "md": 6,
                     "lg": 6,
+                    "xl": 6,
                     "options": [
                       {"value": "all", "label": "all_player"},
                       {"value": "leader", "label": "all_leading_and_nongroup_player"},
@@ -83,7 +87,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "_header_comfort": {
                     "type": "header",
@@ -97,7 +102,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "autoPlayCmd": {
                     "type": "text",
@@ -106,7 +112,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "muteOnRegex": {
                     "type": "checkbox",
@@ -115,7 +122,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "muteRegex": {
                     "type": "text",
@@ -124,7 +132,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "rebootOnFailure": {
                     "type": "checkbox",
@@ -133,7 +142,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 }
             }
         },
@@ -154,7 +164,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "heartbeatRetries": {
                     "type": "number",
@@ -164,7 +175,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "_header_search": {
                     "type": "header",
@@ -179,7 +191,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "searchInterval": {
                     "type": "number",
@@ -189,7 +202,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "_header_reconnect": {
                     "type": "header",
@@ -204,7 +218,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "_header_request": {
                     "type": "header",
@@ -219,7 +234,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "_header_network": {
                     "type": "header",
@@ -234,7 +250,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 },
                 "preferredIPs": {
                     "type": "text",
@@ -243,7 +260,8 @@
                     "xs": 12,
                     "sm": 12,
                     "md": 6,
-                    "lg": 6
+                    "lg": 6,
+                    "xl": 6
                 }
             }
         }
