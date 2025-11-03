@@ -2,6 +2,7 @@
   "name": "iobroker.heos",
   "version": "3.0.0",
   "description": "The adapter lets control HEOS from ioBroker",
+  "type": "module",
   "author": {
     "name": "withstu",
     "email": "withstu@gmx.de"

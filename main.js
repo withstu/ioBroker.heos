@@ -7,12 +7,15 @@
  */
 'use strict';
 
-const utils = require('@iobroker/adapter-core');
+import * as utils from '@iobroker/adapter-core';
+import url from 'node:url';
 
-const net = require('net');
-const NodeSSDP = require('node-ssdp').Client;
-const HeosPlayer = require('./lib/heos-player');
-const { STATES, ERROR_CODES } = require('./lib/constants');
+import net from 'net';
+import SSDP from 'node-ssdp';
+import HeosPlayer from './lib/heos-player.js';
+import { STATES, ERROR_CODES } from './lib/constants.js';
+
+const NodeSSDP = SSDP.Client;
 
 class Heos extends utils.Adapter {
     /**
@@ -3112,15 +3115,15 @@ class Heos extends utils.Adapter {
         this.search();
     }
 }
-
-// @ts-expect-error parent is a valid property on module
-if (module.parent) {
-    // Export the constructor in compact mode
-    /**
-     * @param {Partial<utils.AdapterOptions>} [options] Options
-     */
-    module.exports = options => new Heos(options);
-} else {
-    // otherwise start the instance directly
+const modulePath = url.fileURLToPath(import.meta.url);
+if (process.argv[1] === modulePath) {
     new Heos();
+}
+/**
+ * startAdapter
+ *
+ * @param options options
+ */
+export default function startAdapter(options) {
+    return new Heos(options);
 }
