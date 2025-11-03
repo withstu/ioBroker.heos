@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "news": {
+      "3.0.2": {
+        "en": "fix tests",
+        "de": "fixtests",
+        "ru": "исправление",
+        "pt": "corrigir os testes",
+        "nl": "vastleggen van tests",
+        "fr": "essais de correction",
+        "it": "test di correzione",
+        "es": "pruebas de reparación",
+        "pl": "badania naprawcze",
+        "uk": "фіксувати тести",
+        "zh-cn": "固定测试"
+      },
       "3.0.1": {
         "en": "update vscode settings\nshift from commonjs to esm\nupdate packages",
         "de": "aktualisierung vscode-einstellungen\nverschiebung von commonjs zu esm\nupdate-pakete",
@@ -80,19 +93,6 @@
         "pl": "dodaj pracę dla węzła 19 + ECONNRESET błąd # 299",
         "uk": "add workaround для вершини 19+ ECONNRESET помилка #299",
         "zh-cn": "为节点添加工作环路 19+ 经济错误 # 299"
-      },
-      "2.2.0": {
-        "en": "update dependencies\nadd admin 5 UI support\nimprove preferred IP handling\nimprove undefined station handling #299\nreduce upnp requests",
-        "de": "aktualisierung der abhängigkeiten\nadmin 5 UI Unterstützung hinzufügen\nverbesserung der bevorzugten IP-Behandlung\nundefinierte stationshandling #299 verbessern\nreduzieren von upp-anfragen",
-        "ru": "обновление зависимостей\nadmin 5 Поддержка UI\nулучшение предпочтительной обработки IP\n#299\nуменьшить количество запросов",
-        "pt": "dependências\nadicionar suporte de administrador 5 UI\nmelhorar o manuseio IP preferido\nmelhorar o manuseio de estação indefinido #299\nreduzir pedidos de upnp",
-        "nl": "afhankelijkheden bijwerken\nadmin 5 UI-ondersteuning toevoegen\nverbeteren van voorkeur IP-behandeling\nverbetering van ongedefinieerde stationsafhandeling #299\nverzoeken om upnp verminderen",
-        "fr": "mettre à jour les dépendances\najouter admin 5 soutien UI\naméliorer la gestion de la propriété intellectuelle préférée\naméliorer la gestion de station non définie #299\nréduire les requêtes upnp",
-        "it": "aggiornamento dipendenze\naggiungere admin 5 supporto UI\nmigliorare la gestione IP preferita\nmigliorare la gestione delle stazioni non definite #299\nridurre le richieste di upnp",
-        "es": "dependencias de actualización\nadd admin 5 UI support\nmejorar el manejo IP preferido\nmejorar el manejo no definido de la estación #299\nreducir las solicitudes de respuesta",
-        "pl": "aktualizacji zależności\ndodaj obsługę interfejsu użytkownika admin 5\npoprawić preferowaną obsługę IP\npoprawić nieokreśloną obsługę stacji # 299\nzmniejszyć wnioski upnp",
-        "uk": "оновлення залежності\nдодати підтримку адміністратора 5 UI\nпокращувати кращий IP-сервіс\nполіпшити невизнане обслуговування станції #299\nзменшити кількість запитів",
-        "zh-cn": "更新依赖关系\n添加管理员 5 UI 支持\n改进首选的 IP 处理\n改进未定义的站台处理# 299\n减少上调请求"
       }
     },
     "titleLang": {
