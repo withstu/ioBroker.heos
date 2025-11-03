@@ -147,6 +147,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 ### **WORK IN PROGRESS**
 * (withstu) update vscode settings
 * (withstu) shift from commonjs to esm
+* (withstu) update packages
 
 ### 3.0.0 (2025-10-28)
 * (withstu) improve group state updates
