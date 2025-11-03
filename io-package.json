@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "3.0.0",
+    "version": "3.0.1",
     "news": {
+      "3.0.1": {
+        "en": "update vscode settings\nshift from commonjs to esm\nupdate packages",
+        "de": "aktualisierung vscode-einstellungen\nverschiebung von commonjs zu esm\nupdate-pakete",
+        "ru": "обновление vscode settings\nпереход от commonjs к esm\nобновление пакетов",
+        "pt": "atualizar configurações vscode\nmudar de commonjs para esm\natualizar pacotes",
+        "nl": "vscode instellingen bijwerken\nverschuiving van commonjs naar esm\npakketten bijwerken",
+        "fr": "mettre à jour les paramètres vscode\npassage de l'esprit commun à l'esprit\nmettre à jour les paquets",
+        "it": "impostazioni di aggiornamento vscode\npassare da commonjs a esm\npacchetti di aggiornamento",
+        "es": "actualización configuración de código vscode\nel cambio de commonjs a esm\nactualizar paquetes",
+        "pl": "aktualizacja ustawień vscode\nprzejście z commonjs na esm\naktualizacja pakietów",
+        "uk": "оновлення параметрів vscode\nзсув від звичайнихjs до esm\nоновлення пакетів",
+        "zh-cn": "更新 vscode 设置\n从 commonjs 转到 esm\n更新软件包"
+      },
       "3.0.0": {
         "en": "improve group state updates\nupgrade several packages",
         "de": "verbesserung der gruppenstatus-updates\nmehrere pakete aktualisieren",
@@ -80,19 +93,6 @@
         "pl": "aktualizacji zależności\ndodaj obsługę interfejsu użytkownika admin 5\npoprawić preferowaną obsługę IP\npoprawić nieokreśloną obsługę stacji # 299\nzmniejszyć wnioski upnp",
         "uk": "оновлення залежності\nдодати підтримку адміністратора 5 UI\nпокращувати кращий IP-сервіс\nполіпшити невизнане обслуговування станції #299\nзменшити кількість запитів",
         "zh-cn": "更新依赖关系\n添加管理员 5 UI 支持\n改进首选的 IP 处理\n改进未定义的站台处理# 299\n减少上调请求"
-      },
-      "2.1.0": {
-        "en": "replace got with axios\nimprove upnp handling\nprevent duplicate connect messages",
-        "de": "ersetzen mit axios\nverbesserte upnp-behandlung\ndoppelte verbindungsnachrichten verhindern",
-        "ru": "заменить получилось с axios\nулучшить работу upnp\nпредотвратить дублирование сообщений подключения",
-        "pt": "substituir adquirido com axios\nmelhorar o manuseio de upnp\nevitar mensagens de conexão duplicadas",
-        "nl": "vertaling:\nverbeter de bovenste hand\nverhinder dubbele berichten",
-        "fr": "remplacer obtenu par axios\naméliorer la manutention des ailes\nempêcher les messages de connexion",
-        "it": "sostituire ottenuto con assios\nmigliorare la gestione della upnp\nimpedire i messaggi di connessione duplicati",
-        "es": "reemplazado por axios\nmejorar el manejo de upnp\nevitar duplicados mensajes de conexión",
-        "pl": "zastępować\npoprawić\nlinkować",
-        "uk": "заміну отримав з аксіосом\nполіпшити процес обробки\nзапобігання дублікатів повідомлень з'єднання",
-        "zh-cn": "改为\n改进处理\n防止信息重复"
       }
     },
     "titleLang": {

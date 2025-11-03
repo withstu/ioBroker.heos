@@ -144,7 +144,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 3.0.1 (2025-11-03)
 * (withstu) update vscode settings
 * (withstu) shift from commonjs to esm
 * (withstu) update packages
