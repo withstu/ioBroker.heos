@@ -93,7 +93,7 @@
                 "_header_comfort": {
                     "type": "header",
                     "size": 2,
-                    "text": "comforts_settings"
+                    "text": "comfort_settings"
                 },
                 "autoPlay": {
                     "type": "checkbox",
