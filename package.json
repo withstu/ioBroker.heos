@@ -32,7 +32,7 @@
     "fast-xml-parser": "^5.3.3",
     "html-entities": "^2.5.2",
     "node-ssdp": "^4.0.1",
-    "node-vibrant": "^4.0.3"
+    "node-vibrant": "^4.0.4"
   },
   "devDependencies": {
     "@alcalzone/release-script": "^5.0.0",
