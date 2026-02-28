@@ -21,7 +21,7 @@
     "player_ids_in_state_command_scope_pid": "ID de joueur dans l'état command_scope_pid",
     "preferred_ip": "Adresses IP préférées pour la connexion, si la recherche automatique n'a pas abouti (séparées par des virgules)",
     "queue_settings": "Paramètres de file d'attente",
-    "eboot_on_failure": "Redémarrer, si une panne de périphérique est détectée",
+    "reboot_on_failure": "Redémarrer, si une panne de périphérique est détectée",
     "reconnect_timeout": "Délai de reconnexion",
     "request_timeout": "Expiration du délai de demande",
     "mute_regex": "Regex pour la mise en sourdine",

@@ -21,7 +21,7 @@
     "player_ids_in_state_command_scope_pid": "Identyfikatory graczy w stanie Command_scope_pid",
     "preferred_ip": "Preferowane adresy IP do połączenia, jeśli automatyczne wyszukiwanie nie powiodło się (oddzielone przecinkami)",
     "queue_settings": "Ustawienia kolejki",
-    "eboot_on_failure": "Uruchom ponownie, jeśli wykryta zostanie awaria urządzenia",
+    "reboot_on_failure": "Uruchom ponownie, jeśli wykryta zostanie awaria urządzenia",
     "reconnect_timeout": "Przekroczono limit czasu ponownego połączenia",
     "request_timeout": "Limit czasu żądania",
     "mute_regex": "Regex do wyciszania",

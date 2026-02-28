@@ -21,7 +21,7 @@
     "player_ids_in_state_command_scope_pid": "ID giocatore nello stato command_scope_pid",
     "preferred_ip": "Indirizzi IP preferiti per la connessione, se la ricerca automatica non ha avuto successo (separati da virgole)",
     "queue_settings": "Impostazioni della coda",
-    "eboot_on_failure": "Riavviare se viene rilevato un guasto del dispositivo",
+    "reboot_on_failure": "Riavviare se viene rilevato un guasto del dispositivo",
     "reconnect_timeout": "Timeout di riconnessione",
     "request_timeout": "Richiedi timeout",
     "mute_regex": "Regex per il silenziamento",

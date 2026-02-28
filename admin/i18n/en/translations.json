@@ -21,7 +21,7 @@
     "player_ids_in_state_command_scope_pid": "Player IDs in state command_scope_pid",
     "preferred_ip": "preferred IP addresses for connection, if automatic search was not successfull (comma separated)",
     "queue_settings": "Queue settings",
-    "eboot_on_failure": "Reboot, if device failure is detected",
+    "reboot_on_failure": "Reboot, if device failure is detected",
     "reconnect_timeout": "Reconnect timeout",
     "request_timeout": "Request timeout",
     "mute_regex": "Regex for muting",

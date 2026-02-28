@@ -21,7 +21,7 @@
     "player_ids_in_state_command_scope_pid": "Speler-ID's met de status command_scope_pid",
     "preferred_ip": "Voorkeurs-IP-adressen voor verbinding, als automatisch zoeken niet succesvol was (door komma's gescheiden)",
     "queue_settings": "Wachtrij-instellingen",
-    "eboot_on_failure": "Start opnieuw op als er een apparaatfout wordt gedetecteerd",
+    "reboot_on_failure": "Start opnieuw op als er een apparaatfout wordt gedetecteerd",
     "reconnect_timeout": "Time-out opnieuw verbinden",
     "request_timeout": "Verzoek time-out",
     "mute_regex": "Regex voor dempen",

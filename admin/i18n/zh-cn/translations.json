@@ -21,7 +21,7 @@
     "player_ids_in_state_command_scope_pid": "处于 command_scope_pid 状态的玩家 ID",
     "preferred_ip": "如果自动搜索不成功，则首选连接 IP 地址（逗号分隔）",
     "queue_settings": "队列设置",
-    "eboot_on_failure": "如果检测到设备故障，请重新启动",
+    "reboot_on_failure": "如果检测到设备故障，请重新启动",
     "reconnect_timeout": "重新连接超时",
     "request_timeout": "请求超时",
     "mute_regex": "用于静音的正则表达式",
