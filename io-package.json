@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "3.0.3",
+    "version": "3.0.4",
     "news": {
+      "3.0.4": {
+        "en": "update dependencies",
+        "de": "aktualisierung der abhängigkeiten",
+        "ru": "обновление зависимостей",
+        "pt": "atualizar dependências",
+        "nl": "afhankelijkheden bijwerken",
+        "fr": "mettre à jour les dépendances",
+        "it": "aggiornamento dipendenze",
+        "es": "dependencias de actualización",
+        "pl": "aktualizacji zależności",
+        "uk": "оновлення залежності",
+        "zh-cn": "更新依赖关系"
+      },
       "3.0.3": {
         "en": "update dependencies",
         "de": "aktualisierung der abhängigkeiten",
@@ -80,19 +93,6 @@
         "pl": "dodaj pracę dla połączenia pływowego sid = 0 błędów i napraw format audio\nzwiększenie minimalnej wersji node.js do zalecanej wersji 18\nutrzymanie projektu",
         "uk": "add workaround for tidal connection sid = 0 помилка і виправити аудіо формат\nзбільшити мінімальний вузол.js версія для рекомендованої версії 18\nсупровід проекту",
         "zh-cn": "添加潮汐连接 sid = 0 bug 的绕行并修正音频格式\n将最小节点.js版本增加到建议版本18\n项目维护"
-      },
-      "2.2.1": {
-        "en": "add workaround for node 19+ ECONNRESET bug #299",
-        "de": "workaround für Knoten hinzufügen 19+ ECONNRESET Bug #299",
-        "ru": "добавить обход для узла 19+ ECONNRESET bug #299",
-        "pt": "adicionar solução para o nó 19+ ECONNRESET bug #299",
-        "nl": "workaround toevoegen voor knooppunt 19+ ECONNRESET bug #299",
-        "fr": "ajouter une solution de rechange pour le noeud 19+ bug ECONNRESET #299",
-        "it": "aggiungere il lavoro per nodo 19+ ECONNRESET bug #299",
-        "es": "añadir trabajo alrededor del nodo 19+ ECONNRESET bug #299",
-        "pl": "dodaj pracę dla węzła 19 + ECONNRESET błąd # 299",
-        "uk": "add workaround для вершини 19+ ECONNRESET помилка #299",
-        "zh-cn": "为节点添加工作环路 19+ 经济错误 # 299"
       }
     },
     "titleLang": {
