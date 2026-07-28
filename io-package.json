@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "3.0.4",
+    "version": "3.0.5",
     "news": {
+      "3.0.5": {
+        "en": "Adapter requires node.js >= 22 now\nimprove error handling for sign in if webservice unreachable",
+        "de": "Adapter benötigt node.js >= 22 jetzt\nverbesserung der fehlerbehandlung für die anmeldung, wenn webservice nicht erreichbar ist",
+        "ru": "Адаптер требует node.js >= 22 сейчас\nулучшить обработку ошибок для входа, если веб-сервис недоступен",
+        "pt": "Adaptador requer nod.js >= 22 agora\nmelhorar o tratamento de erros para iniciar sessão se o webservice não for acessível",
+        "nl": "Voor de adapter zijn node.js < 22 nu nodig\nfoutafhandeling verbeteren voor aanmelden als webservice onbereikbaar is",
+        "fr": "Adaptateur nécessite node.js >= 22 maintenant\naméliorer le traitement des erreurs pour se connecter si webservice inaccessible",
+        "it": "Adattatore richiede node.js >= 22 ora\nmigliorare la gestione degli errori per l'accesso se webservice non raggiungibile",
+        "es": "Adaptador requiere node.js ю= 22 ahora\nmejorar el manejo de errores para iniciar sesión si el servicio web no es accesible",
+        "pl": "Adapter wymaga node.js > = 22\npoprawić obsługę błędów dla logowania, jeśli serwis internetowy nie jest dostępny",
+        "uk": "Адаптер вимагає node.js >= 22 тепер\nполіпшити процес обробки помилок для входу в сайт",
+        "zh-cn": "适配器需要节点.js 现在22\n如果网络服务无法访问, 则改善签名错误处理"
+      },
       "3.0.4": {
         "en": "update dependencies",
         "de": "aktualisierung der abhängigkeiten",
@@ -80,19 +93,6 @@
         "pl": "naprawić format audio",
         "uk": "фіксувати аудіо формат",
         "zh-cn": "固定音频格式"
-      },
-      "2.2.2": {
-        "en": "add workaround for tidal connect sid = 0 bug and fix audio format\nincrease minimum node.js version to recommended version 18\nproject maintenance",
-        "de": "fügen sie workaround für tidal connect sid = 0 bug hinzu und reparieren sie audioformat\nminimal node.js-version auf empfohlene version 18 erhöhen\nprojektwartung",
-        "ru": "добавить обход для приливного соединения sid = 0 клопов и исправить аудио формат\nувеличить минимальную версию node.js до рекомендуемой версии 18\nтехническое обслуживание проекта",
-        "pt": "adicionar solução alternativa para tidal conectar sid = 0 bug e corrigir o formato de áudio\naumentar a versão node.js mínima para a versão recomendada 18\nmanutenção do projeto",
-        "nl": "toe te voegen workaround voor getijdenverbinding sid = 0 bug en fix audio-formaat\nverhoog minimum node.js versie naar aanbevolen versie 18\nprojectonderhoud",
-        "fr": "ajouter une solution de rechange pour la connexion de marée sid = 0 bug et corriger le format audio\naugmenter la version minimum node.js à la version recommandée 18\nentretien des projets",
-        "it": "aggiungere workaround per tidal connect sid = 0 bug e correggere il formato audio\naumentare la versione minima node.js alla versione consigliata 18\nmanutenzione del progetto",
-        "es": "añadir workaround for tidal connect sid = 0 bug and fix audio format\naumentar la versión mínima node.js a la versión recomendada 18\nmantenimiento de proyectos",
-        "pl": "dodaj pracę dla połączenia pływowego sid = 0 błędów i napraw format audio\nzwiększenie minimalnej wersji node.js do zalecanej wersji 18\nutrzymanie projektu",
-        "uk": "add workaround for tidal connection sid = 0 помилка і виправити аудіо формат\nзбільшити мінімальний вузол.js версія для рекомендованої версії 18\nсупровід проекту",
-        "zh-cn": "添加潮汐连接 sid = 0 bug 的绕行并修正音频格式\n将最小节点.js版本增加到建议版本18\n项目维护"
       }
     },
     "titleLang": {
