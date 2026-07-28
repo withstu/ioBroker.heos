@@ -145,7 +145,8 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
-- (copilot) Adapter requires node.js >= 22 now
+* (copilot) Adapter requires node.js >= 22 now
+* (withstu) improve error handling for sign in if webservice unreachable
 
 ### 3.0.4 (2026-02-28)
 * (withstu) update dependencies
@@ -371,6 +372,8 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 
 ### 1.0.0 (2020-09-21)
 * (withstu) initial release
+
+[Older changelogs can be found there](CHANGELOG_OLD.md)
 
 ## License
 MIT License
