@@ -1363,7 +1363,7 @@ class Heos extends utils.Adapter {
                         }
                         break;
                     case '-2001': //Cannot connect to Web Services
-                        if(command.startsWith('system/sign_in') && !this.replay_timeout){
+                        if( command.startsWith('system/sign_in') && !this.replay_timeout ){
                             this.replay_timeout = setTimeout(() => {
                                 this.logDebug(`parseResponse: Replay command system/sign_in`, false);
                                 this.signIn();
