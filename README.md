@@ -144,6 +144,9 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (withstu) improve error handling for sign in if webservice unreachable
+
 ### 3.0.5 (2026-07-28)
 * (copilot) Adapter requires node.js >= 22 now
 * (withstu) improve error handling for sign in if webservice unreachable
