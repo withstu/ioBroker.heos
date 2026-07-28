@@ -1369,7 +1369,7 @@ class Heos extends utils.Adapter {
                                 this.signIn();
 
                                 this.replay_timeout = undefined;
-                            }, 10000);
+                            }, 30000);
                         }
                         break;
                 }
