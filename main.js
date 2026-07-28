@@ -54,6 +54,7 @@ class Heos extends utils.Adapter {
 
         this.reconnect_timeout = undefined;
         this.reboot_timeout = undefined;
+        this.replay_timeout = undefined;
 
         this.net_client = undefined;
         this.nodessdp_client = undefined;
@@ -1302,6 +1303,7 @@ class Heos extends utils.Adapter {
             }
 
             if (response.indexOf('command under process') > 0) {
+                this.logDebug("parseResponse: Command under process. Skip.", false)
                 return;
             }
 
@@ -1314,11 +1316,15 @@ class Heos extends utils.Adapter {
                 return;
             }
 
+            //Restore command
             let command = jdata.heos.command;
             if (jdata.heos.message != null && jdata.heos.message.trim().length > 0) {
-                command += `?${jdata.heos.message}`;
+                let msg_params = new URLSearchParams(jdata.heos.message);
+                msg_params.delete('eid')
+                msg_params.delete('text')
+                command += `?${decodeURIComponent(msg_params.toString())}`;
             }
-
+            this.logDebug(`parseResponse: Reset command timeout - ${command}`, false)
             //Clear request timeout
             this.deleteRequestTime(command);
 
@@ -1331,15 +1337,40 @@ class Heos extends utils.Adapter {
                 result = jdata.heos.result;
             }
             if (result != 'success') {
-                switch (jmsg.text) {
-                    case 'User not logged in':
+                switch (jmsg.eid) {
+                    case '8': //'User not logged in'
                         this.signed_in = false;
                         await this.setStateAsync('signed_in', false, true);
                         await this.setStateAsync('signed_in_user', '', true);
                         this.signIn();
+                        if (!this.replay_timeout) {
+                            this.replay_timeout = setTimeout(() => {
+                                this.logDebug(`parseResponse: Replay command ${command}`, false);
+                                this.queueMsg(command)
+
+                                this.replay_timeout = undefined;
+                            }, 2000);
+                        }
                         break;
-                    case 'Processing previous command':
-                        //this.reboot();
+                    case '13': //'Processing previous command'
+                        if (!this.replay_timeout) {
+                            this.replay_timeout = setTimeout(() => {
+                                this.logDebug(`parseResponse: Replay command ${command}`, false);
+                                this.queueMsg(command)
+
+                                this.replay_timeout = undefined;
+                            }, 2000);
+                        }
+                        break;
+                    case '-2001': //Cannot connect to Web Services
+                        if(command.startsWith("system/sign_in") && !this.replay_timeout){
+                            this.replay_timeout = setTimeout(() => {
+                                this.logDebug(`parseResponse: Replay command system/sign_in`, false);
+                                this.signIn();
+
+                                this.replay_timeout = undefined;
+                            }, 10000);
+                        }
                         break;
                 }
                 this.setLastError(`result=${result},text=${jmsg.text},command=${jdata.heos.command}`);
@@ -1380,6 +1411,10 @@ class Heos extends utils.Adapter {
                                 this.signed_in = true;
                                 await this.setStateAsync('signed_in', true, true);
                                 await this.setStateAsync('signed_in_user', jmsg.un, true);
+                                for (const pid in this.players) {
+                                    const player = this.players[pid];
+                                    player.autoPlay()
+                                }
                             } else {
                                 this.signed_in = false;
                                 await this.setStateAsync('signed_in', false, true);
@@ -2100,6 +2135,9 @@ class Heos extends utils.Adapter {
                     throw new Error('HEOS responded with invalid data.');
                 } else {
                     if (!(pid in this.players)) {
+                        if(Object.keys(this.players).length == 0){
+                            this.signIn();
+                        }
                         const heosPlayer = (this.players[pid] = new HeosPlayer(this, player));
                         // wait until objects are created before connecting, because states shouldn't be set before objects exist
                         await heosPlayer.initMetaData(player);
@@ -2423,11 +2461,14 @@ class Heos extends utils.Adapter {
     }
 
     deleteRequestTime(msg) {
+        let command = msg.startsWith('system/') ? msg.split('?')[0] : msg;
+        this.logDebug(`deleteRequestTime: before - ${JSON.stringify(this.request_time)}`, false);
         for (const cmd in this.request_time) {
-            if (msg.startsWith(cmd)) {
+            if (command.startsWith(cmd) || cmd.startsWith(command)) {
                 delete this.request_time[cmd];
             }
         }
+        this.logDebug(`deleteRequestTime: after - ${JSON.stringify(this.request_time)}`, false);
     }
 
     checkDuplicateRequest(msg) {
@@ -2471,9 +2512,7 @@ class Heos extends utils.Adapter {
         if (this.net_client) {
             try {
                 this.net_client.write(`heos://${msg}\n`);
-                if (!msg.startsWith('system/')) {
-                    this.request_time[msg] = now;
-                }
+                this.request_time[msg] = now;
             } catch (err) {
                 this.logError(`[sendMsg] ${err}`, false);
                 this.raiseLeaderFailures(this.ip);
@@ -2527,10 +2566,8 @@ class Heos extends utils.Adapter {
             } else {
                 this.manual_search_mode = true;
                 this.logInfo(`connected to HEOS (${this.ip})`, true);
-                this.getPlayers();
-                this.registerChangeEvents(true);
-                this.signIn();
                 this.startHeartbeat();
+                this.registerChangeEvents(true);
             }
         });
 
@@ -3042,6 +3079,10 @@ class Heos extends utils.Adapter {
         if (this.ssdp_search_timeout) {
             clearTimeout(this.ssdp_search_timeout);
             this.ssdp_search_timeout = undefined;
+        }
+        if (this.replay_timeout) {
+            clearTimeout(this.replay_timeout);
+            this.replay_timeout = undefined;
         }
     }
 
