@@ -10,7 +10,7 @@
 import * as utils from '@iobroker/adapter-core';
 import url from 'node:url';
 
-import net from 'net';
+import net from 'node:net';
 import SSDP from 'node-ssdp';
 import HeosPlayer from './lib/heos-player.js';
 import { STATES, ERROR_CODES } from './lib/constants.js';
