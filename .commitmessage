@@ -1,0 +1,4 @@
+chore: release v3.0.5
+
+* (copilot) Adapter requires node.js >= 22 now
+* (withstu) improve error handling for sign in if webservice unreachable
