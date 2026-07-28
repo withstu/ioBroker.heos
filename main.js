@@ -1303,7 +1303,7 @@ class Heos extends utils.Adapter {
             }
 
             if (response.indexOf('command under process') > 0) {
-                this.logDebug("parseResponse: Command under process. Skip.", false)
+                this.logDebug('parseResponse: Command under process. Skip.', false);
                 return;
             }
 
@@ -1320,11 +1320,11 @@ class Heos extends utils.Adapter {
             let command = jdata.heos.command;
             if (jdata.heos.message != null && jdata.heos.message.trim().length > 0) {
                 let msg_params = new URLSearchParams(jdata.heos.message);
-                msg_params.delete('eid')
-                msg_params.delete('text')
+                msg_params.delete('eid');
+                msg_params.delete('text');
                 command += `?${decodeURIComponent(msg_params.toString())}`;
             }
-            this.logDebug(`parseResponse: Reset command timeout - ${command}`, false)
+            this.logDebug(`parseResponse: Reset command timeout - ${command}`, false);
             //Clear request timeout
             this.deleteRequestTime(command);
 
@@ -1346,7 +1346,7 @@ class Heos extends utils.Adapter {
                         if (!this.replay_timeout) {
                             this.replay_timeout = setTimeout(() => {
                                 this.logDebug(`parseResponse: Replay command ${command}`, false);
-                                this.queueMsg(command)
+                                this.queueMsg(command);
 
                                 this.replay_timeout = undefined;
                             }, 2000);
@@ -1356,14 +1356,14 @@ class Heos extends utils.Adapter {
                         if (!this.replay_timeout) {
                             this.replay_timeout = setTimeout(() => {
                                 this.logDebug(`parseResponse: Replay command ${command}`, false);
-                                this.queueMsg(command)
+                                this.queueMsg(command);
 
                                 this.replay_timeout = undefined;
                             }, 2000);
                         }
                         break;
                     case '-2001': //Cannot connect to Web Services
-                        if(command.startsWith("system/sign_in") && !this.replay_timeout){
+                        if(command.startsWith('system/sign_in') && !this.replay_timeout){
                             this.replay_timeout = setTimeout(() => {
                                 this.logDebug(`parseResponse: Replay command system/sign_in`, false);
                                 this.signIn();
@@ -1413,7 +1413,7 @@ class Heos extends utils.Adapter {
                                 await this.setStateAsync('signed_in_user', jmsg.un, true);
                                 for (const pid in this.players) {
                                     const player = this.players[pid];
-                                    player.autoPlay()
+                                    player.autoPlay();
                                 }
                             } else {
                                 this.signed_in = false;
@@ -2135,7 +2135,7 @@ class Heos extends utils.Adapter {
                     throw new Error('HEOS responded with invalid data.');
                 } else {
                     if (!(pid in this.players)) {
-                        if(Object.keys(this.players).length == 0){
+                        if (Object.keys(this.players).length == 0){
                             this.signIn();
                         }
                         const heosPlayer = (this.players[pid] = new HeosPlayer(this, player));
