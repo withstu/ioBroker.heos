@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "3.0.5",
+    "version": "3.1.0",
     "news": {
+      "3.1.0": {
+        "en": "improve error handling for sign in if webservice unreachable",
+        "de": "verbesserung der fehlerbehandlung für die anmeldung, wenn webservice nicht erreichbar ist",
+        "ru": "улучшить обработку ошибок для входа, если веб-сервис недоступен",
+        "pt": "melhorar o tratamento de erros para iniciar sessão se o webservice não for acessível",
+        "nl": "foutafhandeling verbeteren voor aanmelden als webservice onbereikbaar is",
+        "fr": "améliorer le traitement des erreurs pour se connecter si webservice inaccessible",
+        "it": "migliorare la gestione degli errori per l'accesso se webservice non raggiungibile",
+        "es": "mejorar el manejo de errores para iniciar sesión si el servicio web no es accesible",
+        "pl": "poprawić obsługę błędów dla logowania, jeśli serwis internetowy nie jest dostępny",
+        "uk": "поліпшити процес обробки помилок для входу в сайт",
+        "zh-cn": "如果网络服务无法访问, 则改善签名错误处理"
+      },
       "3.0.5": {
         "en": "Adapter requires node.js >= 22 now\nimprove error handling for sign in if webservice unreachable",
         "de": "Adapter benötigt node.js >= 22 jetzt\nverbesserung der fehlerbehandlung für die anmeldung, wenn webservice nicht erreichbar ist",
@@ -80,19 +93,6 @@
         "pl": "poprawić pracę połączeń pływowych",
         "uk": "поліпшити роботу з під'єднання tidal",
         "zh-cn": "改进潮汐连接工作"
-      },
-      "2.2.3": {
-        "en": "fix audio format",
-        "de": "audioformat anpassen",
-        "ru": "аудио формат",
-        "pt": "corrigir o formato de áudio",
-        "nl": "vast audioformaat",
-        "fr": "correction du format audio",
-        "it": "correzione del formato audio",
-        "es": "formato de audio",
-        "pl": "naprawić format audio",
-        "uk": "фіксувати аудіо формат",
-        "zh-cn": "固定音频格式"
       }
     },
     "titleLang": {

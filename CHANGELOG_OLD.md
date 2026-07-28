@@ -1,4 +1,9 @@
 # Older changes
+## 3.0.1 (2025-11-03)
+* (withstu) update vscode settings
+* (withstu) shift from commonjs to esm
+* (withstu) update packages
+
 ## 3.0.0 (2025-10-28)
 * (withstu) improve group state updates
 * (withstu) upgrade several packages
