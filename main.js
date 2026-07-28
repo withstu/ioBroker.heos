@@ -2135,7 +2135,7 @@ class Heos extends utils.Adapter {
                     throw new Error('HEOS responded with invalid data.');
                 } else {
                     if (!(pid in this.players)) {
-                        if (Object.keys(this.players).length == 0){
+                        if ( Object.keys(this.players).length == 0 ){
                             this.signIn();
                         }
                         const heosPlayer = (this.players[pid] = new HeosPlayer(this, player));
