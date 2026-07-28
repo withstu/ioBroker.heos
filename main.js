@@ -1363,7 +1363,7 @@ class Heos extends utils.Adapter {
                         }
                         break;
                     case '-2001': //Cannot connect to Web Services
-                        if( command.startsWith('system/sign_in') && !this.replay_timeout ){
+                        if(command.startsWith('system/sign_in') && !this.replay_timeout) {
                             this.replay_timeout = setTimeout(() => {
                                 this.logDebug(`parseResponse: Replay command system/sign_in`, false);
                                 this.signIn();
@@ -2135,7 +2135,7 @@ class Heos extends utils.Adapter {
                     throw new Error('HEOS responded with invalid data.');
                 } else {
                     if (!(pid in this.players)) {
-                        if ( Object.keys(this.players).length == 0 ){
+                        if (Object.keys(this.players).length == 0) {
                             this.signIn();
                         }
                         const heosPlayer = (this.players[pid] = new HeosPlayer(this, player));
