@@ -2657,11 +2657,11 @@ class Heos extends utils.Adapter {
                     this.ssdpLeaderElection();
                     if (this.ssdp_retry_counter > 10 && this.known_player_ips.length > 0) {
                         this.manual_search_mode = true;
-                        this.silent_log_mode = true;                        
+                        this.silent_log_mode = true;
                         if (this.config.rebootOnFailure === true) {
                             this.logWarn(
                                 "Can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...",
-                                false
+                                false,
                             );
                             this.rebootAll();
                         } else {
@@ -2679,7 +2679,7 @@ class Heos extends utils.Adapter {
                     }
                 }, this.config.searchInterval);
             } else {
-                this.reconnect()
+                this.reconnect();
             }
         } catch (err) {
             this.logError(`[search] ${err}`, false);
