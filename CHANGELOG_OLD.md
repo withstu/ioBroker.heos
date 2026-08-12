@@ -1,4 +1,7 @@
 # Older changes
+## 3.0.2 (2025-11-03)
+* (withstu) fix tests
+
 ## 3.0.1 (2025-11-03)
 * (withstu) update vscode settings
 * (withstu) shift from commonjs to esm

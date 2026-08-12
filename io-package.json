@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "3.1.0",
+    "version": "3.2.0",
     "news": {
+      "3.2.0": {
+        "en": "add flag to disable SSDP discovery\nfixing iobroker checks",
+        "de": "Füge eine Flagge hinzu, um die SSDP-Erkennung zu deaktivieren.\nBehebung von iobroker-Prüfungen",
+        "ru": "добавить флаг для отключения обнаружения SSDP\nИсправление проверок iobroker",
+        "pt": "Adicionar sinalizador para desativar a descoberta SSDP\ncorrigindo verificações do iobroker",
+        "nl": "Voeg een vlag toe om SSDP-detectie uit te schakelen.\niobroker-controles repareren",
+        "fr": "ajouter un indicateur pour désactiver la découverte SSDP\ncorrection des vérifications iobroker",
+        "it": "aggiungi flag per disabilitare il rilevamento SSDP\ncorrezione dei controlli di iobroker",
+        "es": "agregar bandera para deshabilitar el descubrimiento SSDP\nCorrección de comprobaciones de iobroker",
+        "pl": "dodaj flagę, aby wyłączyć wykrywanie SSDP\nnaprawianie kontroli iobroker",
+        "uk": "додати прапорець для вимкнення виявлення SSDP\nвиправлення чеків iobroker",
+        "zh-cn": "添加标志以禁用 SSDP 发现\n修复 iobroker 检查"
+      },
       "3.1.0": {
         "en": "improve error handling for sign in if webservice unreachable",
         "de": "verbesserung der fehlerbehandlung für die anmeldung, wenn webservice nicht erreichbar ist",
