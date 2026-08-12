@@ -16,19 +16,6 @@
         "uk": "поліпшити процес обробки помилок для входу в сайт",
         "zh-cn": "如果网络服务无法访问, 则改善签名错误处理"
       },
-      "3.0.5": {
-        "en": "Adapter requires node.js >= 22 now\nimprove error handling for sign in if webservice unreachable",
-        "de": "Adapter benötigt node.js >= 22 jetzt\nverbesserung der fehlerbehandlung für die anmeldung, wenn webservice nicht erreichbar ist",
-        "ru": "Адаптер требует node.js >= 22 сейчас\nулучшить обработку ошибок для входа, если веб-сервис недоступен",
-        "pt": "Adaptador requer nod.js >= 22 agora\nmelhorar o tratamento de erros para iniciar sessão se o webservice não for acessível",
-        "nl": "Voor de adapter zijn node.js < 22 nu nodig\nfoutafhandeling verbeteren voor aanmelden als webservice onbereikbaar is",
-        "fr": "Adaptateur nécessite node.js >= 22 maintenant\naméliorer le traitement des erreurs pour se connecter si webservice inaccessible",
-        "it": "Adattatore richiede node.js >= 22 ora\nmigliorare la gestione degli errori per l'accesso se webservice non raggiungibile",
-        "es": "Adaptador requiere node.js ю= 22 ahora\nmejorar el manejo de errores para iniciar sesión si el servicio web no es accesible",
-        "pl": "Adapter wymaga node.js > = 22\npoprawić obsługę błędów dla logowania, jeśli serwis internetowy nie jest dostępny",
-        "uk": "Адаптер вимагає node.js >= 22 тепер\nполіпшити процес обробки помилок для входу в сайт",
-        "zh-cn": "适配器需要节点.js 现在22\n如果网络服务无法访问, 则改善签名错误处理"
-      },
       "3.0.4": {
         "en": "update dependencies",
         "de": "aktualisierung der abhängigkeiten",

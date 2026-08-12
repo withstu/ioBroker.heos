@@ -1344,7 +1344,7 @@ class Heos extends utils.Adapter {
                         await this.setStateAsync('signed_in_user', '', true);
                         this.signIn();
                         if (!this.replay_timeout) {
-                            this.replay_timeout = setTimeout(() => {
+                            this.replay_timeout = this.setTimeout(() => {
                                 this.logDebug(`parseResponse: Replay command ${command}`, false);
                                 this.queueMsg(command);
 
@@ -1354,7 +1354,7 @@ class Heos extends utils.Adapter {
                         break;
                     case '13': //'Processing previous command'
                         if (!this.replay_timeout) {
-                            this.replay_timeout = setTimeout(() => {
+                            this.replay_timeout = this.setTimeout(() => {
                                 this.logDebug(`parseResponse: Replay command ${command}`, false);
                                 this.queueMsg(command);
 
@@ -1364,7 +1364,7 @@ class Heos extends utils.Adapter {
                         break;
                     case '-2001': //Cannot connect to Web Services
                         if (command.startsWith('system/sign_in') && !this.replay_timeout) {
-                            this.replay_timeout = setTimeout(() => {
+                            this.replay_timeout = this.setTimeout(() => {
                                 this.logDebug(`parseResponse: Replay command system/sign_in`, false);
                                 this.signIn();
 
@@ -2388,7 +2388,7 @@ class Heos extends utils.Adapter {
             clearTimeout(this.reboot_timeout);
             this.reboot_timeout = undefined;
         }
-        this.reboot_timeout = setTimeout(() => {
+        this.reboot_timeout = this.setTimeout(() => {
             this.reconnect();
         }, 1000);
     }
@@ -2422,7 +2422,7 @@ class Heos extends utils.Adapter {
     startHeartbeat() {
         if (this.state == STATES.Connected) {
             this.logDebug('[HEARTBEAT] start interval', false);
-            this.heartbeat_interval = setInterval(() => {
+            this.heartbeat_interval = this.setInterval(() => {
                 this.logDebug('[HEARTBEAT] ping', false);
                 this.queueMsg('system/heart_beat');
                 this.heartbeat_retries += 1;
@@ -2587,7 +2587,7 @@ class Heos extends utils.Adapter {
             this.ssdp_search_timeout = undefined;
         }
         if (typeof this.net_client == 'undefined' && this.state == STATES.Searching) {
-            this.ssdp_search_timeout = setTimeout(() => {
+            this.ssdp_search_timeout = this.setTimeout(() => {
                 if (this.state == STATES.Searching && this.ssdp_player_ips.length > 0) {
                     let ip = this.getRandomArrayElement(this.ssdp_player_ips);
                     const maxUptimeIps = this.ssdp_player_ips.filter(element => this.getMaxUptime().includes(element));
@@ -2650,7 +2650,7 @@ class Heos extends utils.Adapter {
                 });
                 this.nodessdp_client.search(this.ssdp_search_target_name);
                 this.ssdpLeaderElection();
-                this.ssdp_search_interval = setInterval(() => {
+                this.ssdp_search_interval = this.setInterval(() => {
                     if (typeof this.net_client == 'undefined') {
                         this.ssdp_retry_counter += 1;
                     }
@@ -3157,7 +3157,7 @@ class Heos extends utils.Adapter {
             clearTimeout(this.reconnect_timeout);
             this.reconnect_timeout = undefined;
         }
-        this.reconnect_timeout = setTimeout(() => {
+        this.reconnect_timeout = this.setTimeout(() => {
             this.search();
         }, this.config.reconnectTimeout);
     }
