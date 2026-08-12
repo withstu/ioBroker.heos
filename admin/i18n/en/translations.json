@@ -34,5 +34,6 @@
     "network": "Network",
     "reconnect": "Reconnect",
     "request": "Request",
-    "search": "Search"
+    "search": "Search",
+    "disable_ssdp_discovery": "Disable SSDP Discovery"
 }

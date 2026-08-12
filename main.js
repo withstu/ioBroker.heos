@@ -2634,7 +2634,7 @@ class Heos extends utils.Adapter {
             } else if (this.next_connect_ips.length > 0) {
                 this.logDebug(`try to connect to ${this.next_connect_ips[0]}`, false);
                 this.connect(this.next_connect_ips[0]);
-            } else {
+            } else if (this.config.disableSSDPDiscovery === false) {
                 this.ssdp_retry_counter = 0;
 
                 this.ssdp_player_ips = [];
@@ -2657,12 +2657,20 @@ class Heos extends utils.Adapter {
                     this.ssdpLeaderElection();
                     if (this.ssdp_retry_counter > 10 && this.known_player_ips.length > 0) {
                         this.manual_search_mode = true;
-                        this.silent_log_mode = true;
-                        this.logWarn(
-                            "can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...",
-                            false,
-                        );
-                        this.rebootAll();
+                        this.silent_log_mode = true;                        
+                        if (this.config.rebootOnFailure === true) {
+                            this.logWarn(
+                                "Can't find any HEOS devices. Try to connect known device IPs and reboot them to exclude device failure...",
+                                false
+                            );
+                            this.rebootAll();
+                        } else {
+                            this.logWarn(
+                                "Can't find any HEOS devices. Activate 'reboot on failure' in the configuration or reboot manually to exclude device failure.",
+                                false,
+                            );
+                            this.reconnect();
+                        }
                     } else {
                         this.logDebug('searching for HEOS devices ...', true);
                         this.ssdp_player_ips = [];
@@ -2670,6 +2678,8 @@ class Heos extends utils.Adapter {
                         this.getPlayers();
                     }
                 }, this.config.searchInterval);
+            } else {
+                this.reconnect()
             }
         } catch (err) {
             this.logError(`[search] ${err}`, false);

@@ -144,6 +144,9 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (withstu) add flag to disable SSDP discovery
+
 ### 3.1.0 (2026-07-28)
 * (withstu) improve error handling for sign in if webservice unreachable
 

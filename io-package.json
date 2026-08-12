@@ -182,7 +182,8 @@
     "queueMode": 4,
     "cmdScope": "leader",
     "sourcePort": 0,
-    "preferredIPs": ""
+    "preferredIPs": "",
+    "disableSSDPDiscovery": false
   },
   "objects": [],
   "instanceObjects": [

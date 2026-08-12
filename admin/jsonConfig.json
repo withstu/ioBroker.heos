@@ -262,6 +262,16 @@
                     "md": 6,
                     "lg": 6,
                     "xl": 6
+                },
+                "disableSSDPDiscovery": {
+                    "type": "checkbox",
+                    "label": "disable_ssdp_discovery",
+                    "help": "",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6,
+                    "xl": 6
                 }
             }
         }
