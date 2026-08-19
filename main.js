@@ -2438,7 +2438,7 @@ class Heos extends utils.Adapter {
                         player.checkHealth();
                     }
                 }
-            }, this.config.heartbeatInterval);
+            }, Number(this.config.heartbeatInterval));
         }
     }
 
@@ -2602,7 +2602,7 @@ class Heos extends utils.Adapter {
                     }
                     this.connect(ip);
                 }
-            }, this.config.searchTimeout);
+            }, Number(this.config.searchTimeout));
         }
     }
 
@@ -2677,7 +2677,7 @@ class Heos extends utils.Adapter {
                         this.nodessdp_client.search(this.ssdp_search_target_name);
                         this.getPlayers();
                     }
-                }, this.config.searchInterval);
+                }, Number(this.config.searchInterval));
             } else {
                 this.reconnect();
             }
@@ -3159,7 +3159,7 @@ class Heos extends utils.Adapter {
         }
         this.reconnect_timeout = this.setTimeout(() => {
             this.search();
-        }, this.config.reconnectTimeout);
+        }, Number(this.config.reconnectTimeout));
     }
 
     main() {
