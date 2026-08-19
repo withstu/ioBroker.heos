@@ -144,6 +144,9 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (withstu) Fix repository checker findings
+
 ### 3.2.1 (2026-08-19)
 * (withstu) Package update
 * (withstu) Improve number casting
