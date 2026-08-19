@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "3.2.0",
+    "version": "3.2.1",
     "news": {
+      "3.2.1": {
+        "en": "Package update\nImprove number casting",
+        "de": "Paketaktualisierung\nVerbesserung der Zahlenzuordnung",
+        "ru": "Обновление пакета\nУлучшить отсчет чисел",
+        "pt": "Atualização de pacote\nMelhorar a conversão de números",
+        "nl": "Pakketupdate\nVerbeter de getallencasting",
+        "fr": "Mise à jour du package\nAméliorer le tirage numérique",
+        "it": "Aggiornamento del pacchetto\nMigliorare la composizione numerica",
+        "es": "Actualización del paquete\nMejorar la conversión de números",
+        "pl": "Aktualizacja pakietu\nPoprawa rzutowania liczb",
+        "uk": "Оновлення пакета\nПокращення кастингу номерів",
+        "zh-cn": "软件包更新\n改进数字投掷"
+      },
       "3.2.0": {
         "en": "add flag to disable SSDP discovery\nfixing iobroker checks",
         "de": "Füge eine Flagge hinzu, um die SSDP-Erkennung zu deaktivieren.\nBehebung von iobroker-Prüfungen",
@@ -80,19 +93,6 @@
         "pl": "poprawić aktualizacje stanu grupy\nupgrade kilka pakietów",
         "uk": "поліпшення оновлення групового стану\nоновлення декількох пакетів",
         "zh-cn": "改进组状态更新\n升级多个软件包"
-      },
-      "2.2.4": {
-        "en": "improve tidal connect workaround",
-        "de": "verbesserung der tidal-verbindung workaround",
-        "ru": "улучшить приливное подключение обход",
-        "pt": "melhorar a ligação de maré",
-        "nl": "verbetering van de getijdenverbinding",
-        "fr": "améliorer la solution de rechange pour la connexion marémotrice",
-        "it": "migliorare la connessione tidale",
-        "es": "mejorar la unión de marea",
-        "pl": "poprawić pracę połączeń pływowych",
-        "uk": "поліпшити роботу з під'єднання tidal",
-        "zh-cn": "改进潮汐连接工作"
       }
     },
     "titleLang": {

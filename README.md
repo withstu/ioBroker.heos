@@ -144,7 +144,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 3.2.1 (2026-08-19)
 * (withstu) Package update
 * (withstu) Improve number casting
 
@@ -160,9 +160,6 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 * (withstu) improve error handling for sign in if webservice unreachable
 
 ### 3.0.4 (2026-02-28)
-* (withstu) update dependencies
-
-### 3.0.3 (2026-02-28)
 * (withstu) update dependencies
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)

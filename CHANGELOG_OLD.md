@@ -1,4 +1,7 @@
 # Older changes
+## 3.0.3 (2026-02-28)
+* (withstu) update dependencies
+
 ## 3.0.2 (2025-11-03)
 * (withstu) fix tests
 
