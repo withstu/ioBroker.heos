@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "3.2.1",
+    "version": "3.2.2",
     "news": {
+      "3.2.2": {
+        "en": "Fix repository checker findings",
+        "de": "Beheben Sie die Fehler des Repository-Prüfers.",
+        "ru": "Исправить результаты проверки репозитория.",
+        "pt": "Corrigir resultados da verificação do repositório",
+        "nl": "Corrigeer de bevindingen van de repositorychecker",
+        "fr": "Correction des résultats du vérificateur de dépôt",
+        "it": "Correggere i risultati del controllo del repository.",
+        "es": "Corregir los hallazgos del verificador del repositorio",
+        "pl": "Napraw wyniki sprawdzania repozytorium",
+        "uk": "Виправлення знахідок перевірки репозиторію",
+        "zh-cn": "修复存储库检查器发现的问题"
+      },
       "3.2.1": {
         "en": "Package update\nImprove number casting",
         "de": "Paketaktualisierung\nVerbesserung der Zahlenzuordnung",
@@ -80,19 +93,6 @@
         "pl": "badania naprawcze",
         "uk": "фіксувати тести",
         "zh-cn": "固定测试"
-      },
-      "3.0.0": {
-        "en": "improve group state updates\nupgrade several packages",
-        "de": "verbesserung der gruppenstatus-updates\nmehrere pakete aktualisieren",
-        "ru": "улучшение групповых обновлений состояния\nобновление нескольких пакетов",
-        "pt": "melhorar as atualizações do estado do grupo\natualizar vários pacotes",
-        "nl": "groepstoestand updates verbeteren\nmeerdere pakketten upgraden",
-        "fr": "améliorer les mises à jour de l'état du groupe\nmise à jour de plusieurs paquets",
-        "it": "migliorare gli aggiornamenti di stato del gruppo\naggiornare diversi pacchetti",
-        "es": "mejorar las actualizaciones del estado de grupo\nactualizar varios paquetes",
-        "pl": "poprawić aktualizacje stanu grupy\nupgrade kilka pakietów",
-        "uk": "поліпшення оновлення групового стану\nоновлення декількох пакетів",
-        "zh-cn": "改进组状态更新\n升级多个软件包"
       }
     },
     "titleLang": {
