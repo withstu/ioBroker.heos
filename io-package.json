@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "3.2.2",
+    "version": "3.2.3",
     "news": {
+      "3.2.3": {
+        "en": "Fix cover colors\nUpdate dependencies",
+        "de": "Fixiert Coverfarben\nAbhängigkeiten updaten",
+        "ru": "Исправьте цвета обложки\nОбновить зависимости",
+        "pt": "Fixe a cor da capa\nAtualizar dependências",
+        "nl": "Kleuren van de omslag corrigeren\nAfhankelijkheden bijwerken",
+        "fr": "Fix cover Colors\nMettre à jour les dépendances",
+        "it": "Fix cover colors\nAggiorna dipendenze",
+        "es": "Fijar colores de tapa\nActualizar dependencias",
+        "pl": "Napraw kolory okładek\nZaktualizuj zależności",
+        "uk": "Виправте кольори обкладинки\nОновлення залежностей",
+        "zh-cn": "修复封面颜色\n更新依赖关系"
+      },
       "3.2.2": {
         "en": "Fix repository checker findings",
         "de": "Beheben Sie die Fehler des Repository-Prüfers.",
@@ -80,19 +93,6 @@
         "pl": "aktualizacji zależności",
         "uk": "оновлення залежності",
         "zh-cn": "更新依赖关系"
-      },
-      "3.0.2": {
-        "en": "fix tests",
-        "de": "fixtests",
-        "ru": "исправление",
-        "pt": "corrigir os testes",
-        "nl": "vastleggen van tests",
-        "fr": "essais de correction",
-        "it": "test di correzione",
-        "es": "pruebas de reparación",
-        "pl": "badania naprawcze",
-        "uk": "фіксувати тести",
-        "zh-cn": "固定测试"
       }
     },
     "titleLang": {

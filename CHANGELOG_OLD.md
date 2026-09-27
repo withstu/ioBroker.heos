@@ -1,4 +1,8 @@
 # Older changes
+## 3.0.5 (2026-07-28)
+* (copilot) Adapter requires node.js >= 22 now
+* (withstu) improve error handling for sign in if webservice unreachable
+
 ## 3.0.4 (2026-02-28)
 * (withstu) update dependencies
 
