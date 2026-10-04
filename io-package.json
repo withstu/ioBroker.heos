@@ -1,8 +1,21 @@
 {
   "common": {
     "name": "heos",
-    "version": "3.2.3",
+    "version": "3.2.4",
     "news": {
+      "3.2.4": {
+        "en": "Update dependencies\nFix #549",
+        "de": "Abhängigkeiten updaten\nFix #549",
+        "ru": "Обновить зависимости\nИсправление #549",
+        "pt": "Atualizar dependências\nFix #549",
+        "nl": "Afhankelijkheden bijwerken\nOplossing #549",
+        "fr": "Mettre à jour les dépendances\nFix #549",
+        "it": "Aggiorna dipendenze\nFix #549",
+        "es": "Actualizar dependencias\nFix #549",
+        "pl": "Zaktualizuj zależności\nPoprawka #549",
+        "uk": "Оновлення залежностей\nВиправлення #549",
+        "zh-cn": "更新依赖关系\n修复 #549"
+      },
       "3.2.3": {
         "en": "Fix cover colors\nUpdate dependencies",
         "de": "Fixiert Coverfarben\nAbhängigkeiten updaten",
@@ -69,19 +82,6 @@
         "zh-cn": "如果网络服务无法访问, 则改善签名错误处理"
       },
       "3.0.4": {
-        "en": "update dependencies",
-        "de": "aktualisierung der abhängigkeiten",
-        "ru": "обновление зависимостей",
-        "pt": "atualizar dependências",
-        "nl": "afhankelijkheden bijwerken",
-        "fr": "mettre à jour les dépendances",
-        "it": "aggiornamento dipendenze",
-        "es": "dependencias de actualización",
-        "pl": "aktualizacji zależności",
-        "uk": "оновлення залежності",
-        "zh-cn": "更新依赖关系"
-      },
-      "3.0.3": {
         "en": "update dependencies",
         "de": "aktualisierung der abhängigkeiten",
         "ru": "обновление зависимостей",
