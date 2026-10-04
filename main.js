@@ -2568,6 +2568,7 @@ class Heos extends utils.Adapter {
                 this.logInfo(`connected to HEOS (${this.ip})`, true);
                 this.startHeartbeat();
                 this.registerChangeEvents(true);
+                this.getPlayers();
             }
         });
 
