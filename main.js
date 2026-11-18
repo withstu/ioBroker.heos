@@ -47,10 +47,17 @@ class Heos extends utils.Adapter {
         this.state = STATES.Disconnected;
         this.signed_in = false;
 
+        // Clear each timer before dropping its handle, otherwise a timer created
+        // meanwhile keeps running unreachable. On the first call from the
+        // constructor the fields are still undefined, which clearing ignores.
         this.heartbeat_retries = 0;
+        clearInterval(this.heartbeat_interval);
         this.heartbeat_interval = undefined;
+        clearInterval(this.player_refresh_interval);
         this.player_refresh_interval = undefined;
+        clearInterval(this.ssdp_search_interval);
         this.ssdp_search_interval = undefined;
+        clearTimeout(this.ssdp_search_timeout);
         this.ssdp_search_timeout = undefined;
 
         this.start_players_errors = 0;
@@ -63,9 +70,13 @@ class Heos extends utils.Adapter {
 
         this.ssdp_player_ips = [];
 
+        clearTimeout(this.reconnect_timeout);
         this.reconnect_timeout = undefined;
+        clearTimeout(this.reboot_timeout);
         this.reboot_timeout = undefined;
+        clearTimeout(this.replay_timeout);
         this.replay_timeout = undefined;
+        clearTimeout(this.incomplete_players_timeout);
         this.incomplete_players_timeout = undefined;
 
         this.net_client = undefined;
@@ -434,7 +445,7 @@ class Heos extends utils.Adapter {
                 state.val = parseInt(state.val);
             }
             if (id.device === 'command') {
-                this.executeCommand(state.val);
+                this.executeCommand(state.val).catch(err => this.logDebug(`[executeCommand] ${err}`, false));
             } else if (id.device === 'offline_mode') {
                 this.offline_mode = state.val;
                 if (this.signed_in && state.val) {
@@ -658,15 +669,24 @@ class Heos extends utils.Adapter {
                         // and drop a reconnect that is already running.
                         this.reconnect_seq++;
                         this.reconnect_pending = true;
-                        await this.disconnect();
+                        try {
+                            await this.disconnect();
+                        } catch (err) {
+                            // search() would have released the lock; do it here instead.
+                            this.reconnect_pending = false;
+                            throw err;
+                        }
                         this.search();
                         break;
                     case 'disconnect':
                         // Drop a running reconnect and keep new ones out until disconnected.
                         this.reconnect_seq++;
                         this.reconnect_pending = true;
-                        await this.disconnect();
-                        this.reconnect_pending = false;
+                        try {
+                            await this.disconnect();
+                        } finally {
+                            this.reconnect_pending = false;
+                        }
                         break;
                     case 'reconnect':
                         this.reconnect();
@@ -2488,8 +2508,12 @@ class Heos extends utils.Adapter {
 
             if (Object.prototype.hasOwnProperty.call(group, 'gid')) {
                 // volume und mute dazu holen
-                this.executeCommand(`group/get_volume?gid=${group.gid}`);
-                this.executeCommand(`group/get_mute?gid=${group.gid}`);
+                this.executeCommand(`group/get_volume?gid=${group.gid}`).catch(err =>
+                    this.logDebug(`[executeCommand] ${err}`, false),
+                );
+                this.executeCommand(`group/get_mute?gid=${group.gid}`).catch(err =>
+                    this.logDebug(`[executeCommand] ${err}`, false),
+                );
             }
         }
     }
@@ -2752,16 +2776,25 @@ class Heos extends utils.Adapter {
         this.connection_generation += 1;
         this.state = STATES.Connecting;
 
+        // Close a previous connection; its handlers below ignore it from now on.
+        if (this.net_client) {
+            this.net_client.destroy();
+        }
+
         this.ip = ip;
         this.logInfo(`connecting to HEOS (${this.ip}) ...`, false);
-        this.net_client = net.connect({ host: this.ip, port: 1255 });
-        this.net_client.setKeepAlive(true, 60000);
-        //this.net_client.setNoDelay(true);
-        this.net_client.setTimeout(60000);
+        const client = net.connect({ host: this.ip, port: 1255 });
+        this.net_client = client;
+        client.setKeepAlive(true, 60000);
+        //client.setNoDelay(true);
+        client.setTimeout(60000);
 
         this.removeNextConnectPlayerIp(ip);
 
-        this.net_client.on('error', error => {
+        client.on('error', error => {
+            if (client !== this.net_client) {
+                return;
+            }
             this.logError(`[connect] ${error}`, false);
             if (!this.removeRebootIp(ip)) {
                 this.raiseLeaderFailures(this.ip);
@@ -2770,7 +2803,10 @@ class Heos extends utils.Adapter {
         });
 
         // timeout
-        this.net_client.on('timeout', () => {
+        client.on('timeout', () => {
+            if (client !== this.net_client) {
+                return;
+            }
             this.logWarn(`timeout trying connect to ${this.ip}`, false);
             if (!this.removeRebootIp(ip)) {
                 this.raiseLeaderFailures(this.ip);
@@ -2778,7 +2814,10 @@ class Heos extends utils.Adapter {
             this.reconnect();
         });
 
-        this.net_client.on('connect', async () => {
+        client.on('connect', async () => {
+            if (client !== this.net_client) {
+                return;
+            }
             this.setStateChanged('info.connection', true, true);
             this.setStateChanged('connected_ip', this.ip, true);
 
@@ -2796,13 +2835,21 @@ class Heos extends utils.Adapter {
         });
 
         // Gegenseite hat die Verbindung geschlossen
-        this.net_client.on('end', () => {
+        client.on('end', () => {
+            if (client !== this.net_client) {
+                return;
+            }
             this.logWarn(`HEOS Player ${this.ip} closed the connection.`, false);
             this.reconnect();
         });
 
         // Datenempfang
-        this.net_client.on('data', data => this.onData(data));
+        client.on('data', data => {
+            if (client !== this.net_client) {
+                return;
+            }
+            this.onData(data);
+        });
     }
 
     ssdpLeaderElection() {
@@ -3388,20 +3435,31 @@ class Heos extends utils.Adapter {
 
         this.logInfo('reconnecting to HEOS ...', false);
 
-        await this.disconnect();
+        try {
+            await this.disconnect();
+        } catch (err) {
+            // Go on with the reconnect anyway; staying disconnected would be worse.
+            this.logWarn(`[reconnect] ${err}`, false);
+        }
         // A manual command, search() or unload took over while disconnecting.
         if (seq !== this.reconnect_seq) {
             return;
         }
 
         this.state = STATES.Reconnecting;
-        if (this.reconnect_timeout) {
-            clearTimeout(this.reconnect_timeout);
-            this.reconnect_timeout = undefined;
+        try {
+            if (this.reconnect_timeout) {
+                clearTimeout(this.reconnect_timeout);
+                this.reconnect_timeout = undefined;
+            }
+            this.reconnect_timeout = this.setTimeout(() => {
+                this.search();
+            }, Number(this.config.reconnectTimeout));
+        } catch (err) {
+            // Never keep the lock without a scheduled search().
+            this.reconnect_pending = false;
+            this.logWarn(`[reconnect] ${err}`, false);
         }
-        this.reconnect_timeout = this.setTimeout(() => {
-            this.search();
-        }, Number(this.config.reconnectTimeout));
     }
 
     main() {
