@@ -2234,8 +2234,18 @@ class Heos extends utils.Adapter {
                         // rewrite the metadata objects only when the entry changed
                         const signature = this.getPlayerEntrySignature(player);
                         if (this.player_entry_signatures[pid] !== signature) {
-                            this.player_entry_signatures[pid] = signature;
-                            this.players[pid].initMetaData(player);
+                            // do not wait for the write, but remember the entry only once it succeeded
+                            const heosPlayer = this.players[pid];
+                            heosPlayer.initMetaData(player).then(
+                                () => {
+                                    if (this.players[pid] === heosPlayer) {
+                                        this.player_entry_signatures[pid] = signature;
+                                    }
+                                },
+                                err => {
+                                    this.logDebug(`can't update metadata of player ${player.name}: ${err}`, false);
+                                },
+                            );
                         }
                     }
                     if (playerConnected) {
