@@ -810,12 +810,39 @@ class Heos extends utils.Adapter {
         });
     }
 
+    /**
+     * Make a command, an answer or the request times safe to log: a sign in is hidden
+     * completely, the account name and password are removed everywhere else.
+     *
+     * @param data text or object with commands as keys
+     * @returns text without credentials
+     */
+    hideCredentials(data) {
+        if (typeof data !== 'string') {
+            const safe = {};
+            for (const key in data) {
+                safe[this.hideCredentials(key)] = ['un', 'pw'].includes(key) ? '***' : data[key];
+            }
+            return JSON.stringify(safe);
+        }
+        if (data.includes('sign_in')) {
+            return 'sign_in - sensitive data hidden';
+        }
+        let safe = data;
+        for (const secret of [this.config.password, this.config.username]) {
+            if (secret) {
+                safe = safe.split(secret).join('***');
+            }
+        }
+        return safe.replace(/\b(un|pw)=[^&"\s]*/g, '$1=***');
+    }
+
     logData(prefix, data) {
         if (data.toString().includes('sign_in')) {
             this.logSilly(`${prefix}: ${data.toString()}`, false);
             this.logDebug(`${prefix}: sign_in - sensitive data hidden`, false);
         } else {
-            this.logDebug(`${prefix}: ${data.toString()}`, false);
+            this.logDebug(`${prefix}: ${this.hideCredentials(data.toString())}`, false);
         }
     }
 
@@ -1363,7 +1390,7 @@ class Heos extends utils.Adapter {
                 this.logSilly(`parseResponse: ${response}`, false);
                 this.logDebug('parseResponse: sign_in - sensitive data hidden', false);
             } else {
-                this.logDebug(`parseResponse: ${response}`, false);
+                this.logDebug(`parseResponse: ${this.hideCredentials(response)}`, false);
             }
 
             if (response.indexOf('command under process') > 0) {
@@ -1388,7 +1415,7 @@ class Heos extends utils.Adapter {
                 msg_params.delete('text');
                 command += `?${decodeURIComponent(msg_params.toString())}`;
             }
-            this.logDebug(`parseResponse: Reset command timeout - ${command}`, false);
+            this.logDebug(`parseResponse: Reset command timeout - ${this.hideCredentials(command)}`, false);
             //Clear request timeout
             this.deleteRequestTime(command);
 
@@ -1409,7 +1436,7 @@ class Heos extends utils.Adapter {
                         this.signIn();
                         if (!this.replay_timeout) {
                             this.replay_timeout = this.setTimeout(() => {
-                                this.logDebug(`parseResponse: Replay command ${command}`, false);
+                                this.logDebug(`parseResponse: Replay command ${this.hideCredentials(command)}`, false);
                                 this.queueMsg(command);
 
                                 this.replay_timeout = undefined;
@@ -1419,7 +1446,7 @@ class Heos extends utils.Adapter {
                     case '13': //'Processing previous command'
                         if (!this.replay_timeout) {
                             this.replay_timeout = this.setTimeout(() => {
-                                this.logDebug(`parseResponse: Replay command ${command}`, false);
+                                this.logDebug(`parseResponse: Replay command ${this.hideCredentials(command)}`, false);
                                 this.queueMsg(command);
 
                                 this.replay_timeout = undefined;
@@ -1470,7 +1497,7 @@ class Heos extends utils.Adapter {
                             this.getMusicSources();
                             break;
                         case 'user_changed':
-                            this.logDebug(`sign: ${JSON.stringify(jmsg)}`, false);
+                            this.logDebug(`sign: ${this.hideCredentials(jmsg)}`, false);
                             if ('signed_in' in jmsg) {
                                 this.signed_in = true;
                                 await this.setStateAsync('signed_in', true, true);
@@ -1986,7 +2013,7 @@ class Heos extends utils.Adapter {
                 }
             }
         } catch (err) {
-            this.logError(`[parseResponse] ${err}\n ${response}`);
+            this.logError(`[parseResponse] ${err}\n ${this.hideCredentials(response)}`);
         }
     }
 
@@ -2793,13 +2820,13 @@ class Heos extends utils.Adapter {
 
     deleteRequestTime(msg) {
         let command = msg.startsWith('system/') ? msg.split('?')[0] : msg;
-        this.logDebug(`deleteRequestTime: before - ${JSON.stringify(this.request_time)}`, false);
+        this.logDebug(`deleteRequestTime: before - ${this.hideCredentials(this.request_time)}`, false);
         for (const cmd in this.request_time) {
             if (command.startsWith(cmd) || cmd.startsWith(command)) {
                 delete this.request_time[cmd];
             }
         }
-        this.logDebug(`deleteRequestTime: after - ${JSON.stringify(this.request_time)}`, false);
+        this.logDebug(`deleteRequestTime: after - ${this.hideCredentials(this.request_time)}`, false);
     }
 
     checkDuplicateRequest(msg) {
@@ -2809,14 +2836,16 @@ class Heos extends utils.Adapter {
             //Request Timeout
             if (Math.floor((now - this.request_time[msg]) / 1000) < this.config.requestTimeout) {
                 duplicate = true;
-                this.logDebug(`Skip duplicate request: ${msg}`);
+                this.logDebug(`Skip duplicate request: ${this.hideCredentials(msg)}`);
             } else {
-                this.logWarn(`[checkDuplicateRequest] Response timed out: ${msg}. Increase leader failure counter.`);
+                this.logWarn(
+                    `[checkDuplicateRequest] Response timed out: ${this.hideCredentials(msg)}. Increase leader failure counter.`,
+                );
                 this.raiseLeaderFailures(this.ip);
                 this.deleteRequestTime(msg);
             }
         }
-        this.logDebug(`Request times: ${JSON.stringify(this.request_time)}`);
+        this.logDebug(`Request times: ${this.hideCredentials(this.request_time)}`);
         return duplicate;
     }
 
