@@ -146,6 +146,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 -->
 ### **WORK IN PROGRESS**
 * (withstu) Update dependencies
+* (cavernerg) fix: do not share one array between preferred and next connect IPs
 
 ### 3.2.4 (2026-10-04)
 * (withstu) Update dependencies
