@@ -56,6 +56,7 @@ class Heos extends utils.Adapter {
         this.start_players_errors = 0;
         this.start_players_pending = undefined;
         this.player_entry_signatures = {};
+        this.failing_player_connects = {};
         this.incomplete_players_since = undefined;
         this.ssdp_retry_counter = 0;
         this.known_player_ips = [];
@@ -2210,11 +2211,18 @@ class Heos extends utils.Adapter {
                         }
                         try {
                             await this.connectPlayerWithDeadline(heosPlayer);
+                            delete this.failing_player_connects[pid];
                         } catch (err) {
                             if (!isStale()) {
                                 this.logDebug(`can't connect error: ${err}`, false);
-                                this.logWarn(`can't connect player ${player.name} (${player.ip}). Skip.`, false);
-                                this.raiseFailures(player.ip, ERROR_CODES.General);
+                                // warn and count only the first failure while the connect keeps failing
+                                if (this.failing_player_connects[pid]) {
+                                    this.logDebug(`can't connect player ${player.name} (${player.ip}). Skip.`, false);
+                                } else {
+                                    this.failing_player_connects[pid] = true;
+                                    this.logWarn(`can't connect player ${player.name} (${player.ip}). Skip.`, false);
+                                    this.raiseFailures(player.ip, ERROR_CODES.General);
+                                }
                             }
                             playerConnected = false;
                         }
@@ -2256,6 +2264,13 @@ class Heos extends utils.Adapter {
             if (isStale()) {
                 this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
                 return;
+            }
+            // forget connect failures of players that are no longer listed
+            const listedPids = payload.map(player => `${player.pid}`);
+            for (const pid in this.failing_player_connects) {
+                if (!listedPids.includes(pid)) {
+                    delete this.failing_player_connects[pid];
+                }
             }
             if (incompleteAnswer && this.incomplete_players_since === undefined) {
                 this.incomplete_players_since = Date.now();
