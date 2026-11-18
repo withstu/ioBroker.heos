@@ -2409,10 +2409,6 @@ class Heos extends utils.Adapter {
             }
         } else {
             this.manual_search_mode = false;
-            if (this.config.disableSSDPDiscovery === true && this.next_connect_ips.length == 0) {
-                // without SSDP discovery fall back to the IPs of the known players
-                this.next_connect_ips = [...this.known_player_ips];
-            }
         }
     }
 
