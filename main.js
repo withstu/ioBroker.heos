@@ -202,6 +202,7 @@ class Heos extends utils.Adapter {
             this.next_connect_ips = [];
             this.connection_generation = 0;
             this.start_players_running = false;
+            this.start_players_generation = undefined;
             this.reconnect_pending = false;
             this.reconnect_seq = 0;
             this.unloading = false;
@@ -2181,26 +2182,38 @@ class Heos extends utils.Adapter {
     }
 
     /**
-     * Process a get_players answer. Only one pass runs at a time; an answer arriving
-     * meanwhile waits and replaces any older waiting answer.
+     * Process a get_players answer. Only one pass per connection runs at a time; an answer
+     * arriving meanwhile waits and replaces any older waiting answer. An answer of a newer
+     * connection does not wait for a pass of an old connection, which is stale and returns
+     * at its next check.
      *
      * @param {object[]} payload player list from get_players
      */
     async startPlayers(payload) {
-        if (this.start_players_running) {
+        const generation = this.connection_generation;
+        if (this.start_players_running && this.start_players_generation === generation) {
             this.start_players_pending = payload;
             return;
         }
+        // a waiting answer belongs to the old connection
+        this.start_players_pending = undefined;
         this.start_players_running = true;
+        this.start_players_generation = generation;
         try {
             let next = payload;
             do {
                 await this.runStartPlayers(next);
+                if (this.start_players_generation !== generation) {
+                    // a pass of a newer connection took over, including its waiting answer
+                    return;
+                }
                 next = this.start_players_pending;
                 this.start_players_pending = undefined;
             } while (next);
         } finally {
-            this.start_players_running = false;
+            if (this.start_players_generation === generation) {
+                this.start_players_running = false;
+            }
         }
     }
 
