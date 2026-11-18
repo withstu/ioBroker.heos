@@ -13,7 +13,7 @@ import url from 'node:url';
 import net from 'node:net';
 import SSDP from 'node-ssdp';
 import HeosPlayer from './lib/heos-player.js';
-import { STATES, ERROR_CODES } from './lib/constants.js';
+import { STATES, ERROR_CODES, INCOMPLETE_PLAYERS_RETRY_MS, INCOMPLETE_PLAYERS_TOLERANCE_MS } from './lib/constants.js';
 
 const NodeSSDP = SSDP.Client;
 
@@ -48,6 +48,7 @@ class Heos extends utils.Adapter {
 
         this.start_players_errors = 0;
         this.start_players_pending = undefined;
+        this.incomplete_players_since = undefined;
         this.ssdp_retry_counter = 0;
         this.known_player_ips = [];
 
@@ -56,6 +57,7 @@ class Heos extends utils.Adapter {
         this.reconnect_timeout = undefined;
         this.reboot_timeout = undefined;
         this.replay_timeout = undefined;
+        this.incomplete_players_timeout = undefined;
 
         this.net_client = undefined;
         this.nodessdp_client = undefined;
@@ -2149,6 +2151,7 @@ class Heos extends utils.Adapter {
         try {
             const connectedPlayers = [];
             const foundPlayerIps = [];
+            let incompleteAnswer = false;
             for (let i = 0; i < payload.length; i++) {
                 let playerConnected = true;
                 const player = payload[i];
@@ -2157,21 +2160,11 @@ class Heos extends utils.Adapter {
                     foundPlayerIps.push(player.ip);
                 }
                 if (!player.name || !Object.prototype.hasOwnProperty.call(player, 'ip') || player.ip == '127.0.0.1') {
-                    this.start_players_errors += 1;
-                    this.logDebug(`Start players payload error: ${JSON.stringify(payload)}`, false);
-                    if (this.start_players_errors > 4) {
-                        this.start_players_errors = 0;
-                        if (this.config.rebootOnFailure === true) {
-                            this.logWarn('HEOS is not responding as expected. Reboot.', false);
-                            this.reboot();
-                        } else {
-                            this.logWarn(
-                                'Device failure detected. Activate "reboot on failure" in the configuration or reboot manually.',
-                                true,
-                            );
-                        }
+                    // HEOS is still discovering this player: keep a known one, skip an unknown one
+                    incompleteAnswer = true;
+                    if (pid in this.players) {
+                        connectedPlayers.push(pid);
                     }
-                    throw new Error('HEOS responded with invalid data.');
                 } else {
                     if (!(pid in this.players)) {
                         if (Object.keys(this.players).length == 0) {
@@ -2228,6 +2221,42 @@ class Heos extends utils.Adapter {
                 this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
                 return;
             }
+            if (incompleteAnswer && this.incomplete_players_since === undefined) {
+                this.incomplete_players_since = Date.now();
+                this.logDebug(`Start players payload error: ${JSON.stringify(payload)}`, false);
+            }
+            const toleranceExpired =
+                incompleteAnswer && Date.now() - this.incomplete_players_since > INCOMPLETE_PLAYERS_TOLERANCE_MS;
+            if (!incompleteAnswer || toleranceExpired) {
+                this.incomplete_players_since = undefined;
+                if (this.incomplete_players_timeout) {
+                    clearTimeout(this.incomplete_players_timeout);
+                    this.incomplete_players_timeout = undefined;
+                }
+            }
+            if (toleranceExpired) {
+                this.start_players_errors += 1;
+                this.logDebug(`Start players payload error: ${JSON.stringify(payload)}`, false);
+                if (this.start_players_errors > 4) {
+                    this.start_players_errors = 0;
+                    if (this.config.rebootOnFailure === true) {
+                        this.logWarn('HEOS is not responding as expected. Reboot.', false);
+                        this.reboot();
+                    } else {
+                        this.logWarn(
+                            'Device failure detected. Activate "reboot on failure" in the configuration or reboot manually.',
+                            true,
+                        );
+                    }
+                }
+                throw new Error('HEOS responded with invalid data.');
+            }
+            if (incompleteAnswer && !this.incomplete_players_timeout) {
+                this.incomplete_players_timeout = this.setTimeout(() => {
+                    this.incomplete_players_timeout = undefined;
+                    this.getPlayers();
+                }, INCOMPLETE_PLAYERS_RETRY_MS);
+            }
             //Remove disconnected players && Update reboot times for not connected players
             const connectedPlayerIps = [];
             for (const pid in this.players) {
@@ -2247,11 +2276,11 @@ class Heos extends utils.Adapter {
                 }
             }
 
-            //Check for players in fail state
+            //Check for players in fail state (an incomplete answer is provisional and proves nothing)
             let playerInFailState = false;
             for (const id in this.ssdp_player_ips) {
                 const ip = this.ssdp_player_ips[id];
-                if (this.getUptime(ip) >= 5 && !foundPlayerIps.includes(ip)) {
+                if (!incompleteAnswer && this.getUptime(ip) >= 5 && !foundPlayerIps.includes(ip)) {
                     this.raiseLeaderFailures(this.ip);
                     this.raiseFailures(ip, ERROR_CODES.General);
                     this.logDebug(
@@ -2266,7 +2295,7 @@ class Heos extends utils.Adapter {
             }
             if (playerInFailState) {
                 this.reconnect();
-            } else if (connectedPlayers.length == 0) {
+            } else if (connectedPlayers.length == 0 && !incompleteAnswer) {
                 if (this.config.rebootOnFailure === true) {
                     this.logWarn("Can't connect any players. Reboot.", true);
                     this.rebootAll();
@@ -3172,6 +3201,10 @@ class Heos extends utils.Adapter {
         if (this.replay_timeout) {
             clearTimeout(this.replay_timeout);
             this.replay_timeout = undefined;
+        }
+        if (this.incomplete_players_timeout) {
+            clearTimeout(this.incomplete_players_timeout);
+            this.incomplete_players_timeout = undefined;
         }
     }
 
