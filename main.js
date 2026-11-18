@@ -174,6 +174,7 @@ class Heos extends utils.Adapter {
             this.leader_failure_counter = {};
             this.preferred_player_ips = [];
             this.next_connect_ips = [];
+            this.connection_generation = 0;
         }
     }
 
@@ -2103,6 +2104,13 @@ class Heos extends utils.Adapter {
 
     // Für die gefundenen HEOS Player entsprechende class HeosPlayer Instanzen bilden und nicht mehr verbundene Player stoppen
     async startPlayers(payload) {
+        // A run is stale once the adapter disconnected or reconnected while it was waiting
+        const generation = this.connection_generation;
+        const isStale = () => this.connection_generation !== generation || this.state != STATES.Connected;
+        if (isStale()) {
+            this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
+            return;
+        }
         try {
             const connectedPlayers = [];
             const foundPlayerIps = [];
@@ -2137,6 +2145,10 @@ class Heos extends utils.Adapter {
                         const heosPlayer = (this.players[pid] = new HeosPlayer(this, player));
                         // wait until objects are created before connecting, because states shouldn't be set before objects exist
                         await heosPlayer.initMetaData(player);
+                        if (isStale()) {
+                            this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
+                            return;
+                        }
                         if (
                             this.preferred_player_ips.length > 0 &&
                             this.preferred_player_ips.indexOf(this.ip) === -1 &&
@@ -2145,14 +2157,29 @@ class Heos extends utils.Adapter {
                             this.manual_search_mode = true;
                             this.logInfo(`preferred player ${player.ip} found. Reconnect.`);
                             this.reconnect();
+                            return;
                         }
                         try {
                             await heosPlayer.connect();
                         } catch (err) {
-                            this.logDebug(`can't connect error: ${err}`, false);
-                            this.logWarn(`can't connect player ${player.name} (${player.ip}). Skip.`, false);
-                            this.raiseFailures(player.ip, ERROR_CODES.General);
+                            if (!isStale()) {
+                                this.logDebug(`can't connect error: ${err}`, false);
+                                this.logWarn(`can't connect player ${player.name} (${player.ip}). Skip.`, false);
+                                this.raiseFailures(player.ip, ERROR_CODES.General);
+                            }
                             playerConnected = false;
+                        }
+                        if (isStale()) {
+                            if (this.players[pid] !== heosPlayer) {
+                                // the player list was reset meanwhile, so nobody else will stop this player
+                                try {
+                                    await heosPlayer.disconnect();
+                                } catch (err) {
+                                    this.logDebug(`can't disconnect orphaned player ${player.name}: ${err}`, false);
+                                }
+                            }
+                            this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
+                            return;
                         }
                     } else {
                         this.players[pid].initMetaData(player);
@@ -2162,11 +2189,19 @@ class Heos extends utils.Adapter {
                     }
                 }
             }
+            if (isStale()) {
+                this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
+                return;
+            }
             //Remove disconnected players && Update reboot times for not connected players
             const connectedPlayerIps = [];
             for (const pid in this.players) {
                 if (!connectedPlayers.includes(pid)) {
                     await this.stopPlayer(pid);
+                    if (isStale()) {
+                        this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
+                        return;
+                    }
                 } else {
                     connectedPlayerIps.push(this.players[pid].ip);
                 }
@@ -2535,6 +2570,7 @@ class Heos extends utils.Adapter {
     }
 
     connect(ip) {
+        this.connection_generation += 1;
         this.state = STATES.Connecting;
 
         this.ip = ip;
