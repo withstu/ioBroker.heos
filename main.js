@@ -48,6 +48,7 @@ class Heos extends utils.Adapter {
 
         this.start_players_errors = 0;
         this.start_players_pending = undefined;
+        this.player_entry_signatures = {};
         this.incomplete_players_since = undefined;
         this.ssdp_retry_counter = 0;
         this.known_player_ips = [];
@@ -2108,6 +2109,18 @@ class Heos extends utils.Adapter {
         }
         // player leeren
         delete this.players[pid];
+        delete this.player_entry_signatures[pid];
+    }
+
+    /**
+     * Signature of the player entry fields that end up in the player's metadata objects.
+     *
+     * @param {object} player player entry from get_players
+     * @returns {string} signature
+     */
+    getPlayerEntrySignature(player) {
+        const { pid, ip, name, model, serial, version, network, lineout } = player;
+        return JSON.stringify({ pid, ip, name, model, serial, version, network, lineout });
     }
 
     /**
@@ -2177,6 +2190,7 @@ class Heos extends utils.Adapter {
                             this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
                             return;
                         }
+                        this.player_entry_signatures[pid] = this.getPlayerEntrySignature(player);
                         if (
                             this.preferred_player_ips.length > 0 &&
                             this.preferred_player_ips.indexOf(this.ip) === -1 &&
@@ -2210,7 +2224,12 @@ class Heos extends utils.Adapter {
                             return;
                         }
                     } else {
-                        this.players[pid].initMetaData(player);
+                        // rewrite the metadata objects only when the entry changed
+                        const signature = this.getPlayerEntrySignature(player);
+                        if (this.player_entry_signatures[pid] !== signature) {
+                            this.player_entry_signatures[pid] = signature;
+                            this.players[pid].initMetaData(player);
+                        }
                     }
                     if (playerConnected) {
                         connectedPlayers.push(pid);
