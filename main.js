@@ -2236,17 +2236,18 @@ class Heos extends utils.Adapter {
     }
 
     updatePreferredPlayerIPs() {
-        if (this.config.preferredIPs.length > 0) {
-            const ips = this.config.preferredIPs
-                .split(',')
-                .map(function (item) {
-                    return item.trim();
-                })
-                .filter(function (item) {
-                    return item.length > 0;
-                });
+        const ips = this.config.preferredIPs
+            .split(',')
+            .map(function (item) {
+                return item.trim();
+            })
+            .filter(function (item) {
+                return item.length > 0;
+            });
+        if (ips.length > 0) {
             this.preferred_player_ips = ips;
-            if (this.manual_search_mode) {
+            // without SSDP discovery the list is the only way to find a player, so refill it once it ran empty
+            if (this.manual_search_mode || this.config.disableSSDPDiscovery === true) {
                 if (this.next_connect_ips.length == 0) {
                     // copy, so removeNextConnectPlayerIp() does not shrink the preferred list
                     this.next_connect_ips = [...ips];
@@ -2254,6 +2255,10 @@ class Heos extends utils.Adapter {
             }
         } else {
             this.manual_search_mode = false;
+            if (this.config.disableSSDPDiscovery === true && this.next_connect_ips.length == 0) {
+                // without SSDP discovery fall back to the IPs of the known players
+                this.next_connect_ips = [...this.known_player_ips];
+            }
         }
     }
 
