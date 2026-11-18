@@ -47,6 +47,8 @@ class Heos extends utils.Adapter {
         this.ip = '';
         this.state = STATES.Disconnected;
         this.signed_in = false;
+        // true while the current connection was opened only to reboot a device
+        this.reboot_only_connection = false;
 
         // Clear each timer before dropping its handle, otherwise a timer created
         // meanwhile keeps running unreachable. On the first call from the
@@ -2610,7 +2612,9 @@ class Heos extends utils.Adapter {
     }
 
     signIn() {
-        if (this.offline_mode || !this.config.username || !this.config.password) {
+        if (this.reboot_only_connection) {
+            this.logDebug('Skip sign in, because this connection is only used to reboot a device.', false);
+        } else if (this.offline_mode || !this.config.username || !this.config.password) {
             this.logInfo('Skip sign in, because offline mode is activated or credentials missing.', false);
         } else if (this.state == STATES.Connected) {
             // heos://system/sign_in?un=heos_username&pw=heos_password
@@ -2834,6 +2838,7 @@ class Heos extends utils.Adapter {
     connect(ip) {
         this.connection_generation += 1;
         this.state = STATES.Connecting;
+        this.reboot_only_connection = false;
 
         // Close a previous connection; its handlers below ignore it from now on.
         if (this.net_client) {
@@ -2882,6 +2887,7 @@ class Heos extends utils.Adapter {
 
             this.state = STATES.Connected;
             if (this.reboot_ips.includes(this.ip)) {
+                this.reboot_only_connection = true;
                 this.reboot();
             } else {
                 this.manual_search_mode = true;
