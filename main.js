@@ -188,6 +188,7 @@ class Heos extends utils.Adapter {
             this.next_connect_ips = [];
             this.connection_generation = 0;
             this.start_players_running = false;
+            this.reconnect_pending = false;
         }
     }
 
@@ -398,6 +399,7 @@ class Heos extends utils.Adapter {
      * Is called when adapter shuts down
      */
     async onUnload() {
+        this.reconnect_pending = false;
         await this.disconnect();
     }
 
@@ -630,7 +632,7 @@ class Heos extends utils.Adapter {
         }
     }
 
-    executeCommand(cmd) {
+    async executeCommand(cmd) {
         //('command: '+cmd);
         // cmd auswerten
         cmd = cmd.split('/');
@@ -649,11 +651,15 @@ class Heos extends utils.Adapter {
                         this.getMusicSources();
                         break;
                     case 'connect':
-                        this.disconnect();
+                        // Hold the reconnect lock until search() starts, so no
+                        // reconnect can slip in while disconnect() is running.
+                        this.reconnect_pending = true;
+                        await this.disconnect();
                         this.search();
                         break;
                     case 'disconnect':
-                        this.disconnect();
+                        await this.disconnect();
+                        this.reconnect_pending = false;
                         break;
                     case 'reconnect':
                         this.reconnect();
@@ -2819,6 +2825,7 @@ class Heos extends utils.Adapter {
 
     /** Verbindung zum HEOS System herstellen */
     async search() {
+        this.reconnect_pending = false;
         try {
             //Reset connect states
             this.setStateChanged('info.connection', false, true);
@@ -3361,9 +3368,14 @@ class Heos extends utils.Adapter {
     }
 
     async reconnect() {
+        // Only one reconnect at a time: the lock is held from here until search() starts.
+        if (this.reconnect_pending) {
+            return;
+        }
         if (this.state == STATES.Reconnecting || this.state == STATES.Disconnecting) {
             return;
         }
+        this.reconnect_pending = true;
 
         this.logInfo('reconnecting to HEOS ...', false);
 
