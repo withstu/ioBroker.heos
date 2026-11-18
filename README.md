@@ -151,10 +151,16 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 * (cavernerg) Process player list answers one at a time
 * (cavernerg) Tolerate incomplete player entries instead of dropping the connection
 * (cavernerg) Refresh the player list periodically when connected through configured IPs (no SSDP search interval running); unchanged player objects are no longer rewritten
-* (cavernerg) Never use stored player IPs as connect targets; without SSDP discovery only the preferred IPs are used
+* (cavernerg) Do not fall back to stored player IPs when SSDP discovery is disabled; only the preferred IPs are used
 * (cavernerg) Give up a player connect after 45 seconds so it cannot block later player list updates
 * (cavernerg) Retry a failed player metadata update with the next player list
 * (cavernerg) Warn only once while a player connect keeps failing
+* (cavernerg) Run only one reconnect at a time; manual commands and unload take over cleanly
+* (cavernerg) Clear timers and ignore events of a replaced connection
+* (cavernerg) Unload cleanly (callback, stop timeout)
+* (cavernerg) Connect new players staggered instead of one after another
+* (cavernerg) Never sign in on a connection opened only to reboot a device
+* (cavernerg) Always complete the teardown on disconnect
 
 ### 3.2.4 (2026-10-04)
 * (withstu) Update dependencies
