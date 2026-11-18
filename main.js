@@ -13,7 +13,13 @@ import url from 'node:url';
 import net from 'node:net';
 import SSDP from 'node-ssdp';
 import HeosPlayer from './lib/heos-player.js';
-import { STATES, ERROR_CODES, INCOMPLETE_PLAYERS_RETRY_MS, INCOMPLETE_PLAYERS_TOLERANCE_MS } from './lib/constants.js';
+import {
+    STATES,
+    ERROR_CODES,
+    INCOMPLETE_PLAYERS_RETRY_MS,
+    INCOMPLETE_PLAYERS_TOLERANCE_MS,
+    PLAYER_CONNECT_TIMEOUT_MS,
+} from './lib/constants.js';
 
 const NodeSSDP = SSDP.Client;
 
@@ -2203,7 +2209,7 @@ class Heos extends utils.Adapter {
                             return;
                         }
                         try {
-                            await heosPlayer.connect();
+                            await this.connectPlayerWithDeadline(heosPlayer);
                         } catch (err) {
                             if (!isStale()) {
                                 this.logDebug(`can't connect error: ${err}`, false);
@@ -2333,6 +2339,29 @@ class Heos extends utils.Adapter {
             this.logError(`[startPlayers] ${err}`);
             this.raiseLeaderFailures(this.ip);
             this.reconnect();
+        }
+    }
+
+    /**
+     * Connect a player, but give up after PLAYER_CONNECT_TIMEOUT_MS, so a connect that never
+     * settles cannot block startPlayers. A late result of the abandoned connect is ignored.
+     *
+     * @param {HeosPlayer} heosPlayer player to connect
+     */
+    async connectPlayerWithDeadline(heosPlayer) {
+        let deadlineTimer;
+        const deadline = new Promise((resolve, reject) => {
+            deadlineTimer = this.setTimeout(() => {
+                reject(new Error(`connect timed out after ${PLAYER_CONNECT_TIMEOUT_MS} ms`));
+            }, PLAYER_CONNECT_TIMEOUT_MS);
+        });
+        const connecting = heosPlayer.connect();
+        // the connect may still reject after the deadline passed; nobody waits for it then
+        connecting.catch(() => {});
+        try {
+            await Promise.race([connecting, deadline]);
+        } finally {
+            this.clearTimeout(deadlineTimer);
         }
     }
 
