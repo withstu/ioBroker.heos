@@ -144,6 +144,14 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (cavernerg) Keep preferred IPs and next connect IPs separate to avoid needless reconnects on start; ignore empty entries in the preferred IP list
+* (cavernerg) Refill the connect IP list when SSDP discovery is disabled, falling back to the known player IPs if no preferred IPs are set
+* (cavernerg) Abandon player start-up when the connection changed meanwhile
+* (cavernerg) Process player list answers one at a time
+* (cavernerg) Tolerate incomplete player entries instead of dropping the connection
+* (cavernerg) Refresh the player list periodically when connecting without SSDP discovery; unchanged player objects are no longer rewritten
+
 ### 3.2.4 (2026-10-04)
 * (withstu) Update dependencies
 * (withstu) Fix #549
