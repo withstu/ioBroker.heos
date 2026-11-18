@@ -19,6 +19,7 @@ import {
     INCOMPLETE_PLAYERS_RETRY_MS,
     INCOMPLETE_PLAYERS_TOLERANCE_MS,
     PLAYER_CONNECT_TIMEOUT_MS,
+    PLAYER_CONNECT_STAGGER_MS,
 } from './lib/constants.js';
 
 const NodeSSDP = SSDP.Client;
@@ -2212,10 +2213,13 @@ class Heos extends utils.Adapter {
             this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
             return;
         }
+        // connects of new players run side by side, PLAYER_CONNECT_STAGGER_MS apart
+        const connects = [];
         try {
             const connectedPlayers = [];
             const foundPlayerIps = [];
             let incompleteAnswer = false;
+            let lastConnectStart;
             for (let i = 0; i < payload.length; i++) {
                 let playerConnected = true;
                 const player = payload[i];
@@ -2231,6 +2235,11 @@ class Heos extends utils.Adapter {
                     }
                 } else {
                     if (!(pid in this.players)) {
+                        // a running connect may have made the pass stale; do not add to a reset player list
+                        if (isStale()) {
+                            this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
+                            return;
+                        }
                         if (Object.keys(this.players).length == 0) {
                             this.signIn();
                         }
@@ -2252,35 +2261,20 @@ class Heos extends utils.Adapter {
                             this.reconnect();
                             return;
                         }
-                        try {
-                            await this.connectPlayerWithDeadline(heosPlayer);
-                            delete this.failing_player_connects[pid];
-                        } catch (err) {
-                            if (!isStale()) {
-                                this.logDebug(`can't connect error: ${err}`, false);
-                                // warn and count only the first failure while the connect keeps failing
-                                if (this.failing_player_connects[pid]) {
-                                    this.logDebug(`can't connect player ${player.name} (${player.ip}). Skip.`, false);
-                                } else {
-                                    this.failing_player_connects[pid] = true;
-                                    this.logWarn(`can't connect player ${player.name} (${player.ip}). Skip.`, false);
-                                    this.raiseFailures(player.ip, ERROR_CODES.General);
+                        playerConnected = false; // pushed once its connect succeeds
+                        const now = Date.now();
+                        const connectStart =
+                            lastConnectStart === undefined
+                                ? now
+                                : Math.max(now, lastConnectStart + PLAYER_CONNECT_STAGGER_MS);
+                        lastConnectStart = connectStart;
+                        connects.push(
+                            this.connectNewPlayer(heosPlayer, player, connectStart - now, isStale).then(connected => {
+                                if (connected) {
+                                    connectedPlayers.push(pid);
                                 }
-                            }
-                            playerConnected = false;
-                        }
-                        if (isStale()) {
-                            if (this.players[pid] !== heosPlayer) {
-                                // the player list was reset meanwhile, so nobody else will stop this player
-                                try {
-                                    await heosPlayer.disconnect();
-                                } catch (err) {
-                                    this.logDebug(`can't disconnect orphaned player ${player.name}: ${err}`, false);
-                                }
-                            }
-                            this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
-                            return;
-                        }
+                            }),
+                        );
                     } else {
                         // rewrite the metadata objects only when the entry changed
                         const signature = this.getPlayerEntrySignature(player);
@@ -2304,6 +2298,7 @@ class Heos extends utils.Adapter {
                     }
                 }
             }
+            await Promise.all(connects);
             if (isStale()) {
                 this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
                 return;
@@ -2407,7 +2402,61 @@ class Heos extends utils.Adapter {
             this.logError(`[startPlayers] ${err}`);
             this.raiseLeaderFailures(this.ip);
             this.reconnect();
+        } finally {
+            // however the pass ends, wait for the connects it started, so passes never overlap
+            await Promise.allSettled(connects);
         }
+    }
+
+    /**
+     * Connect a player startPlayers has just created, after waiting delay ms. A failed connect warns
+     * only once per failure streak. Once the pass is stale, the player is not connected any more and
+     * is stopped if the player list no longer holds it.
+     *
+     * @param {HeosPlayer} heosPlayer player to connect
+     * @param {object} player player entry from get_players
+     * @param {number} delay ms to wait before connecting
+     * @param {() => boolean} isStale true once the pass that created the player is stale
+     * @returns {Promise<boolean>} true if the player is connected
+     */
+    async connectNewPlayer(heosPlayer, player, delay, isStale) {
+        const pid = `${player.pid}`;
+        if (delay > 0) {
+            await new Promise(resolve => this.setTimeout(() => resolve(undefined), delay));
+        }
+        let playerConnected = false;
+        if (!isStale()) {
+            try {
+                await this.connectPlayerWithDeadline(heosPlayer);
+                delete this.failing_player_connects[pid];
+                playerConnected = true;
+            } catch (err) {
+                if (!isStale()) {
+                    this.logDebug(`can't connect error: ${err}`, false);
+                    // warn and count only the first failure while the connect keeps failing
+                    if (this.failing_player_connects[pid]) {
+                        this.logDebug(`can't connect player ${player.name} (${player.ip}). Skip.`, false);
+                    } else {
+                        this.failing_player_connects[pid] = true;
+                        this.logWarn(`can't connect player ${player.name} (${player.ip}). Skip.`, false);
+                        this.raiseFailures(player.ip, ERROR_CODES.General);
+                    }
+                }
+            }
+        }
+        if (isStale()) {
+            if (this.players[pid] !== heosPlayer) {
+                // the player list was reset meanwhile, so nobody else will stop this player
+                try {
+                    await heosPlayer.disconnect();
+                } catch (err) {
+                    this.logDebug(`can't disconnect orphaned player ${player.name}: ${err}`, false);
+                }
+            }
+            this.logDebug(`[startPlayers] connection changed meanwhile. Drop player ${player.name}.`, false);
+            return false;
+        }
+        return playerConnected;
     }
 
     /**
