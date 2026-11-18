@@ -43,6 +43,7 @@ class Heos extends utils.Adapter {
 
         this.heartbeat_retries = 0;
         this.heartbeat_interval = undefined;
+        this.player_refresh_interval = undefined;
         this.ssdp_search_interval = undefined;
         this.ssdp_search_timeout = undefined;
 
@@ -2585,6 +2586,37 @@ class Heos extends utils.Adapter {
         await this.resetHeartbeatRetries(false);
     }
 
+    /**
+     * Ask for the player list every searchInterval when connected without SSDP discovery,
+     * so players that failed to start are picked up again. While the SSDP search interval
+     * runs, it asks for the player list itself, so nothing is started then.
+     */
+    startPlayerRefresh() {
+        if (this.ssdp_search_interval) {
+            return;
+        }
+        this.stopPlayerRefresh();
+        const interval = Number(this.config.searchInterval);
+        if (interval > 0) {
+            this.logDebug('[PLAYER REFRESH] start interval', false);
+            this.player_refresh_interval = this.setInterval(() => {
+                this.logDebug('[PLAYER REFRESH] get players', false);
+                this.getPlayers();
+            }, interval);
+        }
+    }
+
+    /**
+     * Stop the periodic player list refresh.
+     */
+    stopPlayerRefresh() {
+        if (this.player_refresh_interval) {
+            this.logDebug('[PLAYER REFRESH] stop interval', false);
+            clearInterval(this.player_refresh_interval);
+            this.player_refresh_interval = undefined;
+        }
+    }
+
     deleteRequestTime(msg) {
         let command = msg.startsWith('system/') ? msg.split('?')[0] : msg;
         this.logDebug(`deleteRequestTime: before - ${JSON.stringify(this.request_time)}`, false);
@@ -2695,6 +2727,7 @@ class Heos extends utils.Adapter {
                 this.startHeartbeat();
                 this.registerChangeEvents(true);
                 this.getPlayers();
+                this.startPlayerRefresh();
             }
         });
 
@@ -3234,6 +3267,7 @@ class Heos extends utils.Adapter {
         this.start_players_pending = undefined;
 
         await this.stopHeartbeat();
+        this.stopPlayerRefresh();
         await this.resetTimeouts();
         await this.resetIntervals();
 
