@@ -204,6 +204,7 @@ class Heos extends utils.Adapter {
             this.start_players_running = false;
             this.reconnect_pending = false;
             this.reconnect_seq = 0;
+            this.unloading = false;
         }
     }
 
@@ -416,6 +417,8 @@ class Heos extends utils.Adapter {
      * @param {() => void} [callback] tells the controller that unloading has finished
      */
     async onUnload(callback) {
+        // from now on nothing may schedule a search any more
+        this.unloading = true;
         this.reconnect_seq++;
         this.reconnect_pending = false;
         try {
@@ -2261,7 +2264,10 @@ class Heos extends utils.Adapter {
                             this.manual_search_mode = true;
                             this.logInfo(`preferred player ${player.ip} found. Reconnect.`);
                             this.reconnect();
-                            return;
+                            // go on with this player if the reconnect did not take place
+                            if (isStale()) {
+                                return;
+                            }
                         }
                         playerConnected = false; // pushed once its connect succeeds
                         const now = Date.now();
@@ -2401,6 +2407,10 @@ class Heos extends utils.Adapter {
                 await this.updateKnownPlayerIPs();
             }
         } catch (err) {
+            if (isStale()) {
+                this.logDebug(`[startPlayers] connection changed meanwhile. Abandon stale run: ${err}`, false);
+                return;
+            }
             this.logError(`[startPlayers] ${err}`);
             this.raiseLeaderFailures(this.ip);
             this.reconnect();
@@ -2944,6 +2954,9 @@ class Heos extends utils.Adapter {
 
     /** Verbindung zum HEOS System herstellen */
     async search() {
+        if (this.unloading) {
+            return;
+        }
         this.reconnect_pending = false;
         this.reconnect_seq++;
         try {
@@ -3511,6 +3524,9 @@ class Heos extends utils.Adapter {
     }
 
     async reconnect() {
+        if (this.unloading) {
+            return;
+        }
         // Only one reconnect at a time: the lock is held from here until search() starts.
         if (this.reconnect_pending) {
             return;
