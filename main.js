@@ -2237,13 +2237,19 @@ class Heos extends utils.Adapter {
 
     updatePreferredPlayerIPs() {
         if (this.config.preferredIPs.length > 0) {
-            const ips = this.config.preferredIPs.split(',').map(function (item) {
-                return item.trim();
-            });
+            const ips = this.config.preferredIPs
+                .split(',')
+                .map(function (item) {
+                    return item.trim();
+                })
+                .filter(function (item) {
+                    return item.length > 0;
+                });
             this.preferred_player_ips = ips;
             if (this.manual_search_mode) {
                 if (this.next_connect_ips.length == 0) {
-                    this.next_connect_ips = ips;
+                    // copy, so removeNextConnectPlayerIp() does not shrink the preferred list
+                    this.next_connect_ips = [...ips];
                 }
             }
         } else {
