@@ -47,6 +47,7 @@ class Heos extends utils.Adapter {
         this.ssdp_search_timeout = undefined;
 
         this.start_players_errors = 0;
+        this.start_players_pending = undefined;
         this.ssdp_retry_counter = 0;
         this.known_player_ips = [];
 
@@ -175,6 +176,7 @@ class Heos extends utils.Adapter {
             this.preferred_player_ips = [];
             this.next_connect_ips = [];
             this.connection_generation = 0;
+            this.start_players_running = false;
         }
     }
 
@@ -2106,8 +2108,37 @@ class Heos extends utils.Adapter {
         delete this.players[pid];
     }
 
-    // Für die gefundenen HEOS Player entsprechende class HeosPlayer Instanzen bilden und nicht mehr verbundene Player stoppen
+    /**
+     * Process a get_players answer. Only one pass runs at a time; an answer arriving
+     * meanwhile waits and replaces any older waiting answer.
+     *
+     * @param {object[]} payload player list from get_players
+     */
     async startPlayers(payload) {
+        if (this.start_players_running) {
+            this.start_players_pending = payload;
+            return;
+        }
+        this.start_players_running = true;
+        try {
+            let next = payload;
+            do {
+                await this.runStartPlayers(next);
+                next = this.start_players_pending;
+                this.start_players_pending = undefined;
+            } while (next);
+        } finally {
+            this.start_players_running = false;
+        }
+    }
+
+    /**
+     * One pass over a get_players answer: create HeosPlayer instances for the players found
+     * and stop players that are no longer connected.
+     *
+     * @param {object[]} payload player list from get_players
+     */
+    async runStartPlayers(payload) {
         // A run is stale once the adapter disconnected or reconnected while it was waiting
         const generation = this.connection_generation;
         const isStale = () => this.connection_generation !== generation || this.state != STATES.Connected;
@@ -3148,6 +3179,7 @@ class Heos extends utils.Adapter {
     async disconnect() {
         this.logInfo('disconnecting from HEOS ...', false);
         this.state = STATES.Disconnecting;
+        this.start_players_pending = undefined;
 
         await this.stopHeartbeat();
         await this.resetTimeouts();
