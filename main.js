@@ -3438,18 +3438,33 @@ class Heos extends utils.Adapter {
         }
     }
 
+    /**
+     * Run one teardown step of disconnect(). A failing step is logged and does not stop the
+     * teardown, so disconnect() always closes the connection and resets its state.
+     *
+     * @param {string} step name of the step for the log
+     * @param {() => (Promise<void> | void)} fn the step
+     */
+    async runDisconnectStep(step, fn) {
+        try {
+            await fn();
+        } catch (err) {
+            this.logWarn(`[disconnect] ${step} failed: ${err}`, false);
+        }
+    }
+
     /** Alle Player stoppen und die TelNet Verbindung schließen */
     async disconnect() {
         this.logInfo('disconnecting from HEOS ...', false);
         this.state = STATES.Disconnecting;
         this.start_players_pending = undefined;
 
-        await this.stopHeartbeat();
-        this.stopPlayerRefresh();
-        await this.resetTimeouts();
-        await this.resetIntervals();
+        await this.runDisconnectStep('stop heartbeat', () => this.stopHeartbeat());
+        await this.runDisconnectStep('stop player refresh', () => this.stopPlayerRefresh());
+        await this.runDisconnectStep('reset timeouts', () => this.resetTimeouts());
+        await this.runDisconnectStep('reset intervals', () => this.resetIntervals());
 
-        await this.stopPlayers();
+        await this.runDisconnectStep('stop players', () => this.stopPlayers());
 
         if (typeof this.net_client !== 'undefined') {
             try {
@@ -3469,21 +3484,29 @@ class Heos extends utils.Adapter {
             }
             this.nodessdp_client = undefined;
         }
-        await this.setStateAsync('error', false, true);
-        await this.setStateAsync('last_error', '', true);
-        await this.setState('signed_in', false, true);
-        await this.setState('signed_in_user', '', true);
+        await this.runDisconnectStep('reset error', () => this.setStateAsync('error', false, true));
+        await this.runDisconnectStep('reset last_error', () => this.setStateAsync('last_error', '', true));
+        await this.runDisconnectStep('reset signed_in', () => this.setState('signed_in', false, true));
+        await this.runDisconnectStep('reset signed_in_user', () => this.setState('signed_in_user', '', true));
 
-        const list = await this.getChannelsAsync('players');
-        if (list) {
-            list.forEach(async item => {
-                await this.setStateAsync(`${item._id}.connected`, false, true);
-            });
-        }
+        await this.runDisconnectStep('reset player connection states', async () => {
+            const list = await this.getChannelsAsync('players');
+            if (list) {
+                const results = await Promise.allSettled(
+                    list.map(item => this.setStateAsync(`${item._id}.connected`, false, true)),
+                );
+                const failed = results.find(result => result.status === 'rejected');
+                if (failed) {
+                    throw failed.reason;
+                }
+            }
+        });
         this.resetVars(false);
 
-        await this.setStateChangedAsync('info.connection', false, true);
-        await this.setStateChangedAsync('connected_ip', '', true);
+        await this.runDisconnectStep('reset info.connection', () =>
+            this.setStateChangedAsync('info.connection', false, true),
+        );
+        await this.runDisconnectStep('reset connected_ip', () => this.setStateChangedAsync('connected_ip', '', true));
         this.logInfo('disconnected from HEOS', false);
     }
 
