@@ -409,11 +409,21 @@ class Heos extends utils.Adapter {
 
     /**
      * Is called when adapter shuts down
+     *
+     * @param {() => void} [callback] tells the controller that unloading has finished
      */
-    async onUnload() {
+    async onUnload(callback) {
         this.reconnect_seq++;
         this.reconnect_pending = false;
-        await this.disconnect();
+        try {
+            await this.disconnect();
+        } catch (err) {
+            this.logDebug(`[onUnload] ${err}`, false);
+        } finally {
+            if (typeof callback === 'function') {
+                callback();
+            }
+        }
     }
 
     /**

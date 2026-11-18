@@ -144,6 +144,7 @@
     "connectionType": "local",
     "dataSource": "poll",
     "tier": 2,
+    "stopTimeout": 5000,
     "adminUI": {
       "config": "json"
     },
