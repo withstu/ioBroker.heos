@@ -2637,9 +2637,10 @@ class Heos extends utils.Adapter {
     }
 
     /**
-     * Ask for the player list every searchInterval when connected without SSDP discovery,
-     * so players that failed to start are picked up again. While the SSDP search interval
-     * runs, it asks for the player list itself, so nothing is started then.
+     * Ask for the player list every searchInterval when connected through configured IPs
+     * (no SSDP search interval running), so players that failed to start are picked up again.
+     * While the SSDP search interval runs, it asks for the player list itself, so nothing is
+     * started then.
      */
     startPlayerRefresh() {
         if (this.ssdp_search_interval) {
