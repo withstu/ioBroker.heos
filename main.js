@@ -13,7 +13,13 @@ import url from 'node:url';
 import net from 'node:net';
 import SSDP from 'node-ssdp';
 import HeosPlayer from './lib/heos-player.js';
-import { STATES, ERROR_CODES } from './lib/constants.js';
+import {
+    STATES,
+    ERROR_CODES,
+    INCOMPLETE_PLAYERS_RETRY_MS,
+    INCOMPLETE_PLAYERS_TOLERANCE_MS,
+    PLAYER_CONNECT_TIMEOUT_MS,
+} from './lib/constants.js';
 
 const NodeSSDP = SSDP.Client;
 
@@ -43,10 +49,15 @@ class Heos extends utils.Adapter {
 
         this.heartbeat_retries = 0;
         this.heartbeat_interval = undefined;
+        this.player_refresh_interval = undefined;
         this.ssdp_search_interval = undefined;
         this.ssdp_search_timeout = undefined;
 
         this.start_players_errors = 0;
+        this.start_players_pending = undefined;
+        this.player_entry_signatures = {};
+        this.failing_player_connects = {};
+        this.incomplete_players_since = undefined;
         this.ssdp_retry_counter = 0;
         this.known_player_ips = [];
 
@@ -55,6 +66,7 @@ class Heos extends utils.Adapter {
         this.reconnect_timeout = undefined;
         this.reboot_timeout = undefined;
         this.replay_timeout = undefined;
+        this.incomplete_players_timeout = undefined;
 
         this.net_client = undefined;
         this.nodessdp_client = undefined;
@@ -174,6 +186,8 @@ class Heos extends utils.Adapter {
             this.leader_failure_counter = {};
             this.preferred_player_ips = [];
             this.next_connect_ips = [];
+            this.connection_generation = 0;
+            this.start_players_running = false;
         }
     }
 
@@ -2103,13 +2117,62 @@ class Heos extends utils.Adapter {
         }
         // player leeren
         delete this.players[pid];
+        delete this.player_entry_signatures[pid];
     }
 
-    // Für die gefundenen HEOS Player entsprechende class HeosPlayer Instanzen bilden und nicht mehr verbundene Player stoppen
+    /**
+     * Signature of the player entry fields that end up in the player's metadata objects.
+     *
+     * @param {object} player player entry from get_players
+     * @returns {string} signature
+     */
+    getPlayerEntrySignature(player) {
+        const { pid, ip, name, model, serial, version, network, lineout } = player;
+        return JSON.stringify({ pid, ip, name, model, serial, version, network, lineout });
+    }
+
+    /**
+     * Process a get_players answer. Only one pass runs at a time; an answer arriving
+     * meanwhile waits and replaces any older waiting answer.
+     *
+     * @param {object[]} payload player list from get_players
+     */
     async startPlayers(payload) {
+        if (this.start_players_running) {
+            this.start_players_pending = payload;
+            return;
+        }
+        this.start_players_running = true;
+        try {
+            let next = payload;
+            do {
+                await this.runStartPlayers(next);
+                next = this.start_players_pending;
+                this.start_players_pending = undefined;
+            } while (next);
+        } finally {
+            this.start_players_running = false;
+        }
+    }
+
+    /**
+     * One pass over a get_players answer: create HeosPlayer instances for the players found
+     * and stop players that are no longer connected.
+     *
+     * @param {object[]} payload player list from get_players
+     */
+    async runStartPlayers(payload) {
+        // A run is stale once the adapter disconnected or reconnected while it was waiting
+        const generation = this.connection_generation;
+        const isStale = () => this.connection_generation !== generation || this.state != STATES.Connected;
+        if (isStale()) {
+            this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
+            return;
+        }
         try {
             const connectedPlayers = [];
             const foundPlayerIps = [];
+            let incompleteAnswer = false;
             for (let i = 0; i < payload.length; i++) {
                 let playerConnected = true;
                 const player = payload[i];
@@ -2118,21 +2181,11 @@ class Heos extends utils.Adapter {
                     foundPlayerIps.push(player.ip);
                 }
                 if (!player.name || !Object.prototype.hasOwnProperty.call(player, 'ip') || player.ip == '127.0.0.1') {
-                    this.start_players_errors += 1;
-                    this.logDebug(`Start players payload error: ${JSON.stringify(payload)}`, false);
-                    if (this.start_players_errors > 4) {
-                        this.start_players_errors = 0;
-                        if (this.config.rebootOnFailure === true) {
-                            this.logWarn('HEOS is not responding as expected. Reboot.', false);
-                            this.reboot();
-                        } else {
-                            this.logWarn(
-                                'Device failure detected. Activate "reboot on failure" in the configuration or reboot manually.',
-                                true,
-                            );
-                        }
+                    // HEOS is still discovering this player: keep a known one, skip an unknown one
+                    incompleteAnswer = true;
+                    if (pid in this.players) {
+                        connectedPlayers.push(pid);
                     }
-                    throw new Error('HEOS responded with invalid data.');
                 } else {
                     if (!(pid in this.players)) {
                         if (Object.keys(this.players).length == 0) {
@@ -2141,6 +2194,11 @@ class Heos extends utils.Adapter {
                         const heosPlayer = (this.players[pid] = new HeosPlayer(this, player));
                         // wait until objects are created before connecting, because states shouldn't be set before objects exist
                         await heosPlayer.initMetaData(player);
+                        if (isStale()) {
+                            this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
+                            return;
+                        }
+                        this.player_entry_signatures[pid] = this.getPlayerEntrySignature(player);
                         if (
                             this.preferred_player_ips.length > 0 &&
                             this.preferred_player_ips.indexOf(this.ip) === -1 &&
@@ -2149,28 +2207,116 @@ class Heos extends utils.Adapter {
                             this.manual_search_mode = true;
                             this.logInfo(`preferred player ${player.ip} found. Reconnect.`);
                             this.reconnect();
+                            return;
                         }
                         try {
-                            await heosPlayer.connect();
+                            await this.connectPlayerWithDeadline(heosPlayer);
+                            delete this.failing_player_connects[pid];
                         } catch (err) {
-                            this.logDebug(`can't connect error: ${err}`, false);
-                            this.logWarn(`can't connect player ${player.name} (${player.ip}). Skip.`, false);
-                            this.raiseFailures(player.ip, ERROR_CODES.General);
+                            if (!isStale()) {
+                                this.logDebug(`can't connect error: ${err}`, false);
+                                // warn and count only the first failure while the connect keeps failing
+                                if (this.failing_player_connects[pid]) {
+                                    this.logDebug(`can't connect player ${player.name} (${player.ip}). Skip.`, false);
+                                } else {
+                                    this.failing_player_connects[pid] = true;
+                                    this.logWarn(`can't connect player ${player.name} (${player.ip}). Skip.`, false);
+                                    this.raiseFailures(player.ip, ERROR_CODES.General);
+                                }
+                            }
                             playerConnected = false;
                         }
+                        if (isStale()) {
+                            if (this.players[pid] !== heosPlayer) {
+                                // the player list was reset meanwhile, so nobody else will stop this player
+                                try {
+                                    await heosPlayer.disconnect();
+                                } catch (err) {
+                                    this.logDebug(`can't disconnect orphaned player ${player.name}: ${err}`, false);
+                                }
+                            }
+                            this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
+                            return;
+                        }
                     } else {
-                        this.players[pid].initMetaData(player);
+                        // rewrite the metadata objects only when the entry changed
+                        const signature = this.getPlayerEntrySignature(player);
+                        if (this.player_entry_signatures[pid] !== signature) {
+                            // do not wait for the write, but remember the entry only once it succeeded
+                            const heosPlayer = this.players[pid];
+                            heosPlayer.initMetaData(player).then(
+                                () => {
+                                    if (this.players[pid] === heosPlayer) {
+                                        this.player_entry_signatures[pid] = signature;
+                                    }
+                                },
+                                err => {
+                                    this.logDebug(`can't update metadata of player ${player.name}: ${err}`, false);
+                                },
+                            );
+                        }
                     }
                     if (playerConnected) {
                         connectedPlayers.push(pid);
                     }
                 }
             }
+            if (isStale()) {
+                this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
+                return;
+            }
+            // forget connect failures of players that are no longer listed
+            const listedPids = payload.map(player => `${player.pid}`);
+            for (const pid in this.failing_player_connects) {
+                if (!listedPids.includes(pid)) {
+                    delete this.failing_player_connects[pid];
+                }
+            }
+            if (incompleteAnswer && this.incomplete_players_since === undefined) {
+                this.incomplete_players_since = Date.now();
+                this.logDebug(`Start players payload error: ${JSON.stringify(payload)}`, false);
+            }
+            const toleranceExpired =
+                incompleteAnswer && Date.now() - this.incomplete_players_since > INCOMPLETE_PLAYERS_TOLERANCE_MS;
+            if (!incompleteAnswer || toleranceExpired) {
+                this.incomplete_players_since = undefined;
+                if (this.incomplete_players_timeout) {
+                    clearTimeout(this.incomplete_players_timeout);
+                    this.incomplete_players_timeout = undefined;
+                }
+            }
+            if (toleranceExpired) {
+                this.start_players_errors += 1;
+                this.logDebug(`Start players payload error: ${JSON.stringify(payload)}`, false);
+                if (this.start_players_errors > 4) {
+                    this.start_players_errors = 0;
+                    if (this.config.rebootOnFailure === true) {
+                        this.logWarn('HEOS is not responding as expected. Reboot.', false);
+                        this.reboot();
+                    } else {
+                        this.logWarn(
+                            'Device failure detected. Activate "reboot on failure" in the configuration or reboot manually.',
+                            true,
+                        );
+                    }
+                }
+                throw new Error('HEOS responded with invalid data.');
+            }
+            if (incompleteAnswer && !this.incomplete_players_timeout) {
+                this.incomplete_players_timeout = this.setTimeout(() => {
+                    this.incomplete_players_timeout = undefined;
+                    this.getPlayers();
+                }, INCOMPLETE_PLAYERS_RETRY_MS);
+            }
             //Remove disconnected players && Update reboot times for not connected players
             const connectedPlayerIps = [];
             for (const pid in this.players) {
                 if (!connectedPlayers.includes(pid)) {
                     await this.stopPlayer(pid);
+                    if (isStale()) {
+                        this.logDebug('[startPlayers] connection changed meanwhile. Abandon stale run.', false);
+                        return;
+                    }
                 } else {
                     connectedPlayerIps.push(this.players[pid].ip);
                 }
@@ -2181,11 +2327,11 @@ class Heos extends utils.Adapter {
                 }
             }
 
-            //Check for players in fail state
+            //Check for players in fail state (an incomplete answer is provisional and proves nothing)
             let playerInFailState = false;
             for (const id in this.ssdp_player_ips) {
                 const ip = this.ssdp_player_ips[id];
-                if (this.getUptime(ip) >= 5 && !foundPlayerIps.includes(ip)) {
+                if (!incompleteAnswer && this.getUptime(ip) >= 5 && !foundPlayerIps.includes(ip)) {
                     this.raiseLeaderFailures(this.ip);
                     this.raiseFailures(ip, ERROR_CODES.General);
                     this.logDebug(
@@ -2200,7 +2346,7 @@ class Heos extends utils.Adapter {
             }
             if (playerInFailState) {
                 this.reconnect();
-            } else if (connectedPlayers.length == 0) {
+            } else if (connectedPlayers.length == 0 && !incompleteAnswer) {
                 if (this.config.rebootOnFailure === true) {
                     this.logWarn("Can't connect any players. Reboot.", true);
                     this.rebootAll();
@@ -2221,6 +2367,29 @@ class Heos extends utils.Adapter {
         }
     }
 
+    /**
+     * Connect a player, but give up after PLAYER_CONNECT_TIMEOUT_MS, so a connect that never
+     * settles cannot block startPlayers. A late result of the abandoned connect is ignored.
+     *
+     * @param {HeosPlayer} heosPlayer player to connect
+     */
+    async connectPlayerWithDeadline(heosPlayer) {
+        let deadlineTimer;
+        const deadline = new Promise((resolve, reject) => {
+            deadlineTimer = this.setTimeout(() => {
+                reject(new Error(`connect timed out after ${PLAYER_CONNECT_TIMEOUT_MS} ms`));
+            }, PLAYER_CONNECT_TIMEOUT_MS);
+        });
+        const connecting = heosPlayer.connect();
+        // the connect may still reject after the deadline passed; nobody waits for it then
+        connecting.catch(() => {});
+        try {
+            await Promise.race([connecting, deadline]);
+        } finally {
+            this.clearTimeout(deadlineTimer);
+        }
+    }
+
     async updateKnownPlayerIPs() {
         const states = await this.getStatesAsync('players.*');
         this.known_player_ips = [];
@@ -2236,14 +2405,21 @@ class Heos extends utils.Adapter {
     }
 
     updatePreferredPlayerIPs() {
-        if (this.config.preferredIPs.length > 0) {
-            const ips = this.config.preferredIPs.split(',').map(function (item) {
+        const ips = this.config.preferredIPs
+            .split(',')
+            .map(function (item) {
                 return item.trim();
+            })
+            .filter(function (item) {
+                return item.length > 0;
             });
+        if (ips.length > 0) {
             this.preferred_player_ips = ips;
-            if (this.manual_search_mode) {
+            // without SSDP discovery the list is the only way to find a player, so refill it once it ran empty
+            if (this.manual_search_mode || this.config.disableSSDPDiscovery === true) {
                 if (this.next_connect_ips.length == 0) {
-                    this.next_connect_ips = ips;
+                    // copy, so removeNextConnectPlayerIp() does not shrink the preferred list
+                    this.next_connect_ips = [...ips];
                 }
             }
         } else {
@@ -2460,6 +2636,38 @@ class Heos extends utils.Adapter {
         await this.resetHeartbeatRetries(false);
     }
 
+    /**
+     * Ask for the player list every searchInterval when connected through configured IPs
+     * (no SSDP search interval running), so players that failed to start are picked up again.
+     * While the SSDP search interval runs, it asks for the player list itself, so nothing is
+     * started then.
+     */
+    startPlayerRefresh() {
+        if (this.ssdp_search_interval) {
+            return;
+        }
+        this.stopPlayerRefresh();
+        const interval = Number(this.config.searchInterval);
+        if (interval > 0) {
+            this.logDebug('[PLAYER REFRESH] start interval', false);
+            this.player_refresh_interval = this.setInterval(() => {
+                this.logDebug('[PLAYER REFRESH] get players', false);
+                this.getPlayers();
+            }, interval);
+        }
+    }
+
+    /**
+     * Stop the periodic player list refresh.
+     */
+    stopPlayerRefresh() {
+        if (this.player_refresh_interval) {
+            this.logDebug('[PLAYER REFRESH] stop interval', false);
+            clearInterval(this.player_refresh_interval);
+            this.player_refresh_interval = undefined;
+        }
+    }
+
     deleteRequestTime(msg) {
         let command = msg.startsWith('system/') ? msg.split('?')[0] : msg;
         this.logDebug(`deleteRequestTime: before - ${JSON.stringify(this.request_time)}`, false);
@@ -2528,6 +2736,7 @@ class Heos extends utils.Adapter {
     }
 
     connect(ip) {
+        this.connection_generation += 1;
         this.state = STATES.Connecting;
 
         this.ip = ip;
@@ -2569,6 +2778,7 @@ class Heos extends utils.Adapter {
                 this.startHeartbeat();
                 this.registerChangeEvents(true);
                 this.getPlayers();
+                this.startPlayerRefresh();
             }
         });
 
@@ -3095,14 +3305,20 @@ class Heos extends utils.Adapter {
             clearTimeout(this.replay_timeout);
             this.replay_timeout = undefined;
         }
+        if (this.incomplete_players_timeout) {
+            clearTimeout(this.incomplete_players_timeout);
+            this.incomplete_players_timeout = undefined;
+        }
     }
 
     /** Alle Player stoppen und die TelNet Verbindung schließen */
     async disconnect() {
         this.logInfo('disconnecting from HEOS ...', false);
         this.state = STATES.Disconnecting;
+        this.start_players_pending = undefined;
 
         await this.stopHeartbeat();
+        this.stopPlayerRefresh();
         await this.resetTimeouts();
         await this.resetIntervals();
 
