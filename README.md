@@ -161,6 +161,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 * (cavernerg) Connect new players staggered instead of one after another
 * (cavernerg) Never sign in on a connection opened only to reboot a device
 * (cavernerg) Always complete the teardown on disconnect
+* (cavernerg) Keep the HEOS account name and password out of the debug log
 
 ### 3.2.4 (2026-10-04)
 * (withstu) Update dependencies
