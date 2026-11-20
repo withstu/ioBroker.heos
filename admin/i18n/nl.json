@@ -11,6 +11,7 @@
     "default_automatic_playback_command": "Standaard automatische afspeelopdracht",
     "disable_ssdp_discovery": "Schakel SSDP-detectie uit",
     "general_settings": "Algemene instellingen",
+    "heartbeat": "Heartbeat (verbindingscontrole)",
     "heartbeat_interval": "Hartslaginterval",
     "heartbeat_retries": "Hartslag nieuwe pogingen",
     "heos_account": "HEOS-account",

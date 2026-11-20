@@ -11,6 +11,7 @@
     "default_automatic_playback_command": "Comando di riproduzione automatica predefinito",
     "disable_ssdp_discovery": "Disabilita rilevamento SSDP",
     "general_settings": "Impostazioni generali",
+    "heartbeat": "Heartbeat (controllo connessione)",
     "heartbeat_interval": "Intervallo di battito cardiaco",
     "heartbeat_retries": "Nuovi tentativi con battito cardiaco",
     "heos_account": "Conto HEOS",
