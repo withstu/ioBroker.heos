@@ -61,7 +61,7 @@ The developers of this module are in no way endorsed by or affiliated with D&M H
 or any associated subsidiaries, logos or trademarks.
 
 ## Reference
-The used HEOS API (HEOS CLI) is documented here: https://rn.dmglobal.com/euheos/HEOS_CLI_ProtocolSpecification.pdf
+The used HEOS API (HEOS CLI) is documented here: https://rn.dmglobal.com/usmodel/HEOS_CLI_ProtocolSpecification-Version-1.24.pdf
 
 ## Advanced usage
 
@@ -178,7 +178,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
-* (Schimi1983) README: quick start, troubleshooting and plain-language explanation of all settings; removed dead badge, updated API link
+* (Schimi1983) README: quick start, troubleshooting and plain-language explanation of all settings; removed dead badge, updated API link to spec v1.24
 * (Schimi1983) Settings: the heartbeat interval field was labelled "Volume step"
 * (Schimi1983) Fix state metadata: buttons are write-only, `volume_lock` uses role `switch`, `connected_ip` uses role `info.ip`, `group_volume` gets range 0-100, valid time units
 * (Schimi1983) Remove roles from folder objects, set `dataSource` to `push`, translate the heartbeat header in the settings
