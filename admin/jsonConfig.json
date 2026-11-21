@@ -158,7 +158,7 @@
                 },
                 "heartbeatInterval": {
                     "type": "number",
-                    "label": "volume_step",
+                    "label": "heartbeat_interval",
                     "help": "",
                     "min": 0,
                     "xs": 12,
