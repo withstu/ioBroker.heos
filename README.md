@@ -147,6 +147,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 ### **WORK IN PROGRESS**
 * (Schimi1983) Fix state metadata: buttons are write-only, `volume_lock` uses role `switch`, `connected_ip` uses role `info.ip`, `group_volume` gets range 0-100, valid time units
 * (Schimi1983) Remove roles from folder objects, set `dataSource` to `push`, translate the heartbeat header in the settings
+* (Schimi1983) New player state `update_available`: shows if a firmware update is available (checked on connect and once a day)
 
 ### 3.2.4 (2026-10-04)
 * (withstu) Update dependencies
