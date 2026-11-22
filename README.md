@@ -5,12 +5,55 @@
 [![Downloads](https://img.shields.io/npm/dm/iobroker.heos.svg)](https://www.npmjs.com/package/iobroker.heos)
 ![Number of Installations (latest)](http://iobroker.live/badges/heos-installed.svg)
 ![Number of Installations (stable)](http://iobroker.live/badges/heos-stable.svg)
-[![Dependency Status](https://img.shields.io/david/withstu/iobroker.heos.svg)](https://david-dm.org/withstu/iobroker.heos)
 [![Known Vulnerabilities](https://snyk.io/test/github/withstu/ioBroker.heos/badge.svg)](https://snyk.io/test/github/withstu/ioBroker.heos)
 
 [![NPM](https://nodei.co/npm/iobroker.heos.png?downloads=true)](https://nodei.co/npm/iobroker.heos/)
 
-The adapter lets control HEOS from ioBroker.
+Control your HEOS speakers and receivers (Denon, Marantz) from ioBroker: play, pause, volume, mute, groups, favorites, playlists and what is currently playing.
+
+## Quick start
+
+1. **Install** the adapter in the ioBroker Admin (Adapters → search for "heos") and create an instance.
+2. **Optional: enter your HEOS account** (tab "Account settings"). It is only needed for your favorites (presets) and playlists. Everything else works without it.
+3. **Save and start.** The adapter finds your HEOS devices in the network by itself. After a few seconds each device appears under `heos.0.players.<player id>`.
+4. **Use it.** The most important states of every player:
+
+| State | What it does |
+|---|---|
+| `play`, `pause`, `stop`, `next`, `prev` | Buttons for playback |
+| `volume` | Volume 0–100 |
+| `muted` | Mute on/off |
+| `current_title`, `current_artist`, `current_image_url` | What is playing right now |
+| `power` | Device on/standby (only on supported devices) |
+
+To play your favorites, press `heos.0.sources.1028.browse` once. The adapter then creates a `play` button for every favorite under `heos.0.sources.1028`. For playlists use `heos.0.sources.1025.browse`.
+
+### No players found?
+
+- ioBroker and the HEOS devices must be in the **same network**. Searching uses multicast (SSDP), which is often blocked between VLANs/subnets or by a Docker bridge network.
+- **ioBroker in Docker**: use network mode `host` or `macvlan`, or enter the IP address of one HEOS device in "Advanced settings → preferred IP addresses". One device is enough – it reports all others.
+- The devices must accept connections on **TCP port 1255** (can be switched off in the HEOS advanced settings, `https://<device-ip>/settings/`).
+
+## Settings explained
+
+**Account settings**
+* **Username / Password**: Your HEOS account. Only needed for favorites and playlists.
+
+**General settings**
+* **Queue settings**: What happens when you start a playlist – play now, play next, add to the end or replace the queue and play.
+* **Command scope**: Which players receive a `scope/[cmd]` command (all players, all group leaders, or the player IDs in `heos.0.command_scope_pid`).
+* **Volume step**: How much `volume_up` / `volume_down` change the volume.
+* **Automatic playback**: Automatically plays music after a player is connected or unmuted. You can switch it off per player with the state `auto_play`.
+* **Mute on regex**: Mutes the player while the song information matches the text pattern, e.g. to mute ads. Example for Spotify: `spotify:ad:|Advertisement`.
+* **Reboot on failure**: Reboots a HEOS device if the adapter detects that it no longer responds properly.
+
+**Advanced settings** – normally you do not need to change anything here.
+* **Heartbeat**: How often (ms) the connection is checked and how many failed checks are allowed before reconnecting.
+* **Search**: How long (ms) and how often (ms) the adapter searches for devices.
+* **Reconnect / Request timeout**: Wait time before reconnecting (ms) and for an answer from the device (s).
+* **Network**: UDP source port for the device search (0 = automatic), preferred IP addresses (comma separated, used if the automatic search fails) and the option to switch the automatic search off completely.
+
+The player state `ignore_broadcast_cmd` defines whether a player ignores commands sent to all players (e.g. `player/set_mute&state=on` or the `play` buttons of presets/playlists).
 
 ## Disclaimer
 HEOS, DENON and Marantz are trademarks of D&M Holdings Inc.
@@ -18,21 +61,11 @@ The developers of this module are in no way endorsed by or affiliated with D&M H
 or any associated subsidiaries, logos or trademarks.
 
 ## Reference
-The used HEOS API is documented here: https://rn.dmglobal.com/euheos/HEOS_CLI_ProtocolSpecification_2021.pdf
+The used HEOS API (HEOS CLI) is documented here: https://rn.dmglobal.com/usmodel/HEOS_CLI_ProtocolSpecification-Version-1.24.pdf
 
-## Network Requirements
-The protocol SSDP is used for finding the players. UPnP requires multicast access to the 239.255.255.250:1900 along with the appropriate IGMP messages. The source port for receiving SSDP Messages can be configured in the adapter settings (Default setting is ```0``` means the port is automatically choosen). Further Details: https://support.denon.com/app/answers/detail/a_id/4717/~/network-requirements-for-heos
-For the API access to the HEOS Players the adapter uses the port ```1255```.
+## Advanced usage
 
-## Configuration
-
-* **AutoPlay**: Automatically plays music after the player is connected or on unmute. Can be configured globally in configuration. If it is enabled globally you can disable it for one specific player with the state ```auto_play```.
-* **Command scope**: Defines to which players the command ```scope/[cmd]``` of the command state is send to. It can be send to all players, all leading players or to all PIDs in the comma separated state: ```heos.0.command_scope_pid```
-* **Mute Regex**:
-In the configuration you can activate a function to mute the player based on a regex match on the song information. That can be used to mute ads automatically. For example for Spotify you can use the following regex: ```spotify:ad:|Advertisement```.
-* **ignore_broadcast_cmd**: This player state configures, if the player should ignore commands to all players e.g. player/set_mute&state=on or pressing the play button for presets/playlists
-
-## States and their meanings
+### States and their meanings
 
 ### Command State
 
@@ -145,9 +178,15 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
+* (withstu) Update dependencies
+* (Schimi1983) README: quick start, troubleshooting and plain-language explanation of all settings; removed dead badge, updated API link to spec v1.24
+* (Schimi1983) Settings: the heartbeat interval field was labelled "Volume step"
 * (Schimi1983) Fix state metadata: buttons are write-only, `volume_lock` uses role `switch`, `connected_ip` uses role `info.ip`, `group_volume` gets range 0-100, valid time units
 * (Schimi1983) Remove roles from folder objects, set `dataSource` to `push`, translate the heartbeat header in the settings
 * (Schimi1983) New player state `update_available`: shows if a firmware update is available (checked on connect and once a day)
+* (cavernerg) fix: do not share one array between preferred and next connect IPs
+* (cavernerg) fix: refill connect list when SSDP discovery is disabled
+* (cavernerg) fix: abandon startPlayers when the connection changed meanwhile
 
 ### 3.2.4 (2026-10-04)
 * (withstu) Update dependencies
