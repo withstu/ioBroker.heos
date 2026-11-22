@@ -142,7 +142,7 @@
     "type": "multimedia",
     "compact": true,
     "connectionType": "local",
-    "dataSource": "poll",
+    "dataSource": "push",
     "tier": 2,
     "adminUI": {
       "config": "json"

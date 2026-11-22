@@ -257,7 +257,7 @@ class Heos extends utils.Adapter {
                 name: 'Connected IP address',
                 desc: 'IP address to which the adapter is connected to',
                 type: 'string',
-                role: 'text',
+                role: 'info.ip',
                 read: true,
                 write: false,
                 def: '',
@@ -890,7 +890,6 @@ class Heos extends utils.Adapter {
             type: 'folder',
             common: {
                 name: source.name,
-                role: 'media.source',
             },
             native: {},
         });
@@ -967,7 +966,7 @@ class Heos extends utils.Adapter {
                 desc: 'Browse and update source. Output is written to browse_result.',
                 type: 'boolean',
                 role: 'button',
-                read: true,
+                read: false,
                 write: true,
                 def: false,
             },
@@ -992,7 +991,6 @@ class Heos extends utils.Adapter {
             type: 'folder',
             common: {
                 name: payload.name || `Playlist ${itemId}`,
-                role: 'media.playlist',
             },
             native: {},
         });
@@ -1044,7 +1042,7 @@ class Heos extends utils.Adapter {
                     desc: 'Play on all players',
                     type: 'boolean',
                     role: 'button',
-                    read: true,
+                    read: false,
                     write: true,
                     def: false,
                 },
@@ -1145,7 +1143,6 @@ class Heos extends utils.Adapter {
             type: 'folder',
             common: {
                 name: `Preset ${itemId}`,
-                role: 'media.preset',
             },
             native: {},
         });
@@ -1197,7 +1194,7 @@ class Heos extends utils.Adapter {
                     desc: 'Play on all players',
                     type: 'boolean',
                     role: 'button',
-                    read: true,
+                    read: false,
                     write: true,
                     def: false,
                 },
@@ -1495,7 +1492,6 @@ class Heos extends utils.Adapter {
                                     type: 'folder',
                                     common: {
                                         name: 'Sources',
-                                        role: 'media.sources',
                                     },
                                     native: {},
                                 });

@@ -11,6 +11,7 @@
     "default_automatic_playback_command": "Команда автоматического воспроизведения по умолчанию",
     "disable_ssdp_discovery": "Отключить обнаружение SSDP",
     "general_settings": "Общие настройки",
+    "heartbeat": "Heartbeat (проверка соединения)",
     "heartbeat_interval": "Интервал сердцебиения",
     "heartbeat_retries": "Повторные попытки пульса",
     "heos_account": "Учетная запись HEOS",
