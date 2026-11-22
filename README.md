@@ -184,6 +184,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 * (Schimi1983) Fix state metadata: buttons are write-only, `volume_lock` uses role `switch`, `connected_ip` uses role `info.ip`, `group_volume` gets range 0-100, valid time units
 * (Schimi1983) Remove roles from folder objects, set `dataSource` to `push`, translate the heartbeat header in the settings
 * (cavernerg) fix: do not share one array between preferred and next connect IPs
+* (cavernerg) fix: refill connect list when SSDP discovery is disabled
 
 ### 3.2.4 (2026-10-04)
 * (withstu) Update dependencies
