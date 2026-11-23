@@ -26,6 +26,8 @@ Control your HEOS speakers and receivers (Denon, Marantz) from ioBroker: play, p
 | `current_title`, `current_artist`, `current_image_url` | What is playing right now |
 | `power` | Device on/standby (only on supported devices) |
 
+**Quick Select** (only on some models, e.g. Denon Home, Denon Home Sound Bar 550, HEOS Bar, AV receivers): the states `quick_select` and `quick_select_save` appear automatically. Choose 1–6 in `quick_select` to recall a Quick Select, or in `quick_select_save` to store the current state there. The names are the ones you gave them in the HEOS app. What is stored depends on the device (e.g. input, sound mode, volume).
+
 To play your favorites, press `heos.0.sources.1028.browse` once. The adapter then creates a `play` button for every favorite under `heos.0.sources.1028`. For playlists use `heos.0.sources.1025.browse`.
 
 ### No players found?
@@ -187,6 +189,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 * (cavernerg) fix: do not share one array between preferred and next connect IPs
 * (cavernerg) fix: refill connect list when SSDP discovery is disabled
 * (cavernerg) fix: abandon startPlayers when the connection changed meanwhile
+* (Schimi1983) Quick Select: new player states `quick_select` (recall 1–6) and `quick_select_save` (store 1–6) with the names from the HEOS app, only on supported devices
 
 ### 3.2.4 (2026-10-04)
 * (withstu) Update dependencies
