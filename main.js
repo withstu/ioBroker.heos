@@ -1314,6 +1314,9 @@ class Heos extends utils.Adapter {
                 return;
             }
 
+            // @KI_HINWEIS: The HEOS CLI spec shows some responses with a leading space (e.g. " player/check_update"), so trim before parsing.
+            jdata.heos.command = String(jdata.heos.command).trim();
+
             //Restore command
             let command = jdata.heos.command;
             if (jdata.heos.message != null && jdata.heos.message.trim().length > 0) {
