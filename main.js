@@ -2842,7 +2842,8 @@ class Heos extends utils.Adapter {
             this.setStateChanged('connected_ip', '', true);
             const list = await this.getChannelsAsync('players');
             if (list) {
-                list.forEach(async item => {
+                // @KI_HINWEIS: getChannels('players') also returns sub channels like players.<pid>.quick_selects.<n>, only the player channels have a connected state.
+                list.filter(item => item._id.split('.').length === 4).forEach(async item => {
                     await this.setStateAsync(`${item._id}.connected`, false, true);
                 });
             }
@@ -3360,7 +3361,8 @@ class Heos extends utils.Adapter {
 
         const list = await this.getChannelsAsync('players');
         if (list) {
-            list.forEach(async item => {
+            // only player channels (heos.0.players.<pid>), not sub channels like quick_selects.<n>
+            list.filter(item => item._id.split('.').length === 4).forEach(async item => {
                 await this.setStateAsync(`${item._id}.connected`, false, true);
             });
         }
