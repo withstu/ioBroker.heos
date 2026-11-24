@@ -180,6 +180,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
+* (Schimi1983) Player objects are only written when they are new or changed (less load on start and on player changes, history/smartName settings are kept)
 * (withstu) Update dependencies
 * (Schimi1983) README: quick start, troubleshooting and plain-language explanation of all settings; removed dead badge, updated API link to spec v1.24
 * (Schimi1983) Settings: the heartbeat interval field was labelled "Volume step"
@@ -190,7 +191,6 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 * (cavernerg) fix: refill connect list when SSDP discovery is disabled
 * (cavernerg) fix: abandon startPlayers when the connection changed meanwhile
 * (Schimi1983) Quick Select: new player state `quick_select_supported` and folder `quick_selects` with name, `play` and `save` button per Quick Select (only on supported devices)
-* (Schimi1983) Player objects are only written when they are new or changed (less load on start and on player changes, history/smartName settings are kept)
 
 ### 3.2.4 (2026-10-04)
 * (withstu) Update dependencies
