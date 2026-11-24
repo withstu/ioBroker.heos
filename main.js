@@ -368,6 +368,8 @@ class Heos extends utils.Adapter {
         this.subscribeStates('players.*.group_volume');
         this.subscribeStates('players.*.group_muted');
         this.subscribeStates('players.*.command');
+        this.subscribeStates('players.*.quick_selects.*.play');
+        this.subscribeStates('players.*.quick_selects.*.save');
         this.subscribeStates('players.*.power');
         this.subscribeStates('players.*.play');
         this.subscribeStates('players.*.stop');
@@ -482,6 +484,15 @@ class Heos extends utils.Adapter {
                         player.sendCommand(`set_group_mute?state=${state.val === true ? 'on' : 'off'}`);
                     } else if (id.state === 'command') {
                         player.sendCommand(state.val);
+                    } else if (id.state === 'quick_selects' && fullId.length >= 6) {
+                        // players.<pid>.quick_selects.<1-6>.play|save
+                        const qsId = parseInt(fullId[fullId.length - 2]);
+                        const action = fullId[fullId.length - 1];
+                        if (qsId >= 1 && qsId <= 6 && (action === 'play' || action === 'save')) {
+                            player.sendCommand(
+                                `${action === 'play' ? 'play_quickselect' : 'set_quickselect'}?id=${qsId}`,
+                            );
+                        }
                     } else if (id.state === 'power') {
                         player.setUpnpDevicePowerState(state.val);
                     } else if (id.state === 'seek') {
@@ -1338,6 +1349,15 @@ class Heos extends utils.Adapter {
                 result = jdata.heos.result;
             }
             if (result != 'success') {
+                // @KI_HINWEIS: Quick Select is only supported by some models (spec 4.2.25). An error here just means "not supported", so no error state.
+                if (jdata.heos.command === 'player/get_quickselects') {
+                    this.logDebug(`parseResponse: Quick Select not supported - ${command}`, false);
+                    const qsPlayer = this.players && jmsg.pid ? this.players[jmsg.pid] : undefined;
+                    if (qsPlayer) {
+                        this.setStateChanged(`${qsPlayer.state_path}quick_select_supported`, false, true);
+                    }
+                    return;
+                }
                 switch (jmsg.eid) {
                     case '8': //'User not logged in'
                         this.signed_in = false;
