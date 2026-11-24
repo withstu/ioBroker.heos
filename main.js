@@ -37,6 +37,8 @@ class Heos extends utils.Adapter {
     resetVars(initMode) {
         this.players = {};
         this.browse_cmd_map = {};
+        // object key below group_presets -> HEOS preset_id
+        this.group_preset_ids = {};
         this.ip = '';
         this.state = STATES.Disconnected;
         this.signed_in = false;
@@ -348,6 +350,7 @@ class Heos extends utils.Adapter {
 
         //Sources
         this.subscribeStates('sources.*.browse');
+        this.subscribeStates('group_presets.*.apply');
 
         //Players
         this.subscribeStates('players.*.muted');
@@ -444,6 +447,8 @@ class Heos extends utils.Adapter {
                 fullId[fullId.length - 1] === 'play'
             ) {
                 this.sendCommandToAllPlayers(`play_preset?preset=${id.state}`, true);
+            } else if (id.device === 'group_presets' && id.channel && id.state === 'apply') {
+                this.applyGroupPreset(id.channel);
             } else if (id.device === 'sources' && id.channel && id.state === 'browse') {
                 this.browseSource(id.channel);
             } else if (id.device === 'players' && id.channel && id.state) {
@@ -1350,6 +1355,12 @@ class Heos extends utils.Adapter {
             }
             if (result != 'success') {
                 // @KI_HINWEIS: Quick Select is only supported by some models (spec 4.2.25). An error here just means "not supported", so no error state.
+                // @KI_HINWEIS: Group presets need HEOS 3.34 or newer (spec 4.3.11). An error here just means "not supported", so no error state.
+                if (/get_group_presets$/.test(jdata.heos.command)) {
+                    this.logDebug(`parseResponse: group presets not supported - ${command}`, false);
+                    await this.setGroupPresetsSupported(false);
+                    return;
+                }
                 if (jdata.heos.command === 'player/get_quickselects') {
                     this.logDebug(`parseResponse: Quick Select not supported - ${command}`, false);
                     const qsPlayer = this.players && jmsg.pid ? this.players[jmsg.pid] : undefined;
@@ -1840,8 +1851,23 @@ class Heos extends utils.Adapter {
                     }
                     break;
 
+                // @KI_HINWEIS: The spec sends group preset commands as heos://group/..., but the responses come back as
+                // "group_presets/...". Both variants are handled, so it works no matter which one the firmware uses.
+                case 'group_presets':
+                    switch (cmd) {
+                        case 'get_group_presets':
+                            await this.updateGroupPresets(jdata.payload);
+                            break;
+                        case 'apply_group_preset':
+                            // the device sends a groups_changed event afterwards, which refreshes groups and presets
+                            break;
+                    }
+                    break;
                 case 'group':
                     switch (cmd) {
+                        case 'get_group_presets':
+                            await this.updateGroupPresets(jdata.payload);
+                            break;
                         // { "heos":{"command":"player/set_group","result":"success",
                         //           "message": "gid='new group_id'&name='group_name'&pid='player_id_1, player_id_2,…,player_id_n'
                         //          }
@@ -2374,6 +2400,141 @@ class Heos extends utils.Adapter {
         if (this.state == STATES.Connected) {
             // heos://group/get_groups
             this.queueMsg('group/get_groups');
+            this.getGroupPresets();
+        }
+    }
+
+    /**
+     * Request the group presets stored in the HEOS app (spec 4.3.11, HEOS 3.34 or newer).
+     * Also called on groups_changed, because the "Active" state of a preset depends on the current groups.
+     */
+    getGroupPresets() {
+        if (this.state == STATES.Connected) {
+            // heos://group/get_group_presets?include_all=on
+            this.queueMsg('group/get_group_presets?include_all=on');
+        }
+    }
+
+    /**
+     * Apply a group preset (spec 4.3.12).
+     *
+     * @param {string} key object key of the preset below group_presets
+     */
+    applyGroupPreset(key) {
+        const presetIds = this.group_preset_ids || {};
+        const presetId = presetIds[key];
+        if (!presetId) {
+            this.logWarn(`Unknown group preset ${key}, please wait until the presets are loaded`, false);
+            return;
+        }
+        if (this.state == STATES.Connected) {
+            // heos://group/apply_group_preset?preset_id=preset_uuid
+            this.queueMsg(`group/apply_group_preset?preset_id=${presetId}`);
+        }
+    }
+
+    /**
+     * Create/update the indicator whether the HEOS system supports group presets.
+     *
+     * @param {boolean} supported true, if get_group_presets was answered successfully
+     */
+    async setGroupPresetsSupported(supported) {
+        await this.extendObjectAsync('group_presets_supported', {
+            type: 'state',
+            common: {
+                name: 'Group presets supported',
+                desc: 'True, if the HEOS system supports group presets (HEOS 3.34 or newer)',
+                type: 'boolean',
+                role: 'indicator',
+                read: true,
+                write: false,
+                def: false,
+            },
+            native: {},
+        });
+        await this.setStateChangedAsync('group_presets_supported', supported, true);
+    }
+
+    /**
+     * Create/update one channel per group preset and remove presets that no longer exist.
+     *
+     * @param {Array<{preset_id?: string, name?: string, state?: string, devices?: Array<{name?: string, pid?: string|number}>}>} presets payload of get_group_presets
+     */
+    async updateGroupPresets(presets) {
+        await this.setGroupPresetsSupported(true);
+        await this.extendObjectAsync('group_presets', {
+            type: 'folder',
+            common: { name: 'Group presets' },
+            native: {},
+        });
+        const ids = {};
+        for (const preset of Array.isArray(presets) ? presets : []) {
+            if (!preset || !preset.preset_id) {
+                continue;
+            }
+            const presetId = String(preset.preset_id);
+            const key = presetId.replace(this.FORBIDDEN_CHARS, '_').replace(/[.\s]/g, '_');
+            ids[key] = presetId;
+            const name = preset.name ? String(preset.name) : presetId;
+            const path = `group_presets.${key}`;
+            const players = (Array.isArray(preset.devices) ? preset.devices : [])
+                .map(device => (device && device.name ? String(device.name) : ''))
+                .filter(playerName => playerName)
+                .join(', ');
+            // @KI_HINWEIS: extendObject instead of setObject, so user settings (e.g. history) survive updates.
+            await this.extendObjectAsync(path, {
+                type: 'channel',
+                common: { name },
+                native: { preset_id: presetId },
+            });
+            await this.extendObjectAsync(`${path}.name`, {
+                type: 'state',
+                common: { name: 'Name', type: 'string', role: 'text', read: true, write: false },
+                native: {},
+            });
+            await this.extendObjectAsync(`${path}.state`, {
+                type: 'state',
+                common: {
+                    name: 'State',
+                    desc: 'Active, Inactive or Disabled (a player of this preset is not available)',
+                    type: 'string',
+                    role: 'text',
+                    read: true,
+                    write: false,
+                },
+                native: {},
+            });
+            await this.extendObjectAsync(`${path}.players`, {
+                type: 'state',
+                common: { name: 'Players', type: 'string', role: 'text', read: true, write: false },
+                native: {},
+            });
+            await this.extendObjectAsync(`${path}.apply`, {
+                type: 'state',
+                common: {
+                    name: `Apply ${name}`,
+                    desc: 'Group the players as stored in this preset',
+                    type: 'boolean',
+                    role: 'button',
+                    read: false,
+                    write: true,
+                    def: false,
+                },
+                native: {},
+            });
+            await this.setStateChangedAsync(`${path}.name`, name, true);
+            await this.setStateChangedAsync(`${path}.state`, preset.state ? String(preset.state) : '', true);
+            await this.setStateChangedAsync(`${path}.players`, players, true);
+        }
+        this.group_preset_ids = ids;
+
+        // remove presets that were deleted in the HEOS app
+        const channels = await this.getChannelsOfAsync('group_presets');
+        for (const channel of channels || []) {
+            const key = channel._id.split('.').pop();
+            if (key && !(key in ids)) {
+                await this.delObjectAsync(`group_presets.${key}`, { recursive: true });
+            }
         }
     }
 
