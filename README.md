@@ -182,6 +182,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
+* (Schimi1983) Player objects are only written when they are new or changed (less load on start and on player changes, history/smartName settings are kept)
 * (withstu) Update dependencies
 * (Schimi1983) README: quick start, troubleshooting and plain-language explanation of all settings; removed dead badge, updated API link to spec v1.24
 * (Schimi1983) Settings: the heartbeat interval field was labelled "Volume step"
