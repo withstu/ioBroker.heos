@@ -182,6 +182,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
+* (Schimi1983) Player timers use the adapter timer functions, so they are cleaned up reliably when the adapter stops
 * (Schimi1983) Fix warnings "State ...quick_selects.<n>.connected has no existing object" on start/stop
 * (Schimi1983) Player objects are only written when they are new or changed (less load on start and on player changes, history/smartName settings are kept)
 * (withstu) Update dependencies
