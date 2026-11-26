@@ -272,6 +272,16 @@
                     "md": 6,
                     "lg": 6,
                     "xl": 6
+                },
+                "useTls": {
+                    "type": "checkbox",
+                    "label": "use_tls",
+                    "help": "use_tls_help",
+                    "xs": 12,
+                    "sm": 12,
+                    "md": 6,
+                    "lg": 6,
+                    "xl": 6
                 }
             }
         }

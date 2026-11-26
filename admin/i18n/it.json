@@ -35,6 +35,8 @@
     "search_interval": "Intervallo di ricerca",
     "search_timeout": "Timeout della ricerca",
     "udp_source_port": "Porta di origine [UDP] per client SSDP (0 = automatico)",
+    "use_tls": "Connessione crittografata (TLS, porta 1265)",
+    "use_tls_help": "Richiede HEOS 3.67 o successivo. Attivare solo se la porta 1255 è disattivata sui dispositivi o se si desidera una connessione crittografata.",
     "username": "Nome utente",
     "volume_step": "Passo del volume"
 }

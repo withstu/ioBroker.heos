@@ -183,7 +183,8 @@
     "cmdScope": "leader",
     "sourcePort": 0,
     "preferredIPs": "",
-    "disableSSDPDiscovery": false
+    "disableSSDPDiscovery": false,
+    "useTls": false
   },
   "objects": [],
   "instanceObjects": [

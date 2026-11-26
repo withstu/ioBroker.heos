@@ -11,6 +11,7 @@ import * as utils from '@iobroker/adapter-core';
 import url from 'node:url';
 
 import net from 'node:net';
+import tls from 'node:tls';
 import SSDP from 'node-ssdp';
 import HeosPlayer from './lib/heos-player.js';
 import { STATES, ERROR_CODES } from './lib/constants.js';
@@ -2758,8 +2759,14 @@ class Heos extends utils.Adapter {
         this.state = STATES.Connecting;
 
         this.ip = ip;
-        this.logInfo(`connecting to HEOS (${this.ip}) ...`, false);
-        this.net_client = net.connect({ host: this.ip, port: 1255 });
+        // @KI_HINWEIS: HEOS 3.67+ also accepts TLS on port 1265 (spec v1.24, section 2). The devices use a
+        // self-signed certificate, so it cannot be verified. Port 1255 can be switched off on the device;
+        // then TLS is the only way to connect.
+        const useTls = !!this.config.useTls;
+        this.logInfo(`connecting to HEOS (${this.ip}${useTls ? ', encrypted' : ''}) ...`, false);
+        this.net_client = useTls
+            ? tls.connect({ host: this.ip, port: 1265, rejectUnauthorized: false })
+            : net.connect({ host: this.ip, port: 1255 });
         this.net_client.setKeepAlive(true, 60000);
         //this.net_client.setNoDelay(true);
         this.net_client.setTimeout(60000);
@@ -2783,7 +2790,8 @@ class Heos extends utils.Adapter {
             this.reconnect();
         });
 
-        this.net_client.on('connect', async () => {
+        // A TLS socket is only ready after the handshake ('secureConnect'), 'connect' fires before it.
+        this.net_client.on(useTls ? 'secureConnect' : 'connect', async () => {
             this.setStateChanged('info.connection', true, true);
             this.setStateChanged('connected_ip', this.ip, true);
 

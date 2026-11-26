@@ -55,7 +55,7 @@ To play your favorites, press `heos.0.sources.1028.browse` once. The adapter the
 * **Heartbeat**: How often (ms) the connection is checked and how many failed checks are allowed before reconnecting.
 * **Search**: How long (ms) and how often (ms) the adapter searches for devices.
 * **Reconnect / Request timeout**: Wait time before reconnecting (ms) and for an answer from the device (s).
-* **Network**: UDP source port for the device search (0 = automatic), preferred IP addresses (comma separated, used if the automatic search fails) and the option to switch the automatic search off completely.
+* **Network**: UDP source port for the device search (0 = automatic), preferred IP addresses (comma separated, used if the automatic search fails) and the option to switch the automatic search off completely. **Encrypted connection**: connects via TLS on port 1265 instead of port 1255 (HEOS 3.67 or newer). Only needed if port 1255 is switched off on your devices.
 
 The player state `ignore_broadcast_cmd` defines whether a player ignores commands sent to all players (e.g. `player/set_mute&state=on` or the `play` buttons of presets/playlists).
 
@@ -195,6 +195,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 * (cavernerg) fix: abandon startPlayers when the connection changed meanwhile
 * (Schimi1983) Quick Select: new player state `quick_select_supported` and folder `quick_selects` with name, `play` and `save` button per Quick Select (only on supported devices)
 * (Schimi1983) Group presets: new folder `group_presets` with name, players, state and `apply` button per preset from the HEOS app, plus indicator `group_presets_supported`
+* (Schimi1983) New option "Encrypted connection" (TLS, port 1265) in the advanced settings, for HEOS 3.67 or newer
 
 ### 3.2.4 (2026-10-04)
 * (withstu) Update dependencies

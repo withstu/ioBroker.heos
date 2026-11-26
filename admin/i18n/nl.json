@@ -35,6 +35,8 @@
     "search_interval": "Zoekinterval",
     "search_timeout": "Time-out voor zoeken",
     "udp_source_port": "Bronpoort [UDP] voor SSDP-client (0 = automatisch)",
+    "use_tls": "Versleutelde verbinding (TLS, poort 1265)",
+    "use_tls_help": "Vereist HEOS 3.67 of nieuwer. Alleen inschakelen als poort 1255 op je apparaten is uitgeschakeld of als je een versleutelde verbinding wilt.",
     "username": "Gebruikersnaam",
     "volume_step": "Volumestap"
 }
