@@ -28,7 +28,7 @@ Control your HEOS speakers and receivers (Denon, Marantz) from ioBroker: play, p
 
 **Quick Select** (only on some models, e.g. Denon Home, Denon Home Sound Bar 550, HEOS Bar, AV receivers): `quick_select_supported` shows if a player supports it. If yes, the folder `quick_selects` contains one entry per Quick Select with its name from the HEOS app, a `play` button to recall it and a `save` button to store the current state there. What is stored depends on the device (e.g. input, sound mode, volume).
 
-**Group presets** (HEOS 3.34 or newer): groups you saved in the HEOS app appear in the folder `group_presets`, each with its name, the players, the current state (Active, Inactive, Disabled) and an `apply` button that groups the players. `group_presets_supported` shows if your HEOS system supports it.
+**Group presets** (HEOS 3.34 or newer): groups you saved in the HEOS app appear in the folder `group_presets`, each with its name, the players, their player ids (`pids`, players that are not available are missing), the current state (Active, Inactive, Disabled) and an `apply` button that groups the players. `group_presets_supported` shows if your HEOS system supports it. HEOS does not store a group leader in the preset; to choose one, write a player id of the preset to `leader` before pressing `apply` (empty = HEOS decides). The value is kept when the presets are updated.
 
 **AV receivers (Denon, Marantz):** this adapter controls everything that runs over HEOS (streaming, groups, favorites, what is playing). For the receiver itself – inputs, zones, sound modes, channel levels – use the [Denon/Marantz adapter](https://github.com/iobroker-community-adapters/ioBroker.denon) as well. Both adapters can run at the same time.
 
@@ -184,6 +184,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
+* (cavernerg) Group presets: new states `pids` (player ids of the preset) and `leader` (optional player id that leads the group when the preset is applied)
 * (cavernerg) Group presets: a second `apply` of the same preset was skipped or logged as "Response timed out" (the request time of `apply_group_preset` was never cleared)
 
 ### 3.3.0 (2026-11-27)
