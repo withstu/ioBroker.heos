@@ -183,7 +183,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
-### **WORK IN PROGRESS**
+### 3.3.0 (2026-11-27)
 * (Schimi1983) Player timers use the adapter timer functions, so they are cleaned up reliably when the adapter stops
 * (Schimi1983) Fix warnings "State ...quick_selects.<n>.connected has no existing object" on start/stop
 * (Schimi1983) Player objects are only written when they are new or changed (less load on start and on player changes, history/smartName settings are kept)
@@ -215,10 +215,6 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 ### 3.2.1 (2026-08-19)
 * (withstu) Package update
 * (withstu) Improve number casting
-
-### 3.2.0 (2026-08-12)
-* (withstu) add flag to disable SSDP discovery
-* (withstu) fixing iobroker checks
 
 [Older changelogs can be found there](CHANGELOG_OLD.md)
 

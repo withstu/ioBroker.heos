@@ -1,4 +1,8 @@
 # Older changes
+## 3.2.0 (2026-08-12)
+* (withstu) add flag to disable SSDP discovery
+* (withstu) fixing iobroker checks
+
 ## 3.1.0 (2026-07-28)
 * (withstu) improve error handling for sign in if webservice unreachable
 
