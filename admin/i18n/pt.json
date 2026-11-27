@@ -36,7 +36,7 @@
     "search_timeout": "Tempo limite de pesquisa",
     "udp_source_port": "Porta de origem [UDP] para cliente SSDP (0 = automático)",
     "use_tls": "Ligação encriptada (TLS, porta 1265)",
-    "use_tls_help": "Requer HEOS 3.67 ou mais recente. Ative apenas se a porta 1255 estiver desativada nos seus dispositivos ou se quiser uma ligação encriptada.",
+    "use_tls_help": "Requer HEOS 3.67 ou mais recente. Ative apenas se a porta 1255 estiver desativada nos seus dispositivos ou se quiser uma ligação encriptada. A porta 1265 vem desativada nos dispositivos: ative-a em cada dispositivo na app HEOS (Os meus dispositivos → Definições avançadas) ou em https://<IP do dispositivo>/settings/.",
     "username": "Nome de usuário",
     "volume_step": "Etapa de volume"
 }

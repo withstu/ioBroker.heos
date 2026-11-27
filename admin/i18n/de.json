@@ -36,7 +36,7 @@
     "search_timeout": "Zeitüberschreitung bei der Suche",
     "udp_source_port": "Quellport [UDP] für SSDP-Client (0 = automatisch)",
     "use_tls": "Verschlüsselte Verbindung (TLS, Port 1265)",
-    "use_tls_help": "Benötigt HEOS 3.67 oder neuer. Nur einschalten, wenn Port 1255 an deinen Geräten abgeschaltet ist oder du eine verschlüsselte Verbindung möchtest.",
+    "use_tls_help": "Benötigt HEOS 3.67 oder neuer. Nur einschalten, wenn Port 1255 an deinen Geräten abgeschaltet ist oder du eine verschlüsselte Verbindung möchtest. Port 1265 ist an den Geräten ab Werk aus: je Gerät in der HEOS-App (Meine Geräte → Erweiterte Einstellungen) oder unter https://<Geräte-IP>/settings/ einschalten.",
     "username": "Nutzername",
     "volume_step": "Lautstärkeschritt"
 }

@@ -36,7 +36,7 @@
     "search_timeout": "Tiempo de espera de búsqueda",
     "udp_source_port": "Puerto de origen [UDP] para el cliente SSDP (0 = automático)",
     "use_tls": "Conexión cifrada (TLS, puerto 1265)",
-    "use_tls_help": "Requiere HEOS 3.67 o posterior. Actívela solo si el puerto 1255 está desactivado en sus dispositivos o si desea una conexión cifrada.",
+    "use_tls_help": "Requiere HEOS 3.67 o posterior. Actívela solo si el puerto 1255 está desactivado en sus dispositivos o si desea una conexión cifrada. El puerto 1265 viene desactivado en los dispositivos: actívelo en cada dispositivo en la app HEOS (Mis dispositivos → Ajustes avanzados) o en https://<IP del dispositivo>/settings/.",
     "username": "Nombre de usuario",
     "volume_step": "paso de volumen"
 }

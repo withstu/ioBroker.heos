@@ -57,7 +57,7 @@ To play your favorites, press `heos.0.sources.1028.browse` once. The adapter the
 * **Heartbeat**: How often (ms) the connection is checked and how many failed checks are allowed before reconnecting.
 * **Search**: How long (ms) and how often (ms) the adapter searches for devices.
 * **Reconnect / Request timeout**: Wait time before reconnecting (ms) and for an answer from the device (s).
-* **Network**: UDP source port for the device search (0 = automatic), preferred IP addresses (comma separated, used if the automatic search fails) and the option to switch the automatic search off completely. **Encrypted connection**: connects via TLS on port 1265 instead of port 1255 (HEOS 3.67 or newer). Only needed if port 1255 is switched off on your devices.
+* **Network**: UDP source port for the device search (0 = automatic), preferred IP addresses (comma separated, used if the automatic search fails) and the option to switch the automatic search off completely. **Encrypted connection**: connects via TLS on port 1265 instead of port 1255 (HEOS 3.67 or newer). Only needed if port 1255 is switched off on your devices or you want an encrypted connection. Port 1265 is switched off on the devices by default: enable it per device in the HEOS app (My Devices → Advanced Settings) or at `https://<device IP>/settings/` – otherwise the connection is refused.
 
 The player state `ignore_broadcast_cmd` defines whether a player ignores commands sent to all players (e.g. `player/set_mute&state=on` or the `play` buttons of presets/playlists).
 
@@ -184,6 +184,7 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	### **WORK IN PROGRESS**
 -->
 ### **WORK IN PROGRESS**
+* (cavernerg) Encrypted connection: README and settings help explain that port 1265 has to be enabled on the devices first
 * (cavernerg) Group presets: new states `pids` (player ids of the preset) and `leader` (optional player id that leads the group when the preset is applied)
 * (cavernerg) Group presets: a second `apply` of the same preset was skipped or logged as "Response timed out" (the request time of `apply_group_preset` was never cleared)
 

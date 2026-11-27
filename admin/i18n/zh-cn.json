@@ -36,7 +36,7 @@
     "search_timeout": "搜索超时",
     "udp_source_port": "SSDP 客户端的源端口 [UDP]（0 = 自动）",
     "use_tls": "加密连接（TLS，端口 1265）",
-    "use_tls_help": "需要 HEOS 3.67 或更高版本。仅当设备上的端口 1255 已关闭或您需要加密连接时才启用。",
+    "use_tls_help": "需要 HEOS 3.67 或更高版本。仅当设备上的端口 1255 已关闭或您需要加密连接时才启用。设备上的端口 1265 默认关闭：请在 HEOS 应用中为每台设备开启（我的设备 → 高级设置），或访问 https://<设备 IP>/settings/。",
     "username": "用户名",
     "volume_step": "音量步长"
 }

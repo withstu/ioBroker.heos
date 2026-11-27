@@ -36,7 +36,7 @@
     "search_timeout": "Délai de recherche",
     "udp_source_port": "Port source [UDP] pour le client SSDP (0 = automatique)",
     "use_tls": "Connexion chiffrée (TLS, port 1265)",
-    "use_tls_help": "Nécessite HEOS 3.67 ou plus récent. À activer uniquement si le port 1255 est désactivé sur vos appareils ou si vous souhaitez une connexion chiffrée.",
+    "use_tls_help": "Nécessite HEOS 3.67 ou plus récent. À activer uniquement si le port 1255 est désactivé sur vos appareils ou si vous souhaitez une connexion chiffrée. Le port 1265 est désactivé par défaut sur les appareils : activez-le pour chaque appareil dans l'app HEOS (Mes appareils → Paramètres avancés) ou sur https://<IP de l'appareil>/settings/.",
     "username": "Nom d'utilisateur",
     "volume_step": "Pas de volume"
 }

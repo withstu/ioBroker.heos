@@ -36,7 +36,7 @@
     "search_timeout": "Przekroczono limit czasu wyszukiwania",
     "udp_source_port": "Port źródłowy [UDP] dla klienta SSDP (0 = automatycznie)",
     "use_tls": "Szyfrowane połączenie (TLS, port 1265)",
-    "use_tls_help": "Wymaga HEOS 3.67 lub nowszego. Włącz tylko, jeśli port 1255 jest wyłączony na urządzeniach lub chcesz połączenia szyfrowanego.",
+    "use_tls_help": "Wymaga HEOS 3.67 lub nowszego. Włącz tylko, jeśli port 1255 jest wyłączony na urządzeniach lub chcesz połączenia szyfrowanego. Port 1265 jest domyślnie wyłączony na urządzeniach: włącz go dla każdego urządzenia w aplikacji HEOS (Moje urządzenia → Ustawienia zaawansowane) lub pod adresem https://<IP urządzenia>/settings/.",
     "username": "Nazwa użytkownika",
     "volume_step": "Krok głośności"
 }

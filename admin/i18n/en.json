@@ -36,7 +36,7 @@
     "search_timeout": "Search timeout",
     "udp_source_port": "Source port [UDP] for SSDP client (0 = automatic)",
     "use_tls": "Encrypted connection (TLS, port 1265)",
-    "use_tls_help": "Needs HEOS 3.67 or newer. Only switch on if port 1255 is disabled on your devices or you want an encrypted connection.",
+    "use_tls_help": "Needs HEOS 3.67 or newer. Only switch on if port 1255 is disabled on your devices or you want an encrypted connection. Port 1265 is switched off on the devices by default: enable it per device in the HEOS app (My Devices → Advanced Settings) or at https://<device IP>/settings/.",
     "username": "Username",
     "volume_step": "Volume step"
 }
