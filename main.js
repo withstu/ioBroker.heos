@@ -1861,6 +1861,7 @@ class Heos extends utils.Adapter {
                             break;
                         case 'apply_group_preset':
                             // the device sends a groups_changed event afterwards, which refreshes groups and presets
+                            this.clearApplyGroupPresetRequest(jmsg);
                             break;
                     }
                     break;
@@ -1868,6 +1869,9 @@ class Heos extends utils.Adapter {
                     switch (cmd) {
                         case 'get_group_presets':
                             await this.updateGroupPresets(jdata.payload);
+                            break;
+                        case 'apply_group_preset':
+                            this.clearApplyGroupPresetRequest(jmsg);
                             break;
                         // { "heos":{"command":"player/set_group","result":"success",
                         //           "message": "gid='new group_id'&name='group_name'&pid='player_id_1, player_id_2,…,player_id_n'
@@ -2431,6 +2435,20 @@ class Heos extends utils.Adapter {
         if (this.state == STATES.Connected) {
             // heos://group/apply_group_preset?preset_id=preset_uuid
             this.queueMsg(`group/apply_group_preset?preset_id=${presetId}`);
+        }
+    }
+
+    /**
+     * Clear the request time of an applied group preset.
+     *
+     * @param {Record<string, string|null>} jmsg parsed message of the apply_group_preset answer
+     */
+    clearApplyGroupPresetRequest(jmsg) {
+        // @KI_HINWEIS: the answer carries gid, name (and leader) besides preset_id, so the command restored
+        // from it never matches the sent one. Without this the request time stays, and the next apply of the
+        // same preset is skipped as duplicate or counted as response timeout.
+        if (jmsg && jmsg.preset_id) {
+            this.deleteRequestTime(`group/apply_group_preset?preset_id=${jmsg.preset_id}`);
         }
     }
 

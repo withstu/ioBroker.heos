@@ -183,6 +183,9 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (cavernerg) Group presets: a second `apply` of the same preset was skipped or logged as "Response timed out" (the request time of `apply_group_preset` was never cleared)
+
 ### 3.3.0 (2026-11-27)
 * (Schimi1983) Player timers use the adapter timer functions, so they are cleaned up reliably when the adapter stops
 * (Schimi1983) Fix warnings "State ...quick_selects.<n>.connected has no existing object" on start/stop
