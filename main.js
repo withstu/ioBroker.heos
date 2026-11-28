@@ -354,6 +354,7 @@ class Heos extends utils.Adapter {
         //Sources
         this.subscribeStates('sources.*.browse');
         this.subscribeStates('group_presets.*.apply');
+        this.subscribeStates('group_presets.*.leader');
 
         //Players
         this.subscribeStates('players.*.muted');
@@ -408,6 +409,8 @@ class Heos extends utils.Adapter {
         }
         const id = this.idToDCS(_id);
         const fullId = _id.split('.');
+        // value as written, before the conversions below (e.g. '-2' would become the number -2)
+        const rawVal = state.val;
 
         this.logDebug(
             `State change - ID: ${_id} | DCS: ${JSON.stringify(id)} | State: ${JSON.stringify(state)}`,
@@ -452,6 +455,10 @@ class Heos extends utils.Adapter {
                 this.sendCommandToAllPlayers(`play_preset?preset=${id.state}`, true);
             } else if (id.device === 'group_presets' && id.channel && id.state === 'apply') {
                 this.applyGroupPreset(id.channel).catch(err => this.logError(`[applyGroupPreset] ${err}`, false));
+            } else if (id.device === 'group_presets' && id.channel && id.state === 'leader') {
+                this.confirmGroupPresetLeader(id.channel, rawVal).catch(err =>
+                    this.logError(`[confirmGroupPresetLeader] ${err}`, false),
+                );
             } else if (id.device === 'sources' && id.channel && id.state === 'browse') {
                 this.browseSource(id.channel);
             } else if (id.device === 'players' && id.channel && id.state) {
@@ -2435,16 +2442,46 @@ class Heos extends utils.Adapter {
             return;
         }
         const leaderState = await this.getStateAsync(`group_presets.${key}.leader`);
-        let leader = leaderState && leaderState.val != null ? String(leaderState.val).trim() : '';
-        const pids = (this.group_preset_pids || {})[key] || [];
-        if (leader && !pids.includes(leader)) {
-            this.logWarn(`Leader ${leader} is not a player of group preset ${key}, HEOS chooses the leader`, false);
-            leader = '';
-        }
+        const leader = this.checkGroupPresetLeader(key, leaderState ? leaderState.val : null) || '';
         if (this.state == STATES.Connected) {
             // heos://group/apply_group_preset?preset_id=preset_uuid&leader=player_id (leader is optional)
             this.queueMsg(`group/apply_group_preset?preset_id=${presetId}${leader ? `&leader=${leader}` : ''}`);
         }
+    }
+
+    /**
+     * Check the leader of a group preset.
+     *
+     * @param {string} key object key of the preset below group_presets
+     * @param {ioBroker.StateValue} val value of the leader state
+     * @returns {string|null} the leader, '' if HEOS decides, null if it is not a player of the preset
+     */
+    checkGroupPresetLeader(key, val) {
+        const leader = val != null ? String(val).trim() : '';
+        const pids = (this.group_preset_pids || {})[key] || [];
+        if (leader && !pids.includes(leader)) {
+            this.logWarn(`Leader ${leader} is not a player of group preset ${key}, HEOS chooses the leader`, false);
+            return null;
+        }
+        return leader;
+    }
+
+    /**
+     * Confirm a leader written by the user with ack, if it is empty or a player of the preset.
+     * The value itself is never changed.
+     *
+     * @param {string} key object key of the preset below group_presets
+     * @param {ioBroker.StateValue} val value as written by the user
+     */
+    async confirmGroupPresetLeader(key, val) {
+        if (!(this.group_preset_ids || {})[key]) {
+            this.logWarn(`Unknown group preset ${key}, please wait until the presets are loaded`, false);
+            return;
+        }
+        if (this.checkGroupPresetLeader(key, val) === null) {
+            return;
+        }
+        await this.setStateAsync(`group_presets.${key}.leader`, val == null ? val : String(val), true);
     }
 
     /**
