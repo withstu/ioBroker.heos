@@ -2543,13 +2543,12 @@ class Heos extends utils.Adapter {
             ids[key] = presetId;
             const name = preset.name ? String(preset.name) : presetId;
             const path = `group_presets.${key}`;
-            const devices = Array.isArray(preset.devices) ? preset.devices : [];
-            const players = devices
+            const players = (Array.isArray(preset.devices) ? preset.devices : [])
                 .map(device => (device && device.name ? String(device.name) : ''))
                 .filter(playerName => playerName)
                 .join(', ');
             // players that are not available come without pid
-            const pids = devices
+            const pids = (Array.isArray(preset.devices) ? preset.devices : [])
                 .filter(device => device && device.pid !== undefined && device.pid !== null && device.pid !== '')
                 .map(device => String(device.pid));
             pidsByKey[key] = pids;
