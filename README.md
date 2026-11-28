@@ -28,7 +28,7 @@ Control your HEOS speakers and receivers (Denon, Marantz) from ioBroker: play, p
 
 **Quick Select** (only on some models, e.g. Denon Home, Denon Home Sound Bar 550, HEOS Bar, AV receivers): `quick_select_supported` shows if a player supports it. If yes, the folder `quick_selects` contains one entry per Quick Select with its name from the HEOS app, a `play` button to recall it and a `save` button to store the current state there. What is stored depends on the device (e.g. input, sound mode, volume).
 
-**Group presets** (HEOS 3.34 or newer): groups you saved in the HEOS app appear in the folder `group_presets`, each with its name, the players, the current state (Active, Inactive, Disabled) and an `apply` button that groups the players. `group_presets_supported` shows if your HEOS system supports it.
+**Group presets** (HEOS 3.34 or newer): groups you saved in the HEOS app appear in the folder `group_presets`, each with its name, the players, their player ids (`pids`, players that are not available are missing), the current state (Active, Inactive, Disabled) and an `apply` button that groups the players. `group_presets_supported` shows if your HEOS system supports it. HEOS does not store a group leader in the preset; to choose one, write a player id of the preset to `leader` before pressing `apply` (empty = HEOS decides). The adapter confirms a valid value with `ack`; a player id that is not part of the preset is only logged as a warning. The value is kept when the presets are updated. `state` is reported by the device and is not always updated after `apply`.
 
 **AV receivers (Denon, Marantz):** this adapter controls everything that runs over HEOS (streaming, groups, favorites, what is playing). For the receiver itself – inputs, zones, sound modes, channel levels – use the [Denon/Marantz adapter](https://github.com/iobroker-community-adapters/ioBroker.denon) as well. Both adapters can run at the same time.
 
@@ -57,7 +57,7 @@ To play your favorites, press `heos.0.sources.1028.browse` once. The adapter the
 * **Heartbeat**: How often (ms) the connection is checked and how many failed checks are allowed before reconnecting.
 * **Search**: How long (ms) and how often (ms) the adapter searches for devices.
 * **Reconnect / Request timeout**: Wait time before reconnecting (ms) and for an answer from the device (s).
-* **Network**: UDP source port for the device search (0 = automatic), preferred IP addresses (comma separated, used if the automatic search fails) and the option to switch the automatic search off completely. **Encrypted connection**: connects via TLS on port 1265 instead of port 1255 (HEOS 3.67 or newer). Only needed if port 1255 is switched off on your devices.
+* **Network**: UDP source port for the device search (0 = automatic), preferred IP addresses (comma separated, used if the automatic search fails) and the option to switch the automatic search off completely. **Encrypted connection**: connects via TLS on port 1265 instead of port 1255 (HEOS 3.67 or newer). Only needed if port 1255 is switched off on your devices or you want an encrypted connection. Port 1265 is switched off on the devices by default: enable it per device in the HEOS app (My Devices → Advanced Settings) or at `https://<device IP>/settings/` – otherwise the connection is refused.
 
 The player state `ignore_broadcast_cmd` defines whether a player ignores commands sent to all players (e.g. `player/set_mute&state=on` or the `play` buttons of presets/playlists).
 
@@ -183,6 +183,11 @@ Alternative you can use the script from Uhula: https://forum.iobroker.net/post/4
 	Placeholder for the next version (at the beginning of the line):
 	### **WORK IN PROGRESS**
 -->
+### **WORK IN PROGRESS**
+* (cavernerg) Encrypted connection: README and settings help explain that port 1265 has to be enabled on the devices first
+* (cavernerg) Group presets: new states `pids` (player ids of the preset) and `leader` (optional player id that leads the group when the preset is applied, confirmed with ack if it is a player of the preset)
+* (cavernerg) Group presets: a second `apply` of the same preset was skipped or logged as "Response timed out" (the request time of `apply_group_preset` was never cleared)
+
 ### 3.3.0 (2026-11-27)
 * (Schimi1983) Player timers use the adapter timer functions, so they are cleaned up reliably when the adapter stops
 * (Schimi1983) Fix warnings "State ...quick_selects.<n>.connected has no existing object" on start/stop

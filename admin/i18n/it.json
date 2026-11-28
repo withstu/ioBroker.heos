@@ -36,7 +36,7 @@
     "search_timeout": "Timeout della ricerca",
     "udp_source_port": "Porta di origine [UDP] per client SSDP (0 = automatico)",
     "use_tls": "Connessione crittografata (TLS, porta 1265)",
-    "use_tls_help": "Richiede HEOS 3.67 o successivo. Attivare solo se la porta 1255 è disattivata sui dispositivi o se si desidera una connessione crittografata.",
+    "use_tls_help": "Richiede HEOS 3.67 o successivo. Attivare solo se la porta 1255 è disattivata sui dispositivi o se si desidera una connessione crittografata. La porta 1265 è disattivata di fabbrica sui dispositivi: attivarla per ogni dispositivo nell'app HEOS (I miei dispositivi → Impostazioni avanzate) o su https://<IP del dispositivo>/settings/.",
     "username": "Nome utente",
     "volume_step": "Passo del volume"
 }
